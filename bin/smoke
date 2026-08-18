@@ -1,0 +1,391 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Codejitsu\Codex;
+use Codejitsu\Contracts\Codex as CodexContract;
+use Codejitsu\Contracts\Execution\Executable;
+use Codejitsu\Contracts\Execution\Executor as ExecutorContract;
+use Codejitsu\Contracts\Execution\Substrate;
+use Codejitsu\Contracts\Invokable;
+use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
+use Codejitsu\Contracts\Uri\Resolver as ResolverContract;
+use Codejitsu\Contracts\Uri\ResolverDriver;
+use Codejitsu\Enums\Codecs;
+use Codejitsu\Enums\Scrolls\Types;
+use Codejitsu\Execution\ExecutionContext;
+use Codejitsu\Execution\ExecutionId;
+use Codejitsu\Execution\ExecutionStatus;
+use Codejitsu\Execution\Executor;
+use Codejitsu\Execution\InvokableExecutable;
+use Codejitsu\Execution\Substrates\Php;
+use Codejitsu\Uri\Resolver;
+
+require dirname(__DIR__) . '/lib/autoload.php';
+
+final class SmokeExecutable implements Invokable
+{
+    public function __invoke(mixed ...$args): mixed
+    {
+        return array_sum($args);
+    }
+}
+
+$checks = [];
+
+$check = static function (
+    string $name,
+    callable $test,
+) use (&$checks): void {
+    try {
+        $checks[$name] = $test() === true;
+    } catch (Throwable $e) {
+        $checks[$name] = false;
+
+        fwrite(
+            STDERR,
+            sprintf(
+                "[FAIL] %s: %s%s%s%s",
+                $name,
+                $e::class,
+                PHP_EOL,
+                $e->getMessage(),
+                PHP_EOL,
+                PHP_EOL,
+            ),
+        );
+    }
+};
+
+/*
+|--------------------------------------------------------------------------
+| Core
+|--------------------------------------------------------------------------
+*/
+
+$check(
+    'Codex class exists',
+    static fn(): bool => class_exists(Codex::class),
+);
+
+$check(
+    'Codex contract exists',
+    static fn(): bool => interface_exists(CodexContract::class),
+);
+
+$check(
+    'Codex implements contract',
+    static fn(): bool => is_a(
+        Codex::class,
+        CodexContract::class,
+        true,
+    ),
+);
+
+$check(
+    'Scroll contract exists',
+    static fn(): bool => interface_exists(ScrollContract::class),
+);
+
+$check(
+    'Scroll type enum exists',
+    static fn(): bool => enum_exists(Types::class),
+);
+
+$check(
+    'Codec enum exists',
+    static fn(): bool => enum_exists(Codecs::class),
+);
+
+/*
+|--------------------------------------------------------------------------
+| URI
+|--------------------------------------------------------------------------
+*/
+
+$check(
+    'URI Resolver exists',
+    static fn(): bool => class_exists(Resolver::class),
+);
+
+$check(
+    'URI Resolver contract exists',
+    static fn(): bool => interface_exists(ResolverContract::class),
+);
+
+$check(
+    'URI ResolverDriver contract exists',
+    static fn(): bool => interface_exists(ResolverDriver::class),
+);
+
+$check(
+    'Resolver implements contract',
+    static fn(): bool => is_a(
+        Resolver::class,
+        ResolverContract::class,
+        true,
+    ),
+);
+
+/*
+|--------------------------------------------------------------------------
+| Traits / Enums
+|--------------------------------------------------------------------------
+*/
+
+$check(
+    'EnhancedEnum loads',
+    static fn(): bool => trait_exists(
+        \Codejitsu\Traits\EnhancedEnum::class,
+    ),
+);
+
+$check(
+    'Codec enum has cases',
+    static fn(): bool => Codecs::cases() !== [],
+);
+
+$check(
+    'Scroll type enum has cases',
+    static fn(): bool => Types::cases() !== [],
+);
+
+/*
+|--------------------------------------------------------------------------
+| Execution contracts
+|--------------------------------------------------------------------------
+*/
+
+$check(
+    'Executable contract exists',
+    static fn(): bool => interface_exists(Executable::class),
+);
+
+$check(
+    'Substrate contract exists',
+    static fn(): bool => interface_exists(Substrate::class),
+);
+
+$check(
+    'Executor contract exists',
+    static fn(): bool => interface_exists(ExecutorContract::class),
+);
+
+$check(
+    'Executor implements contract',
+    static fn(): bool => is_a(
+        Executor::class,
+        ExecutorContract::class,
+        true,
+    ),
+);
+
+$check(
+    'PHP substrate implements contract',
+    static fn(): bool => is_a(
+        Php::class,
+        Substrate::class,
+        true,
+    ),
+);
+
+/*
+|--------------------------------------------------------------------------
+| Execution values
+|--------------------------------------------------------------------------
+*/
+
+$check(
+    'ExecutionId generates',
+    static fn(): bool => ExecutionId::generate() instanceof ExecutionId,
+);
+
+$check(
+    'ExecutionStatus enum exists',
+    static fn(): bool => enum_exists(ExecutionStatus::class),
+);
+
+$check(
+    'ExecutionStatus enum has cases',
+    static fn(): bool => ExecutionStatus::cases() !== [],
+);
+
+/*
+|--------------------------------------------------------------------------
+| Direct invocation
+|--------------------------------------------------------------------------
+*/
+
+$check(
+    'Invokable executes directly',
+    static function (): bool {
+        $target = new SmokeExecutable();
+
+        return $target(2, 3) === 5;
+    },
+);
+
+$check(
+    'InvokableExecutable wraps Invokable',
+    static function (): bool {
+        $executable = new InvokableExecutable(
+            new SmokeExecutable(),
+        );
+
+        return $executable instanceof Executable;
+    },
+);
+
+$check(
+    'InvokableExecutable executes',
+    static function (): bool {
+        $executable = new InvokableExecutable(
+            new SmokeExecutable(),
+        );
+
+        $result = $executable->execute(
+            new ExecutionContext(
+                id: ExecutionId::generate(),
+                input: [2, 3],
+            ),
+        );
+
+        return $result === 5;
+    },
+);
+
+/*
+|--------------------------------------------------------------------------
+| PHP substrate
+|--------------------------------------------------------------------------
+*/
+
+$check(
+    'PHP substrate supports InvokableExecutable',
+    static function (): bool {
+        $substrate = new Php();
+
+        $executable = new InvokableExecutable(
+            new SmokeExecutable(),
+        );
+
+        return $substrate->supports($executable);
+    },
+);
+
+$check(
+    'PHP execution succeeds',
+    static function (): bool {
+        $context = new ExecutionContext(
+            id: ExecutionId::generate(),
+            input: [2, 3],
+        );
+
+        $executable = new InvokableExecutable(
+            new SmokeExecutable(),
+        );
+
+        $result = (new Php())->execute(
+            $executable,
+            $context,
+        );
+
+        return $result->succeeded()
+            && $result->output === 5
+            && $result->returnCode === 0
+            && $result->error === null
+            && $result->completed();
+    },
+);
+
+$check(
+    'PHP execution captures failure',
+    static function (): bool {
+        $executable = new InvokableExecutable(
+            new class implements Invokable {
+                public function __invoke(mixed ...$args): mixed
+                {
+                    throw new RuntimeException('Smoke failure.');
+                }
+            },
+        );
+
+        $result = (new Php())->execute(
+            $executable,
+            new ExecutionContext(
+                id: ExecutionId::generate(),
+            ),
+        );
+
+        return $result->failed()
+            && $result->returnCode === 1
+            && $result->error instanceof RuntimeException
+            && $result->completed();
+    },
+);
+
+/*
+|--------------------------------------------------------------------------
+| Executor
+|--------------------------------------------------------------------------
+*/
+
+$check(
+    'Executor executes through PHP substrate',
+    static function (): bool {
+        $context = new ExecutionContext(
+            id: ExecutionId::generate(),
+            input: [10, 15],
+        );
+
+        $executable = new InvokableExecutable(
+            new SmokeExecutable(),
+        );
+
+        $executor = new Executor([
+            new Php(),
+        ]);
+
+        $result = $executor->execute(
+            $executable,
+            $context,
+        );
+
+        return $result->succeeded()
+            && $result->output === 25
+            && $result->returnCode === 0;
+    },
+);
+
+/*
+|--------------------------------------------------------------------------
+| Results
+|--------------------------------------------------------------------------
+*/
+
+$passed = 0;
+
+foreach ($checks as $name => $result) {
+    printf(
+        "[%s] %s%s",
+        $result ? 'PASS' : 'FAIL',
+        $name,
+        PHP_EOL,
+    );
+
+    if ($result) {
+        $passed++;
+    }
+}
+
+$total = count($checks);
+
+printf(
+    "%s/%s checks passed%s",
+    $passed,
+    $total,
+    PHP_EOL,
+);
+
+exit($passed === $total ? 0 : 1);

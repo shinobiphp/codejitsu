@@ -1,0 +1,42 @@
+{
+    "name": "shinobiphp/codejitsu",
+    "description": "Modern  PHP 8.4+ framework/toolkit for composable, intent driven applications",
+    "version": "1.0.0",
+    "type": "library",
+    "require": {
+        "psr/container": "^2.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/log": "^3.0",
+        "psr/simple-cache": "^3.0",
+        "symfony/console": "^8.1",
+        "symfony/dependency-injection": "^8.1",
+        "symfony/config": "^8.1",
+        "symfony/finder": "^8.1",
+        "symfony/filesystem": "^8.1",
+        "vlucas/phpdotenv": "^5.6",
+        "nette/neon": "^3.4",
+        "openswoole/core": "^26.2",
+        "opis/json-schema": "^2.6"
+    },
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "Codejitsu\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Shinobi PHP",
+            "email": "shinobiphp@gmail.com"
+        }
+    ],
+    "config": {
+	"bin-dir": "./bin/",
+	"vendor-dir": "./lib/"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
+        }
+    }
+}

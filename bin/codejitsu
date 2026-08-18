@@ -1,0 +1,18 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+$_ENV['CODEJITSU_ENV'] = 'production';
+
+define('CODEJITSU_ROOT', dirname(__DIR__) . DIRECTORY_SEPARATOR);
+define('CODEJITSU_SCROLLS_DIR', CODEJITSU_ROOT . 'scrolls' . DIRECTORY_SEPARATOR);
+
+require_once CODEJITSU_ROOT . 'lib/autoload.php';
+
+use Codejitsu\Boot;
+
+// Automatically detects CLI SAPI, parses --env= and --root= overrides, and runs the CLI app
+$app = Boot::app();
+
+// Run the application with $argv and exit with the integer return status
+exit($app->run($argv));
