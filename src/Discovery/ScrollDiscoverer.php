@@ -22,20 +22,11 @@ final class ScrollDiscoverer
      *
      *   $baseDir/$pluralType/$name.$extension
      *
-     * Example:
-     *
-     *   scrolls/apps/foo.neon
-     *   scrolls/capabilities/database.neon
-     *   scrolls/katas/build-api.neon
-     *
      * @return list<DiscoveredScroll>
      */
     public function discover(): array
     {
-        $baseDir = rtrim(
-            $this->baseDir,
-            '/\\',
-        );
+        $baseDir = rtrim($this->baseDir, '/\\');
 
         if (!is_dir($baseDir)) {
             return [];
@@ -46,78 +37,41 @@ final class ScrollDiscoverer
         foreach (ScrollTypes::cases() as $type) {
             $discovered = [
                 ...$discovered,
-                ...$this->discoverType(
-                    $baseDir,
-                    $type,
-                ),
+                ...$this->discoverType($baseDir, $type),
             ];
         }
 
         return $discovered;
     }
 
-    /**
-     * @return list<DiscoveredScroll>
-     */
-    public function discoverType(
-        string|ScrollTypes $type,
-    ): array {
+    /** @return list<DiscoveredScroll> */
+    public function discoverType(string|ScrollTypes $type): array
+    {
         $type = $type instanceof ScrollTypes
             ? $type
-            : ScrollTypes::normalize(
-                $type,
-                null,
-            );
+            : ScrollTypes::normalize($type, null);
 
         if (!$type instanceof ScrollTypes) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Unknown Scroll type [%s].',
-                    (string) $type,
-                ),
-            );
+            throw new InvalidArgumentException(sprintf('Unknown Scroll type [%s].', (string) $type));
         }
 
-        return $this->discoverTypeFromDirectory(
-            rtrim($this->baseDir, '/\\'),
-            $type,
-        );
+        return $this->discoverTypeFromDirectory(rtrim($this->baseDir, '/\\'), $type);
     }
 
-    /**
-     * @return list<DiscoveredScroll>
-     */
-    private function discoverTypeFromDirectory(
-        string $baseDir,
-        ScrollTypes $type,
-    ): array {
-        $directory = $this->getDirectory(
-            $baseDir,
-            $type,
-        );
+    /** @return list<DiscoveredScroll> */
+    private function discoverTypeFromDirectory(string $baseDir, ScrollTypes $type): array
+    {
+        $directory = $this->getDirectory($baseDir, $type);
 
         if (!is_dir($directory)) {
             return [];
         }
 
-        $extension = $this->resolveExtension(
-            $type,
-        );
-
-        $pattern = $directory
-            . DIRECTORY_SEPARATOR
-            . '*.'
-            . $extension;
-
-        $files = glob($pattern);
+        $extension = $this->resolveExtension($type);
+        $files = glob($directory . DIRECTORY_SEPARATOR . '*.' . $extension);
 
         if ($files === false) {
-            throw new RuntimeException(
-                sprintf(
-                    'Unable to discover Scrolls in [%s].',
-                    $directory,
-                ),
-            );
+            throw new RuntimeException(sprintf('Unable to discover Scrolls in [%s].', $directory));
         }
 
         $result = [];
@@ -127,11 +81,7 @@ final class ScrollDiscoverer
                 continue;
             }
 
-            $name = pathinfo(
-                $path,
-                PATHINFO_FILENAME,
-            );
-
+            $name = pathinfo($path, PATHINFO_FILENAME);
             if ($name === '') {
                 continue;
             }
@@ -147,39 +97,19 @@ final class ScrollDiscoverer
         return $result;
     }
 
-    private function getDirectory(
-        string $baseDir,
-        ScrollTypes $type,
-    ): string {
-        $plural = method_exists(
-            $type,
-            'plural',
-        )
-            ? $type->plural()
-            : $type->value;
+    private function getDirectory(string $baseDir, ScrollTypes $type): string
+    {
+        $plural = method_exists($type, 'plural') ? $type->plural() : $type->value;
 
-        return $baseDir
-            . DIRECTORY_SEPARATOR
-            . strtolower($plural);
+        return $baseDir . DIRECTORY_SEPARATOR . strtolower($plural);
     }
 
-    private function resolveExtension(
-        ScrollTypes $type,
-    ): string {
+    private function resolveExtension(ScrollTypes $type): string
+    {
         if ($this->extension !== null) {
-            return ltrim(
-                $this->extension,
-                '.',
-            );
+            return ltrim($this->extension, '.');
         }
 
-        return match ($type) {
-            ScrollTypes::APP,
-            ScrollTypes::CAPABILITY,
-            ScrollTypes::CONFIG,
-            ScrollTypes::KATA,
-            ScrollTypes::SCHEMA,
-            ScrollTypes::SKILL => 'neon',
-        };
+        return $type->extension();
     }
 }
