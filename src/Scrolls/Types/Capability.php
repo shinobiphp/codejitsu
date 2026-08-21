@@ -12,7 +12,7 @@ use LogicException;
 
 final class Capability extends Scroll
 {
-    public const TYPE = ScrollTypes::CAPABILITY;
+    public const ScrollTypes TYPE = ScrollTypes::CAPABILITY;
 
     public function target(): Invokable|callable
     {
