@@ -10,6 +10,7 @@ use Codejitsu\Apps\Web;
 use Codejitsu\Contracts\App;
 use Codejitsu\Enums\Environment;
 use Codejitsu\Kernel\Kernel;
+use Codejitsu\Scrolls\CommandDiscovery;
 use Codejitsu\Scrolls\ScrollCodex;
 
 final class Boot
@@ -43,9 +44,15 @@ final class Boot
         ?string $rootDir = null,
         ?Environment $environment = null,
     ): Cli {
-        $kernel = Kernel::instance($name ?? 'cli', $codex ?? new ScrollCodex())
-            ->boot($rootDir, $environment);
+        $root = $rootDir ?? (defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd());
+        $scrolls = $codex ?? new ScrollCodex();
 
+        CommandDiscovery::fromDirectory(
+            $root . DIRECTORY_SEPARATOR . 'scrolls' . DIRECTORY_SEPARATOR . 'commands',
+            $scrolls,
+        );
+
+        $kernel = Kernel::instance($name ?? 'cli', $scrolls);
         return new Cli($kernel);
     }
 
@@ -57,9 +64,8 @@ final class Boot
         ?string $rootDir = null,
         ?Environment $environment = null,
     ): Swoole {
-        $kernel = Kernel::instance($name ?? 'swoole', $codex ?? new ScrollCodex())
-            ->boot($rootDir, $environment);
-
+        $kernel = Kernel::instance($name ?? 'swoole', $codex ?? new ScrollCodex());
+        $kernel->boot($rootDir, $environment);
         return new Swoole($kernel, $host, $port);
     }
 
@@ -69,9 +75,8 @@ final class Boot
         ?string $rootDir = null,
         ?Environment $environment = null,
     ): Web {
-        $kernel = Kernel::instance($name ?? 'web', $codex ?? new ScrollCodex())
-            ->boot($rootDir, $environment);
-
+        $kernel = Kernel::instance($name ?? 'web', $codex ?? new ScrollCodex());
+        $kernel->boot($rootDir, $environment);
         return new Web($kernel);
     }
 
