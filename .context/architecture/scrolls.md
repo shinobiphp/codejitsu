@@ -1,0 +1,68 @@
+# Scroll Architecture
+
+A Scroll is a first-class, discoverable, addressable resource.
+
+## Core Contract
+
+Every Scroll has a type, name, version, tags, attributes/data, and optional Envelope/Codex binding. The base class supports hydration, serialization, references, and invocation when the specialized Scroll exposes executable behavior. fileciteturn102file0L2-L2
+
+The current identity key used by `ScrollCodex` is:
+
+```text
+<type>:<name>#<version>
+```
+
+For example:
+
+```text
+command:hello#1.0.0
+schema:hello#1.0.0
+capability:hello#1.0.0
+```
+
+URIs are the external addressing mechanism:
+
+```text
+cmd://hello
+schema://hello
+capability://hello
+config://shinobi
+```
+
+A version fragment may constrain resolution, while omission means the current/latest matching resource. The URI model also has tenant and target concepts reserved for contextual/distributed resolution. fileciteturn107file0L2-L2
+
+## Hydration
+
+Discovery should be able to identify a Scroll without executing it. Hydration turns a discovered/serialized representation into a concrete Scroll instance.
+
+The Envelope is the serialized/resource boundary; the Scroll is the behavioral object.
+
+## References
+
+A Scroll may reference another Scroll by URI. The reference is resolved through the bound `ScrollCodex`:
+
+```text
+Command
+  ├── schema://hello
+  └── capability://hello
+```
+
+This deliberately keeps references addressable rather than embedding arbitrary object graphs.
+
+## Command Scrolls
+
+Command Scrolls provide CLI-oriented metadata such as description, usage, schema, capability, target, and optional child command definitions.
+
+A namespace command keeps child definitions in its serialized data so help/list operations can inspect them without hydrating child Commands. Child commands are exposed canonically with colon-separated names:
+
+```text
+scrolls
+scrolls:cache
+scrolls:cache:rebuild
+```
+
+The parent namespace is the owner of the raw child definitions; runtime child hydration happens only when execution requires it.
+
+## Polyglot Direction
+
+The resource model is intentionally format-neutral at the domain level. NEON is the current storage representation, but Scroll semantics should not depend on PHP-specific implementation details. Future runtimes may consume equivalent Scroll resources in other languages or execution substrates.
