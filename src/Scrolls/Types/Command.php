@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Codejitsu\Scrolls\Types;
 
-use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use Codejitsu\Scrolls\Scroll;
 use InvalidArgumentException;
@@ -54,26 +53,21 @@ final class Command extends Scroll
 
     public function execute(mixed ...$args): mixed
     {
-        $payload = $args[0] ?? $args;
-
-        if (!is_array($payload)) {
-            $payload = ['value' => $payload];
-        }
+        $payload = count($args) === 1 && is_array($args[0])
+            ? $args[0]
+            : $args;
 
         if (($schema = $this->schema()) !== null) {
-            $this->ref($schema)(...[$payload]);
+            $this->ref($schema)($payload);
         }
 
         if (($capability = $this->capability()) !== null) {
-            return $this->ref($capability)(...[$payload]);
+            return $this->ref($capability)($payload);
         }
 
         return ($this->target())(...$args);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function references(): array
     {
         $references = [];
