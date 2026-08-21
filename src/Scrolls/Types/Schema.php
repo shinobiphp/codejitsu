@@ -8,6 +8,7 @@ use Codejitsu\Contracts\Schema\Validator;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use Codejitsu\Schema\JsonSchema;
 use Codejitsu\Scrolls\Scroll;
+use InvalidArgumentException;
 
 final class Schema extends Scroll
 {
@@ -18,7 +19,9 @@ final class Schema extends Scroll
     ) {}
 
     public array $definition {
-        get => $this->attributes;
+        get => isset($this->attributes['definition'])
+            ? $this->attributes['definition']
+            : $this->attributes;
     }
 
     public function validate(array $data): void
@@ -32,7 +35,15 @@ final class Schema extends Scroll
     public function execute(array $data): array
     {
         $this->validate($data);
-
         return $data;
+    }
+
+    public function hydrate(array $data): static
+    {
+        if (isset($data['definition']) && !is_array($data['definition'])) {
+            throw new InvalidArgumentException('Schema definition must be an array.');
+        }
+
+        return parent::hydrate($data);
     }
 }
