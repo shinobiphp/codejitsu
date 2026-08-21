@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Codejitsu\Scrolls;
 
+use Codejitsu\Codecs\Neon;
 use Codejitsu\EnvelopeCodex;
 use Codejitsu\Contracts\Scrolls\Envelope as ScrollEnvelope;
 use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use Codejitsu\Contracts\Scrolls\ScrollCodex as ScrollCodexContract;
 use Codejitsu\Contracts\Scrolls\Store as StoreContract;
+use Codejitsu\Enums\Codecs;
 use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\Uri\Resolved;
 use Codejitsu\Uri\Uri;
@@ -20,10 +22,27 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 {
     protected array $scrolls = [];
 
+    public function __construct(array $itemsOrEnvelopes = [])
+    {
+        parent::__construct(Codecs::NEON, $itemsOrEnvelopes);
+    }
+
+    public function load(string $root): static
+    {
+        foreach ((new ScrollDiscovery(new Neon()))->discover($root) as $scroll) {
+            $this->registerScroll($scroll);
+        }
+
+        return $this;
+    }
+
     public function registerScroll(ScrollContract $scroll): static
     {
         $this->validate($scroll);
-        $this->scrolls[strtolower($scroll->name)] = $scroll;
+        $scroll->bind($this);
+        $key = $this->identityKey($scroll);
+        $this->scrolls[$key] = $scroll;
+        $this->items[$key] = $scroll;
         return $this;
     }
 
@@ -45,14 +64,9 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new InvalidArgumentException(sprintf('Unknown Scroll type [%s].', (string) $type));
         }
 
-        $result = new static($this->codec);
-        foreach ($this->envelopes as $name => $envelope) {
-            if ($envelope->scrollType === $target) {
-                $result->loadEnvelope($envelope, $name);
-            }
-        }
-        foreach ($this->scrolls as $scroll) {
-            if ($this->scrollType($scroll) === $target) {
+        $result = new static();
+        foreach ($this->all(true) as $scroll) {
+            if ($scroll instanceof ScrollContract && $this->scrollType($scroll) === $target) {
                 $result->registerScroll($scroll);
             }
         }
@@ -61,9 +75,9 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 
     public function withTag(string $tag): static
     {
-        $result = new static($this->codec);
+        $result = new static();
         foreach ($this->all(true) as $scroll) {
-            if (in_array($tag, $scroll->tags, true)) {
+            if ($scroll instanceof ScrollContract && in_array($tag, $scroll->tags, true)) {
                 $result->registerScroll($scroll);
             }
         }
@@ -72,9 +86,9 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 
     public function withTags(array $tags): static
     {
-        $result = new static($this->codec);
+        $result = new static();
         foreach ($this->all(true) as $scroll) {
-            if (empty(array_diff($tags, $scroll->tags))) {
+            if ($scroll instanceof ScrollContract && empty(array_diff($tags, $scroll->tags))) {
                 $result->registerScroll($scroll);
             }
         }
@@ -88,16 +102,48 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new InvalidArgumentException('Scroll URI cannot be empty.');
         }
 
-        $key = str_contains($value, '://')
-            ? strtolower((Uri::make($value)->path ?? Uri::make($value)->target))
-            : strtolower($value);
+        if (!str_contains($value, '://')) {
+            $matches = array_values(array_filter(
+                $this->all(true),
+                static fn (mixed $scroll): bool =>
+                    $scroll instanceof ScrollContract
+                    && strtolower($scroll->name) === strtolower($value),
+            ));
 
-        if ($this->has($key)) {
-            $scroll = $this->get($key);
-            if (!$scroll instanceof ScrollContract) {
-                throw new LogicException(sprintf('Resolved item [%s] is not a Scroll.', $uri));
+            return match (count($matches)) {
+                1 => $matches[0],
+                0 => throw new OutOfBoundsException(sprintf('Scroll [%s] not found in Codex.', $uri)),
+                default => throw new InvalidArgumentException(sprintf(
+                    'Scroll name [%s] is ambiguous; resolve it by URI.',
+                    $uri,
+                )),
+            };
+        }
+
+        $parsed = Uri::make($value);
+        $type = Types::normalize($parsed->type, null);
+        if (!$type instanceof Types) {
+            throw new InvalidArgumentException(sprintf('Unknown Scroll URI scheme [%s].', $parsed->type));
+        }
+
+        $name = strtolower($parsed->path ?? $parsed->target ?? '');
+        if ($name === '') {
+            throw new InvalidArgumentException(sprintf('Scroll URI [%s] has no name.', $uri));
+        }
+
+        $version = $parsed->version;
+        foreach ($this->all(true) as $scroll) {
+            if (!$scroll instanceof ScrollContract || $this->scrollType($scroll) !== $type) {
+                continue;
             }
-            return $scroll;
+
+            if (strtolower($scroll->name) !== $name) {
+                continue;
+            }
+
+            if ($version === null || $scroll->version === $version) {
+                return $scroll->bind($this);
+            }
         }
 
         throw new OutOfBoundsException(sprintf('Scroll [%s] not found in Codex.', $uri));
@@ -105,16 +151,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 
     public function resolveTyped(Types $type, string $name): ScrollContract
     {
-        $scroll = $this->resolve($name);
-        if ($this->scrollType($scroll) !== $type) {
-            throw new InvalidArgumentException(sprintf(
-                'Scroll [%s] is type [%s], expected [%s].',
-                $name,
-                $this->scrollType($scroll)->value,
-                $type->value,
-            ));
-        }
-        return $scroll;
+        return $this->resolve($type->scheme() . $name);
     }
 
     public function invoke(Types|string $type, string $name, mixed ...$args): mixed
@@ -131,7 +168,10 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         return Resolved::fromUri($uri, $this->resolve((string) $uri));
     }
 
-    public function __get(string $name): mixed { return $this->resolve($name); }
+    public function __get(string $name): mixed
+    {
+        return $this->resolve($name);
+    }
 
     public function __isset(string $name): bool
     {
@@ -162,7 +202,8 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new LogicException('ScrollCodex can only hydrate Scroll envelopes.');
         }
 
-        return $envelope->scrollType->make($envelope, $this->decodeEnvelope($envelope));
+        $scroll = $envelope->scrollType->make($envelope, $this->decodeEnvelope($envelope));
+        return $scroll->bind($this);
     }
 
     protected function scrollType(ScrollContract $scroll): Types
@@ -176,6 +217,16 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new InvalidArgumentException(sprintf('Invalid Scroll type [%s].', (string) $type));
         }
         return $normalized;
+    }
+
+    private function identityKey(ScrollContract $scroll): string
+    {
+        return strtolower(sprintf(
+            '%s:%s#%s',
+            $this->scrollType($scroll)->value,
+            $scroll->name,
+            $scroll->version,
+        ));
     }
 
     protected function validate(mixed $scroll): void

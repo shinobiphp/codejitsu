@@ -14,9 +14,13 @@ final class Capability extends Scroll
 {
     public const ScrollTypes TYPE = ScrollTypes::CAPABILITY;
 
-    public function target(): Invokable|callable
+    public function target(): Invokable|callable|string
     {
         $target = $this->attributes['target'] ?? null;
+
+        if (is_string($target) && trim($target) !== '') {
+            return trim($target);
+        }
 
         if ($target instanceof Invokable || is_callable($target)) {
             return $target;
@@ -30,12 +34,18 @@ final class Capability extends Scroll
 
     public function execute(mixed ...$args): mixed
     {
-        return ($this->target())(...$args);
+        $target = $this->target();
+
+        if (is_string($target)) {
+            return $target(...$args);
+        }
+
+        return $target(...$args);
     }
 
     public function hydrate(array $data): static
     {
-        if (isset($data['target']) && !is_callable($data['target']) && !is_string($data['target'])) {
+        if (isset($data['target']) && !is_string($data['target']) && !$data['target'] instanceof Invokable && !is_callable($data['target'])) {
             throw new InvalidArgumentException('Capability target must be callable or a callable string.');
         }
 

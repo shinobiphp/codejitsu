@@ -20,6 +20,7 @@ abstract class Scroll implements ScrollContract
     public const array TAGS = [];
 
     protected ?EnvelopeContract $envelope = null;
+    protected ?ScrollCodex $codex = null;
     protected array $attributes = [];
     protected ?string $dynamicName = null;
     protected array $dynamicTags = [];
@@ -74,6 +75,35 @@ abstract class Scroll implements ScrollContract
         }
 
         return static::make($resolved->target, $resolved->params);
+    }
+
+    public function bind(ScrollCodex $codex): static
+    {
+        $this->codex = $codex;
+        return $this;
+    }
+
+    public function ref(string $uri): ScrollContract
+    {
+        if ($this->codex === null) {
+            throw new LogicException(sprintf(
+                'Scroll [%s] cannot resolve [%s] without a bound ScrollCodex.',
+                $this->name,
+                $uri,
+            ));
+        }
+
+        $scroll = $this->codex->resolve($uri);
+        if (!$scroll instanceof ScrollContract) {
+            throw new LogicException(sprintf('Reference [%s] did not resolve to a Scroll.', $uri));
+        }
+
+        return $scroll;
+    }
+
+    public function references(): array
+    {
+        return [];
     }
 
     public function hydrate(array $data): static

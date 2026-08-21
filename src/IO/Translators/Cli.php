@@ -16,11 +16,13 @@ final class Cli
 {
     public static function translate(array $argv): CliIntent
     {
-        $filtered = array_values(array_filter($argv, static fn (string $a) => 
-            !str_starts_with($a, '--env=') && !str_starts_with($a, '--root=')
+        $filtered = array_values(array_filter(
+            $argv,
+            static fn (string $arg): bool =>
+                !str_starts_with($arg, '--env=') && !str_starts_with($arg, '--root='),
         ));
 
-        $command = $filtered[1] ?? 'help';
+        $command = strtolower((string) ($filtered[1] ?? ''));
         $rawArgs = array_slice($filtered, 2);
 
         $payload = [];
@@ -30,28 +32,26 @@ final class Cli
             if (str_starts_with($arg, '--')) {
                 $parts = explode('=', substr($arg, 2), 2);
                 $flags[$parts[0]] = $parts[1] ?? true;
-            } else {
-                $payload[] = $arg;
+                continue;
             }
+
+            $payload[] = $arg;
         }
 
-        // Construct your strict Identity structure for the CLI intent
         $identity = new Identity(
             type: IdentityType::Intent,
-            identifier: new Identifier("cli.{$command}"),
-            version: new Version() // or parse from flags/environment if needed
+            identifier: new Identifier('cli.' . ($command === '' ? 'help' : $command)),
+            version: new Version(),
         );
 
-        $metadata = new Metadata($identity, new Collection([
-            'flags' => $flags,
-            'argc' => count($filtered),
-            'raw' => $argv,
-        ]));
-
         return new CliIntent(
-            action: "cli.{$command}",
+            action: $command,
             payload: $payload,
-            metadata: $metadata
+            metadata: new Metadata($identity, new Collection([
+                'flags' => $flags,
+                'argc' => count($filtered),
+                'raw' => $argv,
+            ])),
         );
     }
 }

@@ -1,166 +1,92 @@
-$schema: 'https://json-schema.org/draft/2020-12/schema',
-$id: 'schemas://scroll#1.0.0',
-
-title: 'Codejitsu Scroll',
-description: 'Base schema shared by all Codejitsu Scrolls.',
-
-type: object,
-
-required: [
-    id,
-    uri,
-    name,
-    version,
-    type
-],
-
-properties: {
-    id: {
-        type: string,
-        minLength: 1,
-        description: 'Stable unique identifier for the Scroll.'
-    },
-
-    uri: {
-        type: string,
-        minLength: 1,
-        description: 'Canonical URI used to resolve the Scroll.'
-    },
-
-    name: {
-        type: string,
-        minLength: 1,
-        description: 'Human-readable Scroll identifier.'
-    },
-
-    version: {
-        type: string,
-        pattern: '^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$',
-        description: 'Semantic version of the Scroll.'
-    },
-
-    type: {
-        type: string,
-        minLength: 1,
-        description: 'Codejitsu Scroll type.'
-    },
-
-    description: {
+$schema: 'https://json-schema.org/draft/2020-12/schema'
+$id: 'schemas://scroll#1.0.0'
+title: 'Codejitsu Scroll'
+description: 'Base schema shared by all Codejitsu Scrolls.'
+type: object
+required:
+    - id
+    - uri
+    - name
+    - version
+    - type
+properties:
+    id:
         type: string
-    },
-
-    tags: {
-        type: array,
-        items: {
-            type: string,
-            minLength: 1
-        },
-        uniqueItems: true
-    },
-
-    /**
-     * Optional codec used to decode the Scroll payload.
-     *
-     * This belongs to the envelope/index layer rather than inside
-     * the Scroll's actual domain data.
-     */
-    codec: {
-        type: string,
         minLength: 1
-    },
-
-    /**
-     * Indicates that the data payload is encrypted.
-     */
-    sealed: {
-        type: boolean,
+        description: 'Stable unique identifier for the Scroll.'
+    uri:
+        type: string
+        minLength: 1
+        description: 'Canonical URI used to resolve the Scroll.'
+    name:
+        type: string
+        minLength: 1
+        description: 'Human-readable Scroll identifier.'
+    version:
+        type: string
+        pattern: '^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$'
+        description: 'Semantic version of the Scroll.'
+    type:
+        type: string
+        minLength: 1
+        description: 'Codejitsu Scroll type.'
+    description:
+        type: string
+    tags:
+        type: array
+        items:
+            type: string
+            minLength: 1
+        uniqueItems: true
+    codec:
+        type: string
+        minLength: 1
+    sealed:
+        type: boolean
         default: false
-    },
-
-    /**
-     * Indicates that the data payload is cryptographically signed.
-     */
-    signed: {
-        type: boolean,
+    signed:
+        type: boolean
         default: false
-    },
-
-    /**
-     * Encryption metadata.
-     */
-    seal: {
-        type: object,
-        properties: {
-            algorithm: {
-                type: string,
+    seal:
+        type: object
+        properties:
+            algorithm:
+                type: string
                 minLength: 1
-            },
-
-            keyId: {
-                type: string,
+            keyId:
+                type: string
                 minLength: 1
-            }
-        },
-        required: [
-            algorithm,
-            keyId
-        ],
+        required:
+            - algorithm
+            - keyId
         additionalProperties: true
-    },
-
-    /**
-     * Signature metadata.
-     */
-    signature: {
-        type: object,
-        properties: {
-            algorithm: {
-                type: string,
+    signature:
+        type: object
+        properties:
+            algorithm:
+                type: string
                 minLength: 1
-            },
-
-            keyId: {
-                type: string,
+            keyId:
+                type: string
                 minLength: 1
-            },
-
-            value: {
-                type: string,
+            value:
+                type: string
                 minLength: 1
-            }
-        },
-        required: [
-            algorithm,
-            keyId,
-            value
-        ],
+        required:
+            - algorithm
+            - keyId
+            - value
         additionalProperties: true
-    },
-
-    /**
-     * Arbitrary Scroll metadata.
-     */
-    meta: {
-        type: object,
+    meta:
+        type: object
         additionalProperties: true
-    },
-
-    /**
-     * The actual Scroll payload.
-     *
-     * Discovery should NOT need to decode or hydrate this property.
-     */
-    data: {
-        description: 'The Scroll payload.',
-        type: [
-            object,
-            array,
-            string,
-            number,
-            boolean,
-            'null'
-        ]
-    }
-},
-
+    data:
+        description: 'The Scroll payload.'
+        type:
+            - object
+            - array
+            - string
+            - number
+            - boolean
+            - 'null'
 additionalProperties: true

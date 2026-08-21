@@ -1,0 +1,51 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Codejitsu\Scrolls;
+
+use Codejitsu\Codecs\Neon;
+use Codejitsu\Enums\Scrolls\Types;
+use Codejitsu\Scrolls\Types\Command;
+use RuntimeException;
+
+final class CommandDiscovery
+{
+    private function __construct(private readonly Neon $codec) {}
+
+    public static function fromDirectory(string $directory, ScrollCodex $codex): int
+    {
+        if (!is_dir($directory)) {
+            return 0;
+        }
+
+        $discovery = new self(new Neon());
+        $count = 0;
+        $files = glob(rtrim($directory, '/\\') . DIRECTORY_SEPARATOR . '*.' . Types::COMMAND->extension());
+        if ($files === false) {
+            return 0;
+        }
+
+        foreach ($files as $file) {
+            $payload = file_get_contents($file);
+            if ($payload === false) {
+                throw new RuntimeException(sprintf('Unable to read command Scroll [%s].', $file));
+            }
+
+            $command = Types::COMMAND->make(null, $discovery->decode($payload));
+            if (!$command instanceof Command) {
+                throw new RuntimeException(sprintf('Command resource [%s] did not hydrate as a Command Scroll.', $file));
+            }
+
+            $codex->registerScroll($command);
+            ++$count;
+        }
+
+        return $count;
+    }
+
+    private function decode(string $payload): array
+    {
+        return $this->codec->decode($payload);
+    }
+}

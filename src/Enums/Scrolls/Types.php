@@ -9,6 +9,7 @@ use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use Codejitsu\Enums\Codecs;
 use Codejitsu\Scrolls\Types\App as AppScroll;
 use Codejitsu\Scrolls\Types\Capability as CapabilityScroll;
+use Codejitsu\Scrolls\Types\Command as CommandScroll;
 use Codejitsu\Scrolls\Types\Config as ConfigScroll;
 use Codejitsu\Scrolls\Types\Kata as KataScroll;
 use Codejitsu\Scrolls\Types\Schema as SchemaScroll;
@@ -22,10 +23,37 @@ enum Types: string
 
     case APP = 'app';
     case CAPABILITY = 'capability';
+    case COMMAND = 'command';
     case CONFIG = 'config';
     case KATA = 'kata';
     case SCHEMA = 'schema';
     case SKILL = 'skill';
+
+    public static function normalize(mixed $value, self|string|null $default = null, bool $passthroughUnmatched = false): self|string|null
+    {
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+        $normalized = match ($normalized) {
+            'cmd' => 'command',
+            default => $normalized,
+        };
+
+        $match = self::tryFrom($normalized);
+        if ($match instanceof self) {
+            return $match;
+        }
+
+        if ($passthroughUnmatched) {
+            return $value;
+        }
+
+        return $default instanceof self
+            ? $default
+            : (is_string($default) ? self::tryFrom($default) : null);
+    }
 
     public static function map(): array
     {
@@ -43,6 +71,7 @@ enum Types: string
         return [
             'app' => array_merge(['class' => AppScroll::class, 'plural' => 'apps', 'long_name' => 'application', 'long_plural' => 'applications', 'extension' => 'app', 'scheme' => 'app://'], $codecConfig),
             'capability' => array_merge(['class' => CapabilityScroll::class, 'plural' => 'capabilities', 'long_name' => 'capability', 'long_plural' => 'capabilities', 'extension' => 'capability', 'scheme' => 'capability://'], $codecConfig),
+            'command' => array_merge(['class' => CommandScroll::class, 'plural' => 'commands', 'long_name' => 'command', 'long_plural' => 'commands', 'extension' => 'cmd', 'scheme' => 'cmd://'], $codecConfig),
             'config' => array_merge(['class' => ConfigScroll::class, 'plural' => 'configs', 'long_name' => 'configuration', 'long_plural' => 'configurations', 'extension' => 'config', 'scheme' => 'config://'], $codecConfig),
             'kata' => array_merge(['class' => KataScroll::class, 'plural' => 'katas', 'long_name' => 'kata', 'long_plural' => 'katas', 'extension' => 'kata', 'scheme' => 'kata://'], $codecConfig),
             'schema' => array_merge(['class' => SchemaScroll::class, 'plural' => 'schemas', 'long_name' => 'schema', 'long_plural' => 'schemas', 'extension' => 'schema', 'scheme' => 'schema://'], $codecConfig),
@@ -52,11 +81,15 @@ enum Types: string
 
     public function className(): string
     {
-        $class = $this->to('class');
-        if (!is_string($class) || !class_exists($class)) {
-            throw new InvalidArgumentException(sprintf('No valid Scroll class mapped for type [%s].', $this->value));
-        }
-        return $class;
+        return match ($this) {
+            self::APP => AppScroll::class,
+            self::CAPABILITY => CapabilityScroll::class,
+            self::COMMAND => CommandScroll::class,
+            self::CONFIG => ConfigScroll::class,
+            self::KATA => KataScroll::class,
+            self::SCHEMA => SchemaScroll::class,
+            self::SKILL => SkillScroll::class,
+        };
     }
 
     public function make(?EnvelopeContract $envelope = null, array $data = []): ScrollContract
@@ -77,7 +110,34 @@ enum Types: string
         return $instance;
     }
 
-    public function plural(): string { return (string) $this->to('plural', $this->value . 's'); }
-    public function extension(): string { return (string) $this->to('extension', $this->value); }
-    public function scheme(): string { return (string) $this->to('scheme', $this->value . '://'); }
+    public function plural(): string
+    {
+        return match ($this) {
+            self::APP => 'apps',
+            self::CAPABILITY => 'capabilities',
+            self::COMMAND => 'commands',
+            self::CONFIG => 'configs',
+            self::KATA => 'katas',
+            self::SCHEMA => 'schemas',
+            self::SKILL => 'skills',
+        };
+    }
+
+    public function extension(): string
+    {
+        return match ($this) {
+            self::COMMAND => 'cmd',
+            self::APP => 'app',
+            self::CAPABILITY => 'capability',
+            self::CONFIG => 'config',
+            self::KATA => 'kata',
+            self::SCHEMA => 'schema',
+            self::SKILL => 'skill',
+        };
+    }
+
+    public function scheme(): string
+    {
+        return $this->value . '://';
+    }
 }
