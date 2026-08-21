@@ -9,6 +9,7 @@ use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use Codejitsu\Enums\Codecs;
 use Codejitsu\Scrolls\Types\App as AppScroll;
 use Codejitsu\Scrolls\Types\Capability as CapabilityScroll;
+use Codejitsu\Scrolls\Types\Command as CommandScroll;
 use Codejitsu\Scrolls\Types\Config as ConfigScroll;
 use Codejitsu\Scrolls\Types\Kata as KataScroll;
 use Codejitsu\Scrolls\Types\Schema as SchemaScroll;
@@ -22,6 +23,7 @@ enum Types: string
 
     case APP = 'app';
     case CAPABILITY = 'capability';
+    case COMMAND = 'command';
     case CONFIG = 'config';
     case KATA = 'kata';
     case SCHEMA = 'schema';
@@ -43,6 +45,7 @@ enum Types: string
         return [
             'app' => array_merge(['class' => AppScroll::class, 'plural' => 'apps', 'long_name' => 'application', 'long_plural' => 'applications', 'extension' => 'app', 'scheme' => 'app://'], $codecConfig),
             'capability' => array_merge(['class' => CapabilityScroll::class, 'plural' => 'capabilities', 'long_name' => 'capability', 'long_plural' => 'capabilities', 'extension' => 'capability', 'scheme' => 'capability://'], $codecConfig),
+            'command' => array_merge(['class' => CommandScroll::class, 'plural' => 'commands', 'long_name' => 'command', 'long_plural' => 'commands', 'extension' => 'command', 'scheme' => 'command://'], $codecConfig),
             'config' => array_merge(['class' => ConfigScroll::class, 'plural' => 'configs', 'long_name' => 'configuration', 'long_plural' => 'configurations', 'extension' => 'config', 'scheme' => 'config://'], $codecConfig),
             'kata' => array_merge(['class' => KataScroll::class, 'plural' => 'katas', 'long_name' => 'kata', 'long_plural' => 'katas', 'extension' => 'kata', 'scheme' => 'kata://'], $codecConfig),
             'schema' => array_merge(['class' => SchemaScroll::class, 'plural' => 'schemas', 'long_name' => 'schema', 'long_plural' => 'schemas', 'extension' => 'schema', 'scheme' => 'schema://'], $codecConfig),
