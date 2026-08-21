@@ -11,13 +11,13 @@ use PHPUnit\Framework\TestCase;
 
 final class CommandDiscoveryTest extends TestCase
 {
-    public function testItDiscoversCommandScrollsFromNeonFiles(): void
+    public function testItDiscoversCommandScrollsFromCmdFiles(): void
     {
         $directory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'codejitsu-command-scrolls-' . bin2hex(random_bytes(4));
         mkdir($directory, 0777, true);
 
         try {
-            file_put_contents($directory . DIRECTORY_SEPARATOR . 'hello.neon', <<<'NEON'
+            file_put_contents($directory . DIRECTORY_SEPARATOR . 'hello.cmd', <<<'NEON'
 name: hello
 description: Say hello.
 usage: hello [name]
@@ -33,7 +33,7 @@ NEON);
             self::assertSame('hello', $command->name);
             self::assertSame('hello [name]', $command->usage());
         } finally {
-            @unlink($directory . DIRECTORY_SEPARATOR . 'hello.neon');
+            @unlink($directory . DIRECTORY_SEPARATOR . 'hello.cmd');
             @rmdir($directory);
         }
     }
