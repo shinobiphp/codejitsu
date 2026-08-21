@@ -45,16 +45,21 @@ final class Cli implements App
             return 0;
         }
 
-        $command = $commands[$intent->action] ?? null;
+        $command = $this->resolve($intent->action, $commands);
         if (!$command instanceof Command) {
             fwrite(STDERR, sprintf("Unknown command [%s].%s", $intent->action, PHP_EOL));
             $this->renderUsage($commands, STDERR);
             return 1;
         }
 
+        if ($command->isNamespace() && $intent->payload === []) {
+            $this->renderNamespaceUsage($command);
+            return 0;
+        }
+
         $result = $this->pipeline->send($intent, function (Intent $i) use ($command): mixed {
             return $i instanceof CliIntent
-                ? $this->dispatch($command, $i->payload)
+                ? $command->execute(...$i->payload)
                 : $command->execute($i);
         });
 
@@ -65,32 +70,34 @@ final class Cli implements App
         return is_int($result) ? $result : 0;
     }
 
-    private function dispatch(Command $command, array $payload): mixed
+    /** @param array<string, Command> $commands */
+    private function resolve(string $name, array $commands): ?Command
     {
-        if (!$command->isNamespace()) {
-            return $command->execute(...$payload);
+        $parts = array_values(array_filter(explode(':', strtolower(trim($name))), static fn (string $part): bool => $part !== ''));
+        if ($parts === []) {
+            return null;
         }
 
-        $name = $payload[0] ?? null;
-        if ($name === null || in_array($name, ['--help', '-h', 'help'], true)) {
-            $this->renderNamespaceUsage($command);
-            return 0;
+        $command = $commands[array_shift($parts)] ?? null;
+        if (!$command instanceof Command) {
+            return null;
         }
 
-        if (!is_string($name)) {
-            throw new \InvalidArgumentException(sprintf('Invalid subcommand for [%s].', $command->name));
+        foreach ($parts as $part) {
+            if (!$command->isNamespace()) {
+                return null;
+            }
+
+            $command = $command->child($part);
+            if (!$command instanceof Command) {
+                return null;
+            }
         }
 
-        $child = $command->child($name);
-        if (!$child instanceof Command) {
-            fwrite(STDERR, sprintf("Unknown subcommand [%s] for [%s].%s", $name, $command->name, PHP_EOL));
-            $this->renderNamespaceUsage($command, STDERR);
-            return 1;
-        }
-
-        return $this->dispatch($child, array_slice($payload, 1));
+        return $command;
     }
 
+    /** @return array<string, Command> */
     private function commands(): array
     {
         return array_reduce(
@@ -132,7 +139,7 @@ final class Cli implements App
     private function renderNamespaceUsage(Command $command, mixed $stream = STDOUT): void
     {
         $output = sprintf(
-            "Usage: ./codejitsu %s <subcommand> [arguments] [options]%s%s",
+            "Usage: ./codejitsu %s:<subcommand> [arguments] [options]%s%s",
             $command->name,
             PHP_EOL,
             PHP_EOL,
@@ -143,10 +150,14 @@ final class Cli implements App
                 continue;
             }
 
+            $description = is_string($definition['description'] ?? null)
+                ? $definition['description']
+                : '';
+
             $output .= sprintf(
                 "  %-20s %s%s",
-                $name,
-                is_string($definition['description'] ?? null) ? $definition['description'] : '',
+                $command->name . ':' . $name,
+                $description,
                 PHP_EOL,
             );
         }
