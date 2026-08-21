@@ -87,4 +87,64 @@ final class CommandTest extends TestCase
         $this->expectException(\Throwable::class);
         $command->execute(['valid', 123]);
     }
+
+    public function testNamespaceStoresChildDefinitionsWithoutHydratingThem(): void
+    {
+        $command = (new Command())->hydrate([
+            'name' => 'scrolls',
+            'description' => 'Manage Scrolls.',
+            'usage' => 'scrolls <command> [arguments] [options]',
+            'commands' => [
+                'hello' => [
+                    'description' => 'Say hello.',
+                    'usage' => 'scrolls hello [name]',
+                    'schema' => 'schema://hello',
+                    'capability' => 'capability://hello',
+                ],
+            ],
+        ]);
+
+        self::assertTrue($command->isNamespace());
+        self::assertSame('Say hello.', $command->commands()['hello']['description']);
+        self::assertSame('schema://hello', $command->commands()['hello']['schema']);
+        self::assertNull($command->child('missing'));
+    }
+
+    public function testNamespaceExecutesChildUsingReferencedSchemaAndCapability(): void
+    {
+        $codex = new ScrollCodex();
+
+        $schema = (new Schema())->hydrate([
+            'name' => 'hello',
+            'definition' => [
+                'type' => 'array',
+                'items' => ['type' => 'string'],
+            ],
+        ]);
+
+        $capability = (new Capability())->hydrate([
+            'name' => 'hello',
+            'target' => static fn (array $arguments): string => sprintf(
+                'Hello, %s!',
+                $arguments[0] ?? 'shinobi',
+            ),
+        ]);
+
+        $command = (new Command())->hydrate([
+            'name' => 'scrolls',
+            'commands' => [
+                'hello' => [
+                    'schema' => 'schema://hello',
+                    'capability' => 'capability://hello',
+                ],
+            ],
+        ]);
+
+        $codex
+            ->registerScroll($schema)
+            ->registerScroll($capability)
+            ->registerScroll($command);
+
+        self::assertSame('Hello, B!', $command->execute('hello', 'B'));
+    }
 }
