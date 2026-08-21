@@ -1,6 +1,6 @@
 {
     "name": "shinobiphp/codejitsu",
-    "description": "Modern  PHP 8.4+ framework/toolkit for composable, intent driven applications",
+    "description": "Modern PHP 8.4+ framework/toolkit for composable, intent driven applications",
     "version": "1.0.0",
     "type": "library",
     "require": {
@@ -18,10 +18,18 @@
         "openswoole/core": "^26.2",
         "opis/json-schema": "^2.6"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^12.4"
+    },
     "license": "proprietary",
     "autoload": {
         "psr-4": {
             "Codejitsu\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Codejitsu\\Tests\\": "tests/"
         }
     },
     "authors": [
@@ -31,12 +39,16 @@
         }
     ],
     "config": {
-	"bin-dir": "./bin/",
-	"vendor-dir": "./lib/"
+        "bin-dir": "./bin/",
+        "vendor-dir": "./lib/"
     },
     "extra": {
         "branch-alias": {
             "dev-main": "1.0.x-dev"
         }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-text"
     }
 }
