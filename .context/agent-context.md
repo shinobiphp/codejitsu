@@ -7,10 +7,12 @@ This directory is Codejitsu's shared architectural memory. Any human or AI agent
 Before making a non-trivial architectural change:
 
 1. Read `.context/README.md`.
-2. Read the relevant documents under `architecture/` and `concepts/`.
-3. Read relevant decision records under `decisions/`.
-4. Read `roadmap/` when the change affects planned work.
-5. Inspect the current source/contracts before assuming the documentation is current.
+2. Read `.context/agent-context.md`.
+3. Read the relevant documents under `architecture/` and `concepts/`.
+4. Read relevant decision records under `decisions/`.
+5. Read `roadmap/` when the change affects planned work.
+6. Read `ideas.md` when exploring alternatives or proposing new directions.
+7. Inspect the current source/contracts before assuming the documentation is current.
 
 The repository's source code and tests define current behavior. Context documents explain intent, terminology, constraints, and rationale.
 
@@ -31,6 +33,26 @@ When a change materially affects:
 update the appropriate context document in the same change or pull request.
 
 Do not update context merely because implementation details changed internally without changing architectural meaning.
+
+## Ideas
+
+`.context/ideas.md` is the deliberately non-committed-to-yet idea space.
+
+Ideas are possibilities, not requirements, commitments, or current architecture. Agents may use them to explore options, but must not treat them as authorization to implement work.
+
+Promote ideas deliberately:
+
+```text
+idea
+  ↓
+validated direction → roadmap
+  ↓
+architectural decision → decision record
+  ↓
+implementation → source/tests + updated context
+```
+
+Do not turn `ideas.md` into a task backlog. Concrete work belongs in the project's issue/task system.
 
 ## Decision Records
 
@@ -74,7 +96,7 @@ Agents should:
 - search context before proposing new abstractions
 - update context when architectural meaning changes
 - reference source files/contracts when documenting current implementation
-- distinguish current state from planned state
+- distinguish current state from planned state and ideas
 - avoid copying large amounts of source code into context
 - keep documents concise, composable, and easy to retrieve semantically
 
@@ -83,7 +105,7 @@ Agents should not:
 - treat `.context/` as executable configuration
 - put secrets, credentials, tokens, or environment-specific private data here
 - use context documents as a substitute for tests
-- claim unfinished roadmap items are implemented
+- claim unfinished roadmap or idea items are implemented
 - create duplicate documents for the same concept without a clear reason
 
 ## Cross-Agent Portability
