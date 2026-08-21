@@ -18,12 +18,12 @@ final class Capability extends Scroll
     {
         $target = $this->attributes['target'] ?? null;
 
-        if ($target instanceof Invokable || is_callable($target)) {
-            return $target;
-        }
-
         if (is_string($target) && trim($target) !== '') {
             return trim($target);
+        }
+
+        if ($target instanceof Invokable || is_callable($target)) {
+            return $target;
         }
 
         throw new LogicException(sprintf(
