@@ -24,6 +24,42 @@ final class Command extends Scroll
         return (string) ($this->attributes['usage'] ?? $this->name);
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public function commands(): array
+    {
+        $commands = $this->attributes['commands'] ?? [];
+
+        if (!is_array($commands)) {
+            throw new LogicException(sprintf('Command [%s] commands must be an array.', $this->name));
+        }
+
+        return $commands;
+    }
+
+    public function isNamespace(): bool
+    {
+        return $this->commands() !== [];
+    }
+
+    public function child(string $name): ?self
+    {
+        $definition = $this->commands()[strtolower(trim($name))] ?? null;
+        if (!is_array($definition)) {
+            return null;
+        }
+
+        $child = new self();
+        $child->bind($this->codex());
+        $child->hydrate([
+            'name' => strtolower(trim($name)),
+            ...$definition,
+        ]);
+
+        return $child;
+    }
+
     public function capability(): ?string
     {
         $reference = $this->attributes['capability'] ?? null;
@@ -65,6 +101,24 @@ final class Command extends Scroll
             return $this->ref($capability)($payload);
         }
 
+        if ($this->isNamespace()) {
+            $childName = $payload[0] ?? null;
+            if (!is_string($childName)) {
+                throw new LogicException(sprintf('Command namespace [%s] requires a subcommand.', $this->name));
+            }
+
+            $child = $this->child($childName);
+            if ($child === null) {
+                throw new LogicException(sprintf(
+                    'Unknown subcommand [%s] for command namespace [%s].',
+                    $childName,
+                    $this->name,
+                ));
+            }
+
+            return $child->execute(...array_slice($payload, 1));
+        }
+
         return ($this->target())(...$args);
     }
 
@@ -93,6 +147,10 @@ final class Command extends Scroll
             throw new InvalidArgumentException('Command usage must be a string.');
         }
 
+        if (isset($data['commands']) && !is_array($data['commands'])) {
+            throw new InvalidArgumentException('Command commands must be an array.');
+        }
+
         foreach (['capability', 'schema', 'target'] as $reference) {
             if (isset($data[$reference]) && !is_string($data[$reference]) && !is_callable($data[$reference])) {
                 throw new InvalidArgumentException(sprintf('Command %s must be a URI or callable.', $reference));
@@ -100,5 +158,15 @@ final class Command extends Scroll
         }
 
         return parent::hydrate($data);
+    }
+
+    private function codex(): \Codejitsu\Scrolls\ScrollCodex
+    {
+        $codex = $this->getCodex();
+        if ($codex === null) {
+            throw new LogicException(sprintf('Command [%s] is not bound to a ScrollCodex.', $this->name));
+        }
+
+        return $codex;
     }
 }
