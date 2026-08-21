@@ -24,6 +24,10 @@ interface Scroll extends Resolvable
     /** @return array<string, mixed> */
     public function toArray(): array;
 
+    public function ref(string $uri): Scroll;
+
+    public function references(): array;
+
     public function __invoke(mixed ...$args): mixed;
 
     public function __call(string $method, array $args): mixed;
