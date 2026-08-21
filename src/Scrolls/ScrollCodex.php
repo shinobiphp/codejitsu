@@ -23,6 +23,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
     public function registerScroll(ScrollContract $scroll): static
     {
         $this->validate($scroll);
+        $scroll->bind($this);
         $this->scrolls[strtolower($scroll->name)] = $scroll;
         return $this;
     }
@@ -88,8 +89,9 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new InvalidArgumentException('Scroll URI cannot be empty.');
         }
 
+        $parsed = Uri::make($value);
         $key = str_contains($value, '://')
-            ? strtolower((Uri::make($value)->path ?? Uri::make($value)->target))
+            ? strtolower($parsed->path ?? $parsed->target)
             : strtolower($value);
 
         if ($this->has($key)) {
@@ -97,6 +99,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             if (!$scroll instanceof ScrollContract) {
                 throw new LogicException(sprintf('Resolved item [%s] is not a Scroll.', $uri));
             }
+            $scroll->bind($this);
             return $scroll;
         }
 
@@ -131,7 +134,10 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         return Resolved::fromUri($uri, $this->resolve((string) $uri));
     }
 
-    public function __get(string $name): mixed { return $this->resolve($name); }
+    public function __get(string $name): mixed
+    {
+        return $this->resolve($name);
+    }
 
     public function __isset(string $name): bool
     {
@@ -162,7 +168,8 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new LogicException('ScrollCodex can only hydrate Scroll envelopes.');
         }
 
-        return $envelope->scrollType->make($envelope, $this->decodeEnvelope($envelope));
+        $scroll = $envelope->scrollType->make($envelope, $this->decodeEnvelope($envelope));
+        return $scroll->bind($this);
     }
 
     protected function scrollType(ScrollContract $scroll): Types
