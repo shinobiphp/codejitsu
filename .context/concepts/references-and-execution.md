@@ -1,0 +1,54 @@
+# References and Execution
+
+References connect declarative Scrolls without forcing compile-time object graphs.
+
+## Reference Flow
+
+```text
+scroll attribute
+   ↓
+URI string
+   ↓
+Scroll::ref()
+   ↓
+ScrollCodex::resolve()
+   ↓
+resolved Scroll
+   ↓
+invoke / consume
+```
+
+A Command can reference a Schema for input validation and a Capability for execution.
+
+## Execution Semantics
+
+A Scroll may be executable when its type exposes executable behavior. Execution should remain explicit and observable.
+
+References should resolve through the owning Codex rather than directly constructing another resource. This preserves versioning, addressing, tenancy, and future federation boundaries.
+
+## Command Composition
+
+Command Scrolls can compose behavior from other Scrolls:
+
+```text
+Command
+  ├── Schema
+  │    └── validates payload
+  └── Capability
+       └── performs behavior
+```
+
+Namespace commands add another layer:
+
+```text
+cmd://scrolls
+  ├── scrolls:hello
+  ├── scrolls:cache
+  └── scrolls:cache:rebuild
+```
+
+The parent stores child definitions as data. Child hydration is deferred until execution.
+
+## Principle
+
+References should be declarative, addressable, replaceable, and version-aware. Avoid embedding concrete implementation objects when a stable Scroll URI can express the dependency.
