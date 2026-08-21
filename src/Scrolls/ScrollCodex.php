@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Codejitsu\Scrolls;
 
-use Codejitsu\Codecs\Neon;
 use Codejitsu\EnvelopeCodex;
 use Codejitsu\Contracts\Scrolls\Envelope as ScrollEnvelope;
 use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use Codejitsu\Contracts\Scrolls\ScrollCodex as ScrollCodexContract;
 use Codejitsu\Contracts\Scrolls\Store as StoreContract;
+use Codejitsu\Enums\Codecs;
 use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\Uri\Resolved;
 use Codejitsu\Uri\Uri;
@@ -23,8 +23,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 
     public function __construct(array $itemsOrEnvelopes = [])
     {
-        parent::__construct(null, $itemsOrEnvelopes);
-        $this->codec = \Codejitsu\Enums\Codecs::NEON;
+        parent::__construct(Codecs::NEON, $itemsOrEnvelopes);
     }
 
     public function registerScroll(ScrollContract $scroll): static
@@ -142,8 +141,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 
     public function resolveTyped(Types $type, string $name): ScrollContract
     {
-        $scroll = $this->resolve($type->scheme() . $name);
-        return $scroll;
+        return $this->resolve($type->scheme() . $name);
     }
 
     public function invoke(Types|string $type, string $name, mixed ...$args): mixed
