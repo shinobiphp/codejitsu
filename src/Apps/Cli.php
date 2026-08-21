@@ -7,9 +7,11 @@ namespace Codejitsu\Apps;
 use Codejitsu\Contracts\App;
 use Codejitsu\Contracts\Intent;
 use Codejitsu\Contracts\Middleware;
+use Codejitsu\IO\CliIntent;
 use Codejitsu\IO\Translators\Cli as CliTranslator;
 use Codejitsu\Kernel\Kernel;
 use Codejitsu\Pipeline\Pipeline;
+use Codejitsu\Scrolls\Types\Command;
 use Closure;
 
 final class Cli implements App
@@ -21,7 +23,7 @@ final class Cli implements App
     }
 
     public function __construct(
-        private readonly Kernel $kernelInstance
+        private readonly Kernel $kernelInstance,
     ) {
         $this->pipeline = new Pipeline();
     }
@@ -35,24 +37,58 @@ final class Cli implements App
     public function run(mixed ...$args): int
     {
         $rawArgv = $args[0] ?? $_SERVER['argv'] ?? [];
-        
-        // 1. Translate raw CLI inputs into a typed CliIntent
         $intent = CliTranslator::translate($rawArgv);
-        var_dump($intent);
-        exit;
-        $codex = $this->kernelInstance->codex;
+        $commands = $this->commands();
 
-        // 2. Dispatch through the pipeline and execute Codex command
-        $result = $this->pipeline->send($intent, function (Intent $i) use ($codex) {
-            if (!$codex->has($i->action)) {
-                fwrite(STDERR, "Unknown command action: {$i->action}\n");
-                return 1;
-            }
+        if ($intent->action === '' || in_array($intent->action, ['help', '--help', '-h', 'list'], true)) {
+            $this->renderUsage($commands);
+            return 0;
+        }
 
-            $handler = $codex->get($i->action);
-            return (int) $handler($i);
+        $command = $commands[$intent->action] ?? null;
+        if (!$command instanceof Command) {
+            fwrite(STDERR, sprintf("Unknown command [%s].%s", $intent->action, PHP_EOL));
+            $this->renderUsage($commands, STDERR);
+            return 1;
+        }
+
+        $result = $this->pipeline->send($intent, function (Intent $i) use ($command): mixed {
+            return $i instanceof CliIntent
+                ? $command->execute(...$i->payload)
+                : $command->execute($i);
         });
 
         return is_int($result) ? $result : 0;
+    }
+
+    /** @return array<string, Command> */
+    private function commands(): array
+    {
+        $commands = [];
+
+        foreach ($this->kernelInstance->scrolls->all(true) as $scroll) {
+            if ($scroll instanceof Command) {
+                $commands[$scroll->name] = $scroll;
+            }
+        }
+
+        return $commands;
+    }
+
+    /** @param resource $stream */
+    private function renderUsage(array $commands, mixed $stream = STDOUT): void
+    {
+        fwrite($stream, "Codejitsu\n\n");
+        fwrite($stream, "Usage: ./codejitsu <command> [arguments] [options]\n\n");
+
+        if ($commands === []) {
+            fwrite($stream, "No command Scrolls are currently available.\n");
+            return;
+        }
+
+        fwrite($stream, "Available commands:\n");
+        foreach ($commands as $command) {
+            fwrite($stream, sprintf("  %-20s %s%s", $command->name, $command->description(), PHP_EOL));
+        }
     }
 }
