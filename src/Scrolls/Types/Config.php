@@ -9,7 +9,7 @@ use Codejitsu\Scrolls\Scroll;
 
 final class Config extends Scroll
 {
-    public const TYPE = ScrollTypes::CONFIG;
+    public const ScrollTypes TYPE = ScrollTypes::CONFIG;
 
     public function get(string $path, mixed $default = null): mixed
     {
