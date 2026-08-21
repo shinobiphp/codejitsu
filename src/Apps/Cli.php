@@ -113,7 +113,12 @@ final class Cli implements App
             : "Available commands:\n";
 
         foreach ($commands as $command) {
-            $output .= sprintf("  %-20s %s%s", $command->name, $command->description(), PHP_EOL);
+            $output .= sprintf(
+                "  %-20s %s%s",
+                $command->name,
+                $command->usage(),
+                PHP_EOL,
+            );
         }
 
         if ($stream === STDOUT) {
