@@ -25,6 +25,10 @@ final class Cli
         $command = strtolower((string) ($filtered[1] ?? ''));
         $rawArgs = array_slice($filtered, 2);
 
+        if (in_array($command, ['help', '--help', '-h'], true)) {
+            $command = '';
+        }
+
         $payload = [];
         $flags = [];
 
