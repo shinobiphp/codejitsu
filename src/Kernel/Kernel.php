@@ -6,7 +6,6 @@ namespace Codejitsu\Kernel;
 
 use Codejitsu\Contracts\Scrolls\ScrollCodex;
 use Codejitsu\Enums\Environment;
-use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use ErrorException;
 use RuntimeException;
 use Throwable;
