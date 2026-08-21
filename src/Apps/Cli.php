@@ -36,8 +36,8 @@ final class Cli implements App
 
     public function run(mixed ...$args): int
     {
-        $rawArgv = $args[0] ?? $_SERVER['argv'] ?? [];
-        $intent = CliTranslator::translate($rawArgv);
+        $argv = $args[0] ?? $_SERVER['argv'] ?? [];
+        $intent = CliTranslator::translate($argv);
         $commands = $this->commands();
 
         if ($intent->action === '' || in_array($intent->action, ['help', '--help', '-h', 'list'], true)) {
@@ -58,37 +58,32 @@ final class Cli implements App
                 : $command->execute($i);
         });
 
+        if (is_string($result) && $result !== '') {
+            echo $result;
+        }
+
         return is_int($result) ? $result : 0;
     }
 
-    /** @param list<mixed> $payload */
     private function dispatch(Command $command, array $payload): mixed
     {
         if (!$command->isNamespace()) {
             return $command->execute(...$payload);
         }
 
-        $subcommand = $payload[0] ?? null;
-        if ($subcommand === null || in_array($subcommand, ['--help', '-h', 'help'], true)) {
+        $name = $payload[0] ?? null;
+        if ($name === null || in_array($name, ['--help', '-h', 'help'], true)) {
             $this->renderNamespaceUsage($command);
             return 0;
         }
 
-        if (!is_string($subcommand)) {
-            throw new \InvalidArgumentException(sprintf(
-                'Invalid subcommand for [%s].',
-                $command->name,
-            ));
+        if (!is_string($name)) {
+            throw new \InvalidArgumentException(sprintf('Invalid subcommand for [%s].', $command->name));
         }
 
-        $child = $command->child($subcommand);
+        $child = $command->child($name);
         if (!$child instanceof Command) {
-            fwrite(STDERR, sprintf(
-                "Unknown subcommand [%s] for [%s].%s",
-                $subcommand,
-                $command->name,
-                PHP_EOL,
-            ));
+            fwrite(STDERR, sprintf("Unknown subcommand [%s] for [%s].%s", $name, $command->name, PHP_EOL));
             $this->renderNamespaceUsage($command, STDERR);
             return 1;
         }
@@ -96,57 +91,66 @@ final class Cli implements App
         return $this->dispatch($child, array_slice($payload, 1));
     }
 
-    /** @return array<string, Command> */
     private function commands(): array
     {
-        $commands = [];
-
-        foreach ($this->kernelInstance->scrolls->all(true) as $scroll) {
-            if ($scroll instanceof Command) {
-                $commands[$scroll->name] = $scroll;
-            }
-        }
-
-        return $commands;
+        return array_reduce(
+            $this->kernelInstance->scrolls->all(true),
+            static function (array $commands, mixed $scroll): array {
+                if ($scroll instanceof Command) {
+                    $commands[$scroll->name] = $scroll;
+                }
+                return $commands;
+            },
+            [],
+        );
     }
 
-    /** @param resource $stream */
     private function renderUsage(array $commands, mixed $stream = STDOUT): void
     {
-        fwrite($stream, "Codejitsu\n\n");
-        fwrite($stream, "Usage: ./codejitsu <command> [arguments] [options]\n\n");
+        $output = "Codejitsu\n\nUsage: ./codejitsu <command> [arguments] [options]\n\n";
+        $output .= $commands === []
+            ? "No command Scrolls are currently available.\n"
+            : "Available commands:\n";
 
-        if ($commands === []) {
-            fwrite($stream, "No command Scrolls are currently available.\n");
+        foreach ($commands as $command) {
+            $output .= sprintf("  %-20s %s%s", $command->name, $command->description(), PHP_EOL);
+        }
+
+        if ($stream === STDOUT) {
+            echo $output;
             return;
         }
 
-        fwrite($stream, "Available commands:\n");
-        foreach ($commands as $command) {
-            fwrite($stream, sprintf("  %-20s %s%s", $command->name, $command->description(), PHP_EOL));
-        }
+        fwrite($stream, $output);
     }
 
-    /** @param resource $stream */
     private function renderNamespaceUsage(Command $command, mixed $stream = STDOUT): void
     {
-        fwrite($stream, sprintf(
+        $output = sprintf(
             "Usage: ./codejitsu %s <subcommand> [arguments] [options]%s%s",
             $command->name,
             PHP_EOL,
             PHP_EOL,
-        ));
+        );
 
         foreach ($command->commands() as $name => $definition) {
             if (!is_array($definition)) {
                 continue;
             }
 
-            $description = is_string($definition['description'] ?? null)
-                ? $definition['description']
-                : '';
-
-            fwrite($stream, sprintf("  %-20s %s%s", $name, $description, PHP_EOL));
+            $output .= sprintf(
+                "  %-20s %s%s",
+                $name,
+                is_string($definition['description'] ?? null) ? $definition['description'] : '',
+                PHP_EOL,
+            );
         }
+
+        if ($stream === STDOUT) {
+            echo $output;
+            return;
+        }
+
+        fwrite($stream, $output);
     }
 }
