@@ -24,13 +24,10 @@ final class Command extends Scroll
         return (string) ($this->attributes['usage'] ?? $this->name);
     }
 
-    /**
-     * @return array<string, array<string, mixed>>
-     */
+    /** @return array<string, array<string, mixed>> */
     public function commands(): array
     {
         $commands = $this->attributes['commands'] ?? [];
-
         if (!is_array($commands)) {
             throw new LogicException(sprintf('Command [%s] commands must be an array.', $this->name));
         }
@@ -45,15 +42,19 @@ final class Command extends Scroll
 
     public function child(string $name): ?self
     {
-        $definition = $this->commands()[strtolower(trim($name))] ?? null;
+        $name = strtolower(trim($name));
+        $definition = $this->commands()[$name] ?? null;
         if (!is_array($definition)) {
             return null;
         }
 
         $child = new self();
-        $child->bind($this->codex());
+        if ($this->codex !== null) {
+            $child->bind($this->codex);
+        }
+
         $child->hydrate([
-            'name' => strtolower(trim($name)),
+            'name' => $name,
             ...$definition,
         ]);
 
@@ -158,15 +159,5 @@ final class Command extends Scroll
         }
 
         return parent::hydrate($data);
-    }
-
-    private function codex(): \Codejitsu\Scrolls\ScrollCodex
-    {
-        $codex = $this->getCodex();
-        if ($codex === null) {
-            throw new LogicException(sprintf('Command [%s] is not bound to a ScrollCodex.', $this->name));
-        }
-
-        return $codex;
     }
 }
