@@ -2,4 +2,5 @@ name: hello
 description: Say hello from a command Scroll.
 usage: hello [name]
 type: command
-target: Codejitsu\\Commands\\Hello::run
+schema: schema://hello
+capability: capability://hello
