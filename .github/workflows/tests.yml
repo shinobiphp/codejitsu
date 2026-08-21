@@ -19,8 +19,8 @@ jobs:
           extensions: mbstring
           coverage: none
 
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+      - name: Verify vendored dependencies
+        run: php -r "is_file('lib/autoload.php') || exit('Vendored dependencies are missing.');"
 
       - name: Run tests
         run: composer test
