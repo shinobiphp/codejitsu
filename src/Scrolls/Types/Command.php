@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Codejitsu\Scrolls\Types;
 
+use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use Codejitsu\Scrolls\Scroll;
 use InvalidArgumentException;
@@ -11,7 +12,7 @@ use LogicException;
 
 final class Command extends Scroll
 {
-    public const ScrollTypes TYPE = ScrollTypes::CAPABILITY;
+    public const ScrollTypes TYPE = ScrollTypes::COMMAND;
     public const array TAGS = ['command'];
 
     public function description(): string
@@ -22,6 +23,18 @@ final class Command extends Scroll
     public function usage(): string
     {
         return (string) ($this->attributes['usage'] ?? $this->name);
+    }
+
+    public function capability(): ?string
+    {
+        $reference = $this->attributes['capability'] ?? null;
+        return is_string($reference) && trim($reference) !== '' ? trim($reference) : null;
+    }
+
+    public function schema(): ?string
+    {
+        $reference = $this->attributes['schema'] ?? null;
+        return is_string($reference) && trim($reference) !== '' ? trim($reference) : null;
     }
 
     public function target(): callable
@@ -41,7 +54,39 @@ final class Command extends Scroll
 
     public function execute(mixed ...$args): mixed
     {
+        $payload = $args[0] ?? $args;
+
+        if (!is_array($payload)) {
+            $payload = ['value' => $payload];
+        }
+
+        if (($schema = $this->schema()) !== null) {
+            $this->ref($schema)(...[$payload]);
+        }
+
+        if (($capability = $this->capability()) !== null) {
+            return $this->ref($capability)(...[$payload]);
+        }
+
         return ($this->target())(...$args);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function references(): array
+    {
+        $references = [];
+
+        if (($schema = $this->schema()) !== null) {
+            $references['schema'] = $schema;
+        }
+
+        if (($capability = $this->capability()) !== null) {
+            $references['capability'] = $capability;
+        }
+
+        return $references;
     }
 
     public function hydrate(array $data): static
@@ -54,8 +99,10 @@ final class Command extends Scroll
             throw new InvalidArgumentException('Command usage must be a string.');
         }
 
-        if (isset($data['target']) && !is_callable($data['target']) && !is_string($data['target'])) {
-            throw new InvalidArgumentException('Command target must be callable or a callable string.');
+        foreach (['capability', 'schema', 'target'] as $reference) {
+            if (isset($data[$reference]) && !is_string($data[$reference]) && !is_callable($data[$reference])) {
+                throw new InvalidArgumentException(sprintf('Command %s must be a URI or callable.', $reference));
+            }
         }
 
         return parent::hydrate($data);
