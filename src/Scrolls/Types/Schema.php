@@ -11,7 +11,7 @@ use Codejitsu\Scrolls\Scroll;
 
 final class Schema extends Scroll
 {
-    public const TYPE = ScrollTypes::SCHEMA;
+    public const ScrollTypes TYPE = ScrollTypes::SCHEMA;
 
     public function __construct(
         private readonly Validator $validator = new JsonSchema(),
