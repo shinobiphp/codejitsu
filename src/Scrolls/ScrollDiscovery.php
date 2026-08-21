@@ -11,6 +11,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use FilesystemIterator;
 use RuntimeException;
+use Throwable;
 
 final class ScrollDiscovery
 {
@@ -45,16 +46,26 @@ final class ScrollDiscovery
                 continue;
             }
 
-            $payload = file_get_contents($file->getPathname());
+            $path = $file->getPathname();
+            $payload = file_get_contents($path);
             if ($payload === false) {
                 throw new RuntimeException(sprintf(
                     'Unable to read Scroll resource [%s].',
-                    $file->getPathname(),
+                    $path,
                 ));
             }
 
-            $scroll = $type->make(null, $this->codec->decode($payload));
-            $scrolls[] = $scroll;
+            try {
+                $data = $this->codec->decode($payload);
+            } catch (Throwable $e) {
+                throw new RuntimeException(sprintf(
+                    'Failed to decode Scroll resource [%s]: %s',
+                    $path,
+                    $e->getMessage(),
+                ), previous: $e);
+            }
+
+            $scrolls[] = $type->make(null, $data);
         }
 
         return $scrolls;
