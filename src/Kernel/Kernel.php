@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Codejitsu\Kernel;
 
 use Codejitsu\Contracts\Scrolls\ScrollCodex;
 use Codejitsu\Enums\Environment;
+use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use ErrorException;
 use RuntimeException;
 use Throwable;
@@ -44,60 +46,41 @@ final class Kernel
     private function __construct(
         public readonly string $name,
         private readonly ScrollCodex $scrollsCodex,
-    ) {
-        echo "--> Kernel::__construct for '{$name}' initialized\n";
-    }
+    ) {}
 
-    /**
-     * Retrieve or initialize a named Kernel instance.
-     */
     public static function instance(
         string $name,
         ?ScrollCodex $scrollCodex = null,
     ): self {
-        echo "--> Kernel::instance called with name: '{$name}'\n";
         if (!isset(self::$instances[$name])) {
-            echo "--> Instance '{$name}' not set. Checking ScrollCodex...\n";
             if ($scrollCodex === null) {
-                echo "--> CRITICAL: ScrollCodex is NULL inside Kernel::instance\n";
-                exit;
+                throw new RuntimeException(sprintf(
+                    'Cannot create Kernel [%s] without a ScrollCodex.',
+                    $name,
+                ));
             }
-            
-            echo "--> Instantiating new Kernel('{$name}')...\n";
-            self::$instances[$name] = new self(
-                $name,
-                $scrollCodex,
-            );
-            echo "--> New Kernel instance created and stored.\n";
-        } else {
-            echo "--> Returning existing Kernel instance for '{$name}'.\n";
+
+            self::$instances[$name] = new self($name, $scrollCodex);
         }
-    
+
         return self::$instances[$name];
     }
 
-    public static function hasInstance(
-        string $name,
-    ): bool {
+    public static function hasInstance(string $name): bool
+    {
         return isset(self::$instances[$name]);
     }
 
-    public static function destroy(
-        string $name,
-    ): void {
+    public static function destroy(string $name): void
+    {
         unset(self::$instances[$name]);
     }
 
-    /**
-     * Boot the kernel instance.
-     */
     public function boot(
         ?string $rootDir = null,
         ?Environment $environment = null,
     ): self {
-        echo "--> Kernel::boot() ENTERED\n";
         if ($this->booted) {
-            echo "--> Kernel already booted, returning.\n";
             return $this;
         }
 
@@ -108,27 +91,17 @@ final class Kernel
                     : getcwd()
             );
 
-        $this->root = rtrim(
-            $resolvedRoot,
-            '/\\',
-        );
+        $this->root = rtrim($resolvedRoot, '/\\');
+        $this->env = $environment ?? Environment::PRODUCTION;
 
-        $this->env = Environment::PRODUCTION;
-        // $this->env = $environment
-        //     ?? Environment::current();
+        $this->registerErrorPipeline($this->env);
+        $this->booted = true;
 
-        echo "--> Registering error pipeline...\n";
-        $this->registerErrorPipeline(
-            $this->env,
-        );
-
-        echo "--> Hit checkpoint before scroll discovery / exit\n";
-        var_dump(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5));
+        return $this;
     }
 
-    private function registerErrorPipeline(
-        Environment $environment,
-    ): void {
+    private function registerErrorPipeline(Environment $environment): void
+    {
         set_error_handler(
             function (
                 int $severity,
@@ -148,16 +121,13 @@ final class Kernel
                     $line,
                 );
 
-                Environment::error(
-                    $exception,
-                );
-
+                Environment::error($exception);
                 return true;
             },
         );
 
         set_exception_handler(
-            function (Throwable $e): void {
+            static function (Throwable $e): void {
                 Environment::error($e);
             },
         );
