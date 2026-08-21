@@ -22,16 +22,18 @@ final class CommandDiscovery
 
         $discovery = new self(Codecs::NEON->make());
         $count = 0;
-
-        $files = glob(rtrim($directory, '/\\') . DIRECTORY_SEPARATOR . '*.neon');
+        $files = glob(rtrim($directory, '/\\') . DIRECTORY_SEPARATOR . '*.' . Types::COMMAND->extension());
         if ($files === false) {
             return 0;
         }
 
         foreach ($files as $file) {
-            $data = $discovery->read($file);
-            $command = Types::COMMAND->make(null, $data);
+            $payload = file_get_contents($file);
+            if ($payload === false) {
+                throw new RuntimeException(sprintf('Unable to read command Scroll [%s].', $file));
+            }
 
+            $command = Types::COMMAND->make(null, $discovery->decode($payload));
             if (!$command instanceof Command) {
                 throw new RuntimeException(sprintf('Command resource [%s] did not hydrate as a Command Scroll.', $file));
             }
@@ -43,14 +45,8 @@ final class CommandDiscovery
         return $count;
     }
 
-    /** @return array<string, mixed> */
-    private function read(string $file): array
+    private function decode(string $payload): array
     {
-        $payload = file_get_contents($file);
-        if ($payload === false) {
-            throw new RuntimeException(sprintf('Unable to read command Scroll [%s].', $file));
-        }
-
         return $this->codec->decode($payload);
     }
 }
