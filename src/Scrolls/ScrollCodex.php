@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Codejitsu\Scrolls;
 
+use Codejitsu\Codecs\Neon;
 use Codejitsu\EnvelopeCodex;
 use Codejitsu\Contracts\Scrolls\Envelope as ScrollEnvelope;
 use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
@@ -24,6 +25,15 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
     public function __construct(array $itemsOrEnvelopes = [])
     {
         parent::__construct(Codecs::NEON, $itemsOrEnvelopes);
+    }
+
+    public function load(string $root): static
+    {
+        foreach ((new ScrollDiscovery(new Neon()))->discover($root) as $scroll) {
+            $this->registerScroll($scroll);
+        }
+
+        return $this;
     }
 
     public function registerScroll(ScrollContract $scroll): static
@@ -116,8 +126,6 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new InvalidArgumentException(sprintf('Unknown Scroll URI scheme [%s].', $parsed->type));
         }
 
-        // Codejitsu's canonical short-form URI is e.g. config://app#0.1.0.
-        // When no path is present, the URI authority/target is the Scroll name.
         $name = strtolower($parsed->path ?? $parsed->target ?? '');
         if ($name === '') {
             throw new InvalidArgumentException(sprintf('Scroll URI [%s] has no name.', $uri));
