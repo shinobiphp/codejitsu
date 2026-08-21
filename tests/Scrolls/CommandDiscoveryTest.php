@@ -20,7 +20,7 @@ final class CommandDiscoveryTest extends TestCase
             file_put_contents($directory . DIRECTORY_SEPARATOR . 'hello.cmd', <<<'NEON'
 name: hello
 description: Say hello.
-usage: hello [name]
+usage: 'hello [name]'
 type: command
 target: Codejitsu\\Commands\\Hello::run
 NEON);
@@ -28,7 +28,7 @@ NEON);
             $codex = new ScrollCodex();
             self::assertSame(1, CommandDiscovery::fromDirectory($directory, $codex));
 
-            $command = $codex->get('hello');
+            $command = $codex->get('command:hello#1.0.0');
             self::assertInstanceOf(Command::class, $command);
             self::assertSame('hello', $command->name);
             self::assertSame('hello [name]', $command->usage());
