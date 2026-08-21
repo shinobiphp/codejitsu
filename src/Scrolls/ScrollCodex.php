@@ -116,7 +116,9 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new InvalidArgumentException(sprintf('Unknown Scroll URI scheme [%s].', $parsed->type));
         }
 
-        $name = strtolower($parsed->path ?? '');
+        // Codejitsu's canonical short-form URI is e.g. config://app#0.1.0.
+        // When no path is present, the URI authority/target is the Scroll name.
+        $name = strtolower($parsed->path ?? $parsed->target ?? '');
         if ($name === '') {
             throw new InvalidArgumentException(sprintf('Scroll URI [%s] has no name.', $uri));
         }
