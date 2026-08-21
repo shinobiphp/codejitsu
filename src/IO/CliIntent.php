@@ -8,16 +8,16 @@ use Codejitsu\Contracts\Intent;
 use Codejitsu\Identity\Identity;
 use Codejitsu\Metadata;
 
-final readonly class CliIntent implements Intent
+final class CliIntent implements Intent
 {
     public Identity $identity {
         get => $this->metadata->identity();
     }
 
     public function __construct(
-        public string $action,
-        public array $payload = [],
-        public ?Metadata $metadata = null
+        public readonly string $action,
+        public readonly array $payload = [],
+        public readonly Metadata $metadata,
     ) {}
 
     public function withPayload(array $payload): static
