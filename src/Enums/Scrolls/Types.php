@@ -29,6 +29,32 @@ enum Types: string
     case SCHEMA = 'schema';
     case SKILL = 'skill';
 
+    public static function normalize(mixed $value, self|string|null $default = null, bool $passthroughUnmatched = false): self|string|null
+    {
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+        $normalized = match ($normalized) {
+            'cmd' => 'command',
+            default => $normalized,
+        };
+
+        $match = self::tryFrom($normalized);
+        if ($match instanceof self) {
+            return $match;
+        }
+
+        if ($passthroughUnmatched) {
+            return $value;
+        }
+
+        return $default instanceof self
+            ? $default
+            : (is_string($default) ? self::tryFrom($default) : null);
+    }
+
     public static function map(): array
     {
         $codec = Codecs::default();
@@ -55,11 +81,15 @@ enum Types: string
 
     public function className(): string
     {
-        $class = $this->to('class');
-        if (!is_string($class) || !class_exists($class)) {
-            throw new InvalidArgumentException(sprintf('No valid Scroll class mapped for type [%s].', $this->value));
-        }
-        return $class;
+        return match ($this) {
+            self::APP => AppScroll::class,
+            self::CAPABILITY => CapabilityScroll::class,
+            self::COMMAND => CommandScroll::class,
+            self::CONFIG => ConfigScroll::class,
+            self::KATA => KataScroll::class,
+            self::SCHEMA => SchemaScroll::class,
+            self::SKILL => SkillScroll::class,
+        };
     }
 
     public function make(?EnvelopeContract $envelope = null, array $data = []): ScrollContract
@@ -80,7 +110,34 @@ enum Types: string
         return $instance;
     }
 
-    public function plural(): string { return (string) $this->to('plural', $this->value . 's'); }
-    public function extension(): string { return (string) $this->to('extension', $this->value); }
-    public function scheme(): string { return (string) $this->to('scheme', $this->value . '://'); }
+    public function plural(): string
+    {
+        return match ($this) {
+            self::APP => 'apps',
+            self::CAPABILITY => 'capabilities',
+            self::COMMAND => 'commands',
+            self::CONFIG => 'configs',
+            self::KATA => 'katas',
+            self::SCHEMA => 'schemas',
+            self::SKILL => 'skills',
+        };
+    }
+
+    public function extension(): string
+    {
+        return match ($this) {
+            self::COMMAND => 'cmd',
+            self::APP => 'app',
+            self::CAPABILITY => 'capability',
+            self::CONFIG => 'config',
+            self::KATA => 'kata',
+            self::SCHEMA => 'schema',
+            self::SKILL => 'skill',
+        };
+    }
+
+    public function scheme(): string
+    {
+        return $this->value . '://';
+    }
 }
