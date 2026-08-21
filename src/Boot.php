@@ -10,7 +10,6 @@ use Codejitsu\Apps\Web;
 use Codejitsu\Contracts\App;
 use Codejitsu\Enums\Environment;
 use Codejitsu\Kernel\Kernel;
-use Codejitsu\Scrolls\CommandDiscovery;
 use Codejitsu\Scrolls\ScrollCodex;
 
 final class Boot
@@ -46,11 +45,7 @@ final class Boot
     ): Cli {
         $root = $rootDir ?? (defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd());
         $scrolls = $codex ?? new ScrollCodex();
-
-        CommandDiscovery::fromDirectory(
-            $root . DIRECTORY_SEPARATOR . 'scrolls' . DIRECTORY_SEPARATOR . 'commands',
-            $scrolls,
-        );
+        $scrolls->load($root . DIRECTORY_SEPARATOR . 'scrolls');
 
         $kernel = Kernel::instance($name ?? 'cli', $scrolls);
         return new Cli($kernel);
