@@ -29,7 +29,7 @@ final class CliTest extends TestCase
         self::assertSame(0, $code);
         self::assertStringContainsString('Available commands:', $output);
         self::assertStringContainsString('hello', $output);
-        self::assertStringContainsString('scrolls <command>', $output);
+        self::assertStringContainsString('scrolls <subcommand>', $output);
     }
 
     public function testHelpFormsRenderUsage(): void
@@ -47,8 +47,8 @@ final class CliTest extends TestCase
         [$code, $output] = $this->runCli(['codejitsu', 'scrolls']);
 
         self::assertSame(0, $code);
-        self::assertStringContainsString('Usage: ./codejitsu scrolls <subcommand>', $output);
-        self::assertStringContainsString('hello', $output);
+        self::assertStringContainsString('Usage: ./codejitsu scrolls:<subcommand>', $output);
+        self::assertStringContainsString('scrolls:hello', $output);
         self::assertStringContainsString('Say hello through a nested Command Scroll.', $output);
     }
 
@@ -60,9 +60,9 @@ final class CliTest extends TestCase
         self::assertSame("Hello, B!\n", $output);
     }
 
-    public function testNamespaceCommandExecutionResolvesNestedReferences(): void
+    public function testNamespacedCommandExecutionResolvesNestedReferences(): void
     {
-        [$code, $output] = $this->runCli(['codejitsu', 'scrolls', 'hello', 'B']);
+        [$code, $output] = $this->runCli(['codejitsu', 'scrolls:hello', 'B']);
 
         self::assertSame(0, $code);
         self::assertSame("Hello, B!\n", $output);
