@@ -6,13 +6,12 @@ namespace Codejitsu\Commands;
 
 final class Hello
 {
-    public static function run(mixed $arguments = []): int
+    public static function run(mixed $arguments = []): string
     {
         $name = is_array($arguments)
             ? ($arguments[0] ?? 'shinobi')
             : ($arguments ?: 'shinobi');
 
-        fwrite(STDOUT, sprintf("Hello, %s!%s", (string) $name, PHP_EOL));
-        return 0;
+        return sprintf("Hello, %s!%s", (string) $name, PHP_EOL);
     }
 }
