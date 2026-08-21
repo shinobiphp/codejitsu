@@ -7,7 +7,6 @@ namespace Codejitsu\Scrolls;
 use Codejitsu\Contracts\Scrolls\Envelope as EnvelopeContract;
 use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use Codejitsu\Contracts\Uri\Resolved as ResolvedContract;
-use Codejitsu\Contracts\Uri\Resolvable;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use InvalidArgumentException;
 use LogicException;
@@ -41,10 +40,8 @@ abstract class Scroll implements ScrollContract
     public string $version { get => static::VERSION; }
 
     public ScrollTypes|string $type {
-        get {
-            return static::TYPE
-                ?? throw new LogicException(sprintf('Scroll [%s] does not declare a TYPE.', static::class));
-        }
+        get => static::TYPE
+            ?? throw new LogicException(sprintf('Scroll [%s] does not declare a TYPE.', static::class));
     }
 
     public array $tags {
@@ -65,19 +62,18 @@ abstract class Scroll implements ScrollContract
 
     public static function fromResolution(ResolvedContract $resolved): static
     {
-        $target = $resolved->target;
-
-        if ($target instanceof static) {
-            return $target;
+        if ($resolved->target instanceof static) {
+            return $resolved->target;
         }
 
-        if (!$target instanceof EnvelopeContract) {
-            throw new InvalidArgumentException(
-                sprintf('Scroll resolution target for [%s] must be a Scroll envelope.', $resolved->uri),
-            );
+        if (!$resolved->target instanceof EnvelopeContract) {
+            throw new InvalidArgumentException(sprintf(
+                'Scroll resolution target for [%s] must be a Scroll envelope or Scroll.',
+                $resolved->uri,
+            ));
         }
 
-        return static::make($target, $resolved->params);
+        return static::make($resolved->target, $resolved->params);
     }
 
     public function hydrate(array $data): static
