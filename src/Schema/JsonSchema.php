@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Codejitsu\Schema;
 
-use Codejitsu\Enums\Environment;
 use Opis\JsonSchema\Helper;
 use Opis\JsonSchema\Validator as OpisValidator;
+use InvalidArgumentException;
 
 final class JsonSchema extends Validator
 {
@@ -27,11 +27,9 @@ final class JsonSchema extends Validator
             return;
         }
 
-        Environment::error(
-            new \InvalidArgumentException(
-                $result->error()?->message()
-                    ?? 'Schema validation failed.',
-            ),
+        throw new InvalidArgumentException(
+            $result->error()?->message()
+                ?? 'Schema validation failed.',
         );
     }
 }
