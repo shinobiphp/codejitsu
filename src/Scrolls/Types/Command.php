@@ -48,13 +48,27 @@ final class Command extends Scroll
             return null;
         }
 
+        $qualified = $this->name . ':' . $name;
         $child = new self();
         if ($this->codex !== null) {
             $child->bind($this->codex);
         }
 
+        $usage = $definition['usage'] ?? null;
+        if (is_string($usage) && $usage !== '') {
+            $usage = preg_replace(
+                '/^' . preg_quote($name, '/') . '(?=\s|$)/',
+                $qualified,
+                $usage,
+                1,
+            ) ?? $usage;
+        } else {
+            $usage = $qualified;
+        }
+
         $child->hydrate([
-            'name' => $name,
+            'name' => $qualified,
+            'usage' => $usage,
             ...$definition,
         ]);
 
