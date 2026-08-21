@@ -29,7 +29,7 @@ final class CliTest extends TestCase
         self::assertSame(0, $code);
         self::assertStringContainsString('Available commands:', $output);
         self::assertStringContainsString('hello', $output);
-        self::assertStringContainsString('scrolls <subcommand>', $output);
+        self::assertStringContainsString('scrolls:<subcommand>', $output);
     }
 
     public function testHelpFormsRenderUsage(): void
