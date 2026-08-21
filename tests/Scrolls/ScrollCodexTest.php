@@ -36,7 +36,7 @@ NEON);
         file_put_contents($root . '/capabilities/hello.capability', <<<'NEON'
 name: hello
 type: capability
-target: Codejitsu\\Commands\\Hello::run
+target: Codejitsu\Commands\Hello::run
 NEON);
 
         try {
