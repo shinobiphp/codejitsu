@@ -1,0 +1,6 @@
+name: hello
+type: schema
+schema:
+  type: array
+  items:
+    type: string
