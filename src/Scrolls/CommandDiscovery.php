@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Codejitsu\Scrolls;
 
-use Codejitsu\Contracts\Codec;
-use Codejitsu\Enums\Codecs;
+use Codejitsu\Codecs\Neon;
 use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\Scrolls\Types\Command;
 use RuntimeException;
 
 final class CommandDiscovery
 {
-    private function __construct(private readonly Codec $codec) {}
+    private function __construct(private readonly Neon $codec) {}
 
     public static function fromDirectory(string $directory, ScrollCodex $codex): int
     {
@@ -20,7 +19,7 @@ final class CommandDiscovery
             return 0;
         }
 
-        $discovery = new self(Codecs::NEON->make());
+        $discovery = new self(new Neon());
         $count = 0;
         $files = glob(rtrim($directory, '/\\') . DIRECTORY_SEPARATOR . '*.' . Types::COMMAND->extension());
         if ($files === false) {
