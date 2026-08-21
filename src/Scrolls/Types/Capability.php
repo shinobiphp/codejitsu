@@ -37,14 +37,6 @@ final class Capability extends Scroll
         $target = $this->target();
 
         if (is_string($target)) {
-            if (!is_callable($target)) {
-                throw new LogicException(sprintf(
-                    'Capability [%s] target [%s] is not callable.',
-                    $this->name,
-                    $target,
-                ));
-            }
-
             return $target(...$args);
         }
 
