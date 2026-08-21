@@ -49,11 +49,6 @@ final class Command extends Scroll
         }
 
         $qualified = $this->name . ':' . $name;
-        $child = new self();
-        if ($this->codex !== null) {
-            $child->bind($this->codex);
-        }
-
         $usage = $definition['usage'] ?? null;
         if (is_string($usage) && $usage !== '') {
             $usage = preg_replace(
@@ -66,10 +61,15 @@ final class Command extends Scroll
             $usage = $qualified;
         }
 
+        $child = new self();
+        if ($this->codex !== null) {
+            $child->bind($this->codex);
+        }
+
         $child->hydrate([
+            ...$definition,
             'name' => $qualified,
             'usage' => $usage,
-            ...$definition,
         ]);
 
         return $child;
