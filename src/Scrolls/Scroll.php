@@ -8,6 +8,9 @@ use Codejitsu\Contracts\Scrolls\Envelope as EnvelopeContract;
 use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use Codejitsu\Contracts\Uri\Resolved as ResolvedContract;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
+use Codejitsu\Graph\Edge;
+use Codejitsu\Graph\Graph;
+use Codejitsu\Graph\Node;
 use InvalidArgumentException;
 use LogicException;
 use ReflectionClass;
@@ -24,13 +27,14 @@ abstract class Scroll implements ScrollContract
     protected array $attributes = [];
     protected ?string $dynamicName = null;
     protected array $dynamicTags = [];
+    private ?Graph $graph = null;
 
     public string $name {
         get => $this->dynamicName
             ?? static::NAME
             ?? strtolower((new ReflectionClass($this))->getShortName());
         set(string $value) {
-            $value = trim(strtolower($value));
+            $value = trim(strtolower($value), " /\t\n\r\0\x0B");
             if ($value === '') {
                 throw new InvalidArgumentException('Scroll name cannot be empty.');
             }
@@ -83,6 +87,11 @@ abstract class Scroll implements ScrollContract
         return $this;
     }
 
+    public function graph(): Graph
+    {
+        return $this->graph ??= $this->buildGraph();
+    }
+
     public function ref(string $uri): ScrollContract
     {
         if ($this->codex === null) {
@@ -103,7 +112,7 @@ abstract class Scroll implements ScrollContract
 
     public function references(): array
     {
-        return [];
+        return $this->graph()->outgoing($this->graphId());
     }
 
     public function hydrate(array $data): static
@@ -126,6 +135,7 @@ abstract class Scroll implements ScrollContract
         }
 
         $this->attributes = array_merge($this->attributes, $data);
+        $this->graph = null;
         return $this;
     }
 
@@ -155,6 +165,7 @@ abstract class Scroll implements ScrollContract
     public function __set(string $key, mixed $value): void
     {
         $this->attributes[$key] = $value;
+        $this->graph = null;
     }
 
     public function __isset(string $key): bool
@@ -180,5 +191,45 @@ abstract class Scroll implements ScrollContract
             throw new LogicException(sprintf('Scroll [%s] has no action [%s].', static::class, $method));
         }
         return $this->{$method}(...$args);
+    }
+
+    private function buildGraph(): Graph
+    {
+        $graph = new Graph();
+        $root = $this->graphId();
+        $graph->add(new Node($root, $this, [
+            'name' => $this->name,
+            'type' => $this->type instanceof ScrollTypes ? $this->type->value : $this->type,
+            'version' => $this->version,
+            'tags' => $this->tags,
+        ]));
+
+        $references = $this->attributes['references'] ?? [];
+        if (!is_array($references)) {
+            return $graph;
+        }
+
+        foreach ($references as $identifier => $reference) {
+            $uri = is_string($reference) ? $reference : ($reference['uri'] ?? null);
+            if (!is_string($uri) || trim($uri) === '') {
+                continue;
+            }
+
+            $name = ltrim((string) $identifier, '$');
+            $target = 'uri:' . strtolower($uri);
+            if ($graph->node($target) === null) {
+                $graph->add(new Node($target, $uri));
+            }
+
+            $graph->connect(new Edge($root, $target, $name, 'reference'));
+        }
+
+        return $graph;
+    }
+
+    private function graphId(): string
+    {
+        $type = $this->type instanceof ScrollTypes ? $this->type->value : $this->type;
+        return sprintf('%s://%s#%s', $type, $this->name, $this->version);
     }
 }
