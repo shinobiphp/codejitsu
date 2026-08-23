@@ -9,7 +9,9 @@ use Codejitsu\Enums\Scrolls\Types;
 
 interface ScrollCodex extends EnvelopeCodex
 {
-    public function registerScroll(Scroll $scroll): static;
+    public function registerSource(string $source): static;
+
+    public function registerScroll(Scroll $scroll, ?string $source = null): static;
 
     /**
      * Return a Codex containing only Scrolls of the specified type.
