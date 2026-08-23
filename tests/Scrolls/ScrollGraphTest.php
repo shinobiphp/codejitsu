@@ -2,31 +2,39 @@
 
 declare(strict_types=1);
 
-use Codejitsu\Scrolls\Types\Context;
+namespace Tests\Scrolls;
+
 use Codejitsu\Graph\Edge;
+use Codejitsu\Scrolls\Types\Context;
+use PHPUnit\Framework\TestCase;
 
-it('normalizes named scroll references into graph edges', function (): void {
-    $scroll = (new Context())->hydrate([
-        'name' => 'architecture/codex',
-        'references' => [
-            '$schema' => 'schema://scroll#1.0.0',
-        ],
-    ]);
+final class ScrollGraphTest extends TestCase
+{
+    public function testNormalizesNamedScrollReferencesIntoGraphEdges(): void
+    {
+        $scroll = (new Context())->hydrate([
+            'name' => 'architecture/codex',
+            'references' => [
+                '$schema' => 'schema://scroll#1.0.0',
+            ],
+        ]);
 
-    $edges = $scroll->references();
+        $edges = $scroll->references();
 
-    expect($edges)->toHaveCount(1)
-        ->and($edges[0])->toBeInstanceOf(Edge::class)
-        ->and($edges[0]->name)->toBe('schema')
-        ->and($edges[0]->type)->toBe('reference')
-        ->and($edges[0]->to)->toBe('uri:schema://scroll#1.0.0');
-});
+        self::assertCount(1, $edges);
+        self::assertInstanceOf(Edge::class, $edges[0]);
+        self::assertSame('schema', $edges[0]->name);
+        self::assertSame('reference', $edges[0]->type);
+        self::assertSame('uri:schema://scroll#1.0.0', $edges[0]->to);
+    }
 
-it('supports nested logical scroll paths', function (): void {
-    $scroll = (new Context())->hydrate([
-        'name' => 'architecture/scrolls',
-    ]);
+    public function testSupportsNestedLogicalScrollPaths(): void
+    {
+        $scroll = (new Context())->hydrate([
+            'name' => 'architecture/scrolls',
+        ]);
 
-    expect($scroll->name)->toBe('architecture/scrolls')
-        ->and($scroll->graph()->node('context://architecture/scrolls#1.0.0'))->not->toBeNull();
-});
+        self::assertSame('architecture/scrolls', $scroll->name);
+        self::assertNotNull($scroll->graph()->node('context://architecture/scrolls#1.0.0'));
+    }
+}
