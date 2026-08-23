@@ -249,7 +249,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new InvalidArgumentException(sprintf('Unknown Scroll URI scheme [%s].', $parsed->type));
         }
 
-        $name = strtolower(trim($parsed->path ?? $parsed->target ?? '', '/'));
+        $name = strtolower(trim($parsed->resourcePath, '/'));
         if ($name === '') {
             throw new InvalidArgumentException(sprintf('Scroll URI [%s] has no logical path.', $uri));
         }
