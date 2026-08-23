@@ -92,19 +92,28 @@ abstract class Scroll implements ScrollContract
         return $this->graph ??= $this->buildGraph();
     }
 
-    public function ref(string $uri): ScrollContract
+    public function ref(string $identifier): ScrollContract
     {
         if ($this->codex === null) {
             throw new LogicException(sprintf(
                 'Scroll [%s] cannot resolve [%s] without a bound ScrollCodex.',
                 $this->name,
-                $uri,
+                $identifier,
             ));
+        }
+
+        $uri = $identifier;
+        if (!str_contains($identifier, '://')) {
+            $edge = $this->graph()->edge($this->graphId(), ltrim($identifier, '$'));
+            if ($edge === null || !$this->graph()->node($edge->to) instanceof Node) {
+                throw new LogicException(sprintf('Scroll [%s] has no reference [%s].', $this->name, $identifier));
+            }
+            $uri = (string) $this->graph()->node($edge->to)->value;
         }
 
         $scroll = $this->codex->resolve($uri);
         if (!$scroll instanceof ScrollContract) {
-            throw new LogicException(sprintf('Reference [%s] did not resolve to a Scroll.', $uri));
+            throw new LogicException(sprintf('Reference [%s] did not resolve to a Scroll.', $identifier));
         }
 
         return $scroll;
