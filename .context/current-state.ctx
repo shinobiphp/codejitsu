@@ -1,0 +1,170 @@
+# Codejitsu — Current State
+
+Updated: 2026-08-23
+
+## Status
+
+We are wrapping up the Context Scroll / canonical resource graph work and intentionally stopping here after CI is green and PR #7 is merged.
+
+## Branch / PR
+
+- Repository: `shinobiphp/codejitsu`
+- Working branch: `feat/context-scrolls`
+- PR: #7
+- PR title: `feat: add context scrolls and canonical resource graph`
+- Do not add new architecture to this PR. Fix only issues required for tests, correctness, or merge readiness.
+
+## What Is Locked In
+
+### Scrolls
+
+- Scrolls are **data resources**, not PHP classes in their source representation.
+- Scroll discovery is primarily based on source path, filename, and extension.
+- Existing discovery strategies should be reused; do not introduce attribute-based discovery for `.ctx`, `.neon`, etc.
+- Context Scrolls use `.ctx` and may contain Markdown payloads.
+
+### PHP Discovery
+
+- Attributes are preferred for discovering executable PHP behavior: capabilities, handlers, commands, listeners, etc.
+- Reflection belongs behind discovery/indexing boundaries.
+- Do not force attributes onto data resources merely because attributes are useful for PHP classes.
+
+### URI
+
+Logical resource identity is independent of physical source layout.
+
+Examples:
+
+```text
+context://architecture/scrolls
+context://architecture/scrolls@tenant.global#1.0.0
+```
+
+The path is a logical resource path. The `@source` selector controls source precedence/cascade and is not part of resource identity.
+
+Source cascade semantics:
+
+```text
+@tenant.global  => tenant, then global
+@global.tenant  => global, then tenant
+```
+
+An omitted source uses the registered/default cascade order.
+
+### Physical Resource Layout
+
+Different source layouts may represent the same logical resource:
+
+```text
+scrolls/context/architecture/scrolls.ctx
+```
+
+or a nested resource representation under `architecture.ctx`.
+
+The source maps physical representation to logical resources. URI, Codex, and Scroll behavior must not depend on filesystem layout.
+
+### Canonical Scroll Graph
+
+The canonical representation of a Scroll is a semantic graph, not a codec-specific array and not a compiler-style AST.
+
+Conceptual pipeline:
+
+```text
+Source
+  -> Parser / Codec
+  -> Canonical Scroll Graph
+  -> Index
+  -> Codex
+  -> Scroll
+```
+
+The graph contains:
+
+- identity
+- structured metadata
+- content
+- attributes
+- meaningful resource/child nodes
+- named or typed relationships
+- provenance/source information
+
+Do not model every scalar as a graph node. Graph nodes and edges are for meaningful resources and relationships.
+
+Named references such as:
+
+```text
+$php: context://architecture/php
+```
+
+are normalized into named graph edges. The `$` is source-format syntax, not part of the canonical identifier. References should resolve lazily through the Codex.
+
+### Codex
+
+The Codex is the resource indexing/query/resolution boundary.
+
+Querying should operate primarily on indexed metadata and logical resource paths without hydrating every matching resource.
+
+The Codex should eventually support graph-aware relationship queries, but that is **future work**, not a reason to expand this PR.
+
+## Current Implementation
+
+The branch contains the canonical graph primitives:
+
+```text
+Codejitsu\Graph\Node
+Codejitsu\Graph\Edge
+Codejitsu\Graph\Graph
+```
+
+Graph integrity requires referenced endpoints to exist and rejects duplicate node IDs.
+
+Scroll references are represented through the graph/reference model, while Codex resolution remains the boundary for resolving logical resource URIs.
+
+## Code Standards
+
+`.context/code-standards.md` is the engineering bar.
+
+Important points:
+
+- PHP 8.4+
+- `declare(strict_types=1);`
+- constructor property promotion where appropriate
+- `readonly` where appropriate
+- PHP 8.4 property hooks where they express useful invariants/normalization
+- asymmetric visibility where appropriate
+- strong native typing
+- enums/value objects instead of primitive obsession where warranted
+- composition over inheritance
+- Strategy/Factory/Policy/Specification/Adapter/Decorator/Pipeline/Composite when they solve a real design problem
+- no cargo-cult patterns
+- dependency injection instead of hidden global state/service locators
+- no unnecessary `Interface`, `Helper`, or `Manager` naming
+- public classes represent behavioral contracts; internal interfaces only where a real boundary exists
+- attributes for PHP behavior discovery, not Scroll resource discovery
+- deterministic, cacheable discovery
+- tests for architectural behavior and regression cases
+
+## Finish Line For This Work
+
+Do exactly this and then stop:
+
+1. Verify the current branch and PR contents.
+2. Run the full PHPUnit suite / GitHub CI against the current head.
+3. Fix test or correctness failures only.
+4. Ensure `.ctx` naming and current-state documentation are consistent.
+5. Ensure the PR description accurately reflects the final implementation.
+6. Wait for a real green CI result on the final commit.
+7. Merge PR #7 into `main`.
+8. Do not start App Scrolls, capability/config/schema execution, or additional graph/query architecture in this PR.
+
+## Next Starting Point
+
+After this PR is merged, the next major slice should build on the stabilized resource model:
+
+1. App Scroll (`app://archiq/...`) as a logical resource tree.
+2. Complete source-backed Scroll resolution.
+3. Capability/config/schema Scroll execution.
+4. More complete Codex query language, including graph relationships where useful.
+5. Additional codecs and source implementations.
+
+When resuming, read this file first, then `.context/decisions/0004-canonical-scroll-graph.md` and `.context/code-standards.md` before changing architecture.
