@@ -55,14 +55,27 @@ final class ScrollDiscovery
                 ));
             }
 
-            try {
-                $data = $this->codec->decode($payload);
-            } catch (Throwable $e) {
-                throw new RuntimeException(sprintf(
-                    'Failed to decode Scroll resource [%s]: %s',
-                    $path,
-                    $e->getMessage(),
-                ), previous: $e);
+            if ($type === Types::CONTEXT) {
+                $relative = ltrim(str_replace($root, '', $path), DIRECTORY_SEPARATOR);
+                $name = preg_replace('/\.md$/i', '', str_replace(DIRECTORY_SEPARATOR, '/', $relative));
+                $segments = array_values(array_filter(explode('/', dirname($name)), static fn (string $segment): bool => $segment !== '.'));
+
+                $data = [
+                    'name' => $name,
+                    'data' => $payload,
+                    'tags' => $segments,
+                    'source' => $path,
+                ];
+            } else {
+                try {
+                    $data = $this->codec->decode($payload);
+                } catch (Throwable $e) {
+                    throw new RuntimeException(sprintf(
+                        'Failed to decode Scroll resource [%s]: %s',
+                        $path,
+                        $e->getMessage(),
+                    ), previous: $e);
+                }
             }
 
             $scrolls[] = $type->make(null, $data);
