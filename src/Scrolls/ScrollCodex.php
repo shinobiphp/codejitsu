@@ -102,6 +102,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         }
 
         $name = isset($criteria['name']) ? strtolower((string) $criteria['name']) : null;
+        $path = isset($criteria['path']) ? trim(strtolower((string) $criteria['path']), '/') : null;
         $version = isset($criteria['version']) ? (string) $criteria['version'] : null;
         $tags = isset($criteria['tags']) ? array_map('strtolower', (array) $criteria['tags']) : [];
         $attributes = isset($criteria['attributes']) && is_array($criteria['attributes'])
@@ -120,7 +121,12 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
                     continue;
                 }
 
-                if ($name !== null && strtolower($scroll->name) !== $name) {
+                $scrollName = strtolower(trim($scroll->name, '/'));
+                if ($name !== null && $scrollName !== $name) {
+                    continue;
+                }
+
+                if ($path !== null && $scrollName !== $path) {
                     continue;
                 }
 
@@ -224,7 +230,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
                 $this->all(true),
                 static fn (mixed $scroll): bool =>
                     $scroll instanceof ScrollContract
-                    && strtolower($scroll->name) === strtolower($value),
+                    && strtolower(trim($scroll->name, '/')) === strtolower(trim($value, '/')),
             ));
 
             return match (count($matches)) {
@@ -243,9 +249,9 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new InvalidArgumentException(sprintf('Unknown Scroll URI scheme [%s].', $parsed->type));
         }
 
-        $name = strtolower($parsed->path ?? $parsed->target ?? '');
+        $name = strtolower(trim($parsed->path ?? $parsed->target ?? '', '/'));
         if ($name === '') {
-            throw new InvalidArgumentException(sprintf('Scroll URI [%s] has no name.', $uri));
+            throw new InvalidArgumentException(sprintf('Scroll URI [%s] has no logical path.', $uri));
         }
 
         $version = $parsed->version;
@@ -257,7 +263,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
                     continue;
                 }
 
-                if (strtolower($scroll->name) !== $name) {
+                if (strtolower(trim($scroll->name, '/')) !== $name) {
                     continue;
                 }
 
@@ -272,7 +278,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 
     public function resolveTyped(Types $type, string $name): ScrollContract
     {
-        return $this->resolve($type->scheme() . $name);
+        return $this->resolve($type->scheme() . trim($name, '/'));
     }
 
     public function invoke(Types|string $type, string $name, mixed ...$args): mixed
@@ -373,7 +379,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         return strtolower(sprintf(
             '%s:%s#%s',
             $this->scrollType($scroll)->value,
-            $scroll->name,
+            trim($scroll->name, '/'),
             $scroll->version,
         ));
     }
@@ -383,8 +389,9 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         if (!$scroll instanceof ScrollContract) {
             throw new InvalidArgumentException('Invalid Scroll instance.');
         }
-        if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $scroll->name)) {
-            throw new InvalidArgumentException(sprintf('Invalid Scroll name [%s].', $scroll->name));
+
+        if (!preg_match('/^[a-z0-9][a-z0-9_.\/-]*$/i', trim($scroll->name, '/'))) {
+            throw new InvalidArgumentException(sprintf('Invalid Scroll logical path [%s].', $scroll->name));
         }
     }
 }
