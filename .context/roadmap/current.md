@@ -11,13 +11,54 @@ Move complete Scroll discovery responsibility behind `ScrollCodex` and add persi
 Requirements:
 
 - discover every supported Scroll type from configured roots
+- register every discovery origin as a named source
 - cache the resource index
 - validate cache freshness using a manifest/fingerprint
 - avoid hydration when metadata is enough
 - explicitly clear/rebuild cache
 - expose cache operations as Command Scrolls
 
-### 2. Resource Graph and References
+### 2. Source-Aware URI Resolution
+
+Support layered resource sources without changing logical resource identity.
+
+Requirements:
+
+- URI source selectors using `@source`
+- dot-separated explicit source cascades using left-to-right precedence
+- implicit resolution using sources in reverse registration order
+- explicit source selectors remain authoritative
+- preserve source provenance in indexed metadata
+
+Examples:
+
+```text
+register @global
+register @tenant
+
+config://app
+  → @tenant → @global
+
+config://app@tenant.global
+  → @tenant → @global
+
+config://app@global.tenant
+  → @global → @tenant
+```
+
+### 3. Codex Query and Index
+
+Make lightweight resource metadata a first-class Codex concern.
+
+Requirements:
+
+- `IndexEntry` representation separate from hydrated Scroll instances
+- query by type, name, version, tags, attributes, source, and URI/path
+- preserve source provenance
+- avoid hydrating resources merely to search metadata
+- leave room for full-text and semantic search later
+
+### 4. Resource Graph and References
 
 Make references first-class enough that dependent resources can be inspected before execution.
 
@@ -29,12 +70,15 @@ cmd://hello
   └── capability://hello
 ```
 
-### 3. Schema/Config/Capability Depth
+### 5. Schema/Config/Capability Depth
 
 Strengthen the three initial resource types with richer validation, versioning, composition, and production-grade storage semantics.
 
 ## Next
 
+- first-class `context` Scrolls backed by Markdown content
+- `.context/` discovery/indexing as a normal Codex source
+- first-class Application Scroll resource trees such as `app://archiq/...`
 - formal Scroll identity value object integration
 - stronger Envelope/Scroll serialization contract
 - signed and traceable resource provenance
@@ -42,7 +86,6 @@ Strengthen the three initial resource types with richer validation, versioning, 
 - cache persistence drivers
 - resource dependency graph
 - command introspection and generated help
-- context directory discovery/indexing
 
 ## Later
 
