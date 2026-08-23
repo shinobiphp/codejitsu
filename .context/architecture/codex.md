@@ -4,27 +4,116 @@
 
 ## Current Responsibilities
 
+- register resource sources
+- discover and index resources from configured sources
 - register hydrated Scrolls
-- index by type/name/version
+- index by type/name/version and source provenance
+- query lightweight resource metadata
 - resolve Scroll URIs
-- filter by type and tags
+- filter by type, tags, attributes, and source
 - invoke resolved Scrolls
 - bind Scrolls back to the Codex so references resolve through the same registry
 
-The current implementation extends the broader Envelope Codex and maintains a Scroll registry keyed by normalized type/name/version. fileciteturn103file0L2-L2
+The Codex should remain the single resolution boundary. Applications and Scrolls should not need to know whether a resource came from a filesystem, package, database, tenant store, or remote backend.
+
+## Index Entries
+
+The Codex should distinguish indexed resource metadata from hydrated Scroll instances.
+
+An `IndexEntry` represents enough information to identify and locate a resource without hydrating it. It should include, as applicable:
+
+```text
+identity
+URI
+source
+version
+type
+name
+tags
+attributes
+references/provenance
+location/fingerprint metadata
+```
+
+`query()` operates on these lightweight entries. It must not require hydration of every candidate resource.
+
+## Sources
+
+A source is a named discovery/resolution origin registered with the Codex. Examples include:
+
+```text
+@global
+@tenant
+@package
+@remote
+```
+
+Sources may expose filesystem roots, packages, databases, remote stores, or other backends. Source metadata may include tags such as `scrolls-dir`.
+
+A source name is resolution context, not part of logical resource identity. Multiple sources may contain different versions or representations of the same logical resource.
+
+## Source Cascade
+
+Sources are registered in an ordered collection. When a URI has no explicit source selector, the Codex resolves against registered sources in **reverse registration order**.
+
+For example:
+
+```text
+register @global
+register @tenant
+```
+
+means an unqualified request checks:
+
+```text
+@tenant → @global
+```
+
+This makes later registrations more specific and allows tenant/project/application sources to override broader global defaults.
+
+A URI can explicitly define a source cascade with a dot-separated selector:
+
+```text
+config://app@tenant.global#0.1.0
+config://app@global.tenant#0.1.0
+```
+
+The selector is evaluated left-to-right. `@tenant.global` means tenant first, then global. `@global.tenant` means global first, then tenant.
+
+An explicit source selector or chain is authoritative and does not silently expand into the Codex's implicit registered-source cascade.
+
+## Query
+
+`query()` is the Codex's search boundary. It operates on indexed metadata rather than hydrated Scrolls and should support progressively richer criteria without changing the resource model.
+
+Initial criteria should include:
+
+```text
+type
+name
+version
+tags
+attributes
+source
+URI/path
+```
+
+Future implementations may add full-text, structural, or semantic search over the same indexed resource model.
 
 ## Discovery
 
-`ScrollDiscovery` recursively scans a resource root and maps file extensions to `ScrollTypes`. It decodes the payload and creates the corresponding Scroll type. fileciteturn104file0L2-L2
+`ScrollDiscovery` recursively scans a resource root and maps file extensions to `ScrollTypes`. It decodes the payload and creates the corresponding Scroll type.
 
-This is intentionally a separate concern from resolution. The next architectural step is to move discovery efficiency and persistence into the Codex boundary rather than teaching Boot or applications how resources are stored.
+Discovery is intentionally separate from resolution, but discovery responsibility and its resulting index belong behind the Codex boundary. Each discovered resource must retain source provenance so the same logical resource can be resolved from a specific source or through a source cascade.
 
 ## Cache Direction
 
 The intended cache model is:
 
 ```text
-resource root
+registered source
+   ↓
+resource root/store
    ↓
 manifest / fingerprint
    ↓
@@ -35,7 +124,7 @@ valid cache? ── yes ──> load index
 discover → index → persist cache
 ```
 
-The cache should contain enough metadata to determine whether a resource set changed without requiring full hydration on every startup. Likely inputs include path, extension/type, size, modification time, and/or content hash.
+The cache should contain enough metadata to determine whether a resource set changed without requiring full hydration on every startup. Likely inputs include source identity, path, extension/type, size, modification time, and/or content hash.
 
 Explicit invalidation/rebuild operations should be available through normal Command Scrolls once the mechanism exists:
 
@@ -49,6 +138,8 @@ Cache persistence is not yet part of the current implementation and is deliberat
 
 ## Resolution Semantics
 
-Typed URIs are preferred when a resource name could be ambiguous. Bare names may resolve only when exactly one matching Scroll exists. The Codex already treats ambiguity as an error rather than silently choosing a resource. fileciteturn103file0L2-L2
+Typed URIs are preferred when a resource name could be ambiguous. Bare names may resolve only when exactly one matching Scroll exists. The Codex treats ambiguity as an error rather than silently choosing a resource.
+
+Resolution now additionally considers source selection and fallback. A version fragment constrains the resource version; a source selector constrains the resolution origins and their order.
 
 This is important for a federated/runtime environment where multiple versions, tenants, or resource types may coexist.
