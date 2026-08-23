@@ -57,7 +57,7 @@ final class ScrollDiscovery
 
             if ($type === Types::CONTEXT) {
                 $relative = ltrim(str_replace($root, '', $path), DIRECTORY_SEPARATOR);
-                $name = preg_replace('/\.md$/i', '', str_replace(DIRECTORY_SEPARATOR, '/', $relative));
+                $name = preg_replace('/\.ctx$/i', '', str_replace(DIRECTORY_SEPARATOR, '/', $relative));
                 $segments = array_values(array_filter(explode('/', dirname($name)), static fn (string $segment): bool => $segment !== '.'));
 
                 $data = [
