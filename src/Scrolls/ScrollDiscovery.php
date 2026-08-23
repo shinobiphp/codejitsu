@@ -7,9 +7,9 @@ namespace Codejitsu\Scrolls;
 use Codejitsu\Codecs\Neon;
 use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
+use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use FilesystemIterator;
 use RuntimeException;
 use Throwable;
 
@@ -26,11 +26,6 @@ final class ScrollDiscovery
             return [];
         }
 
-        $extensions = [];
-        foreach (Types::cases() as $type) {
-            $extensions[$type->extension()] = $type;
-        }
-
         $scrolls = [];
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
@@ -41,7 +36,7 @@ final class ScrollDiscovery
                 continue;
             }
 
-            $type = $extensions[strtolower($file->getExtension())] ?? null;
+            $type = $this->typeForExtension($file->getExtension());
             if (!$type instanceof Types) {
                 continue;
             }
@@ -49,25 +44,54 @@ final class ScrollDiscovery
             $path = $file->getPathname();
             $payload = file_get_contents($path);
             if ($payload === false) {
-                throw new RuntimeException(sprintf(
-                    'Unable to read Scroll resource [%s].',
-                    $path,
-                ));
+                throw new RuntimeException(sprintf('Unable to read Scroll resource [%s].', $path));
             }
 
-            try {
-                $data = $this->codec->decode($payload);
-            } catch (Throwable $e) {
-                throw new RuntimeException(sprintf(
-                    'Failed to decode Scroll resource [%s]: %s',
-                    $path,
-                    $e->getMessage(),
-                ), previous: $e);
-            }
-
-            $scrolls[] = $type->make(null, $data);
+            $scrolls[] = $type->make(null, $this->parse($type, $payload, $root, $path));
         }
 
         return $scrolls;
+    }
+
+    private function typeForExtension(string $extension): ?Types
+    {
+        $extension = strtolower($extension);
+
+        foreach (Types::cases() as $type) {
+            if ($type->extension() === $extension) {
+                return $type;
+            }
+        }
+
+        return null;
+    }
+
+    private function parse(Types $type, string $payload, string $root, string $path): array
+    {
+        if ($type === Types::CONTEXT) {
+            $relative = ltrim(str_replace($root, '', $path), DIRECTORY_SEPARATOR);
+            $name = preg_replace('/\.ctx$/i', '', str_replace(DIRECTORY_SEPARATOR, '/', $relative));
+            $segments = array_values(array_filter(
+                explode('/', dirname($name)),
+                static fn (string $segment): bool => $segment !== '.',
+            ));
+
+            return [
+                'name' => $name,
+                'data' => $payload,
+                'tags' => $segments,
+                'source' => $path,
+            ];
+        }
+
+        try {
+            return $this->codec->decode($payload);
+        } catch (Throwable $e) {
+            throw new RuntimeException(sprintf(
+                'Failed to decode Scroll resource [%s]: %s',
+                $path,
+                $e->getMessage(),
+            ), previous: $e);
+        }
     }
 }

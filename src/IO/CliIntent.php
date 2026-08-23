@@ -16,12 +16,16 @@ final class CliIntent implements Intent
 
     public function __construct(
         public readonly string $action,
-        public readonly array $payload = [],
         public readonly Metadata $metadata,
+        public readonly array $payload = [],
     ) {}
 
     public function withPayload(array $payload): static
     {
-        return new self($this->action, $payload, $this->metadata);
+        return new self(
+            action: $this->action,
+            metadata: $this->metadata,
+            payload: $payload
+        );
     }
 }

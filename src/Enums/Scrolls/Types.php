@@ -11,11 +11,11 @@ use Codejitsu\Scrolls\Types\App as AppScroll;
 use Codejitsu\Scrolls\Types\Capability as CapabilityScroll;
 use Codejitsu\Scrolls\Types\Command as CommandScroll;
 use Codejitsu\Scrolls\Types\Config as ConfigScroll;
+use Codejitsu\Scrolls\Types\Context as ContextScroll;
 use Codejitsu\Scrolls\Types\Kata as KataScroll;
 use Codejitsu\Scrolls\Types\Schema as SchemaScroll;
 use Codejitsu\Scrolls\Types\Skill as SkillScroll;
 use Codejitsu\Traits\EnhancedEnum;
-use InvalidArgumentException;
 
 enum Types: string
 {
@@ -25,6 +25,7 @@ enum Types: string
     case CAPABILITY = 'capability';
     case COMMAND = 'command';
     case CONFIG = 'config';
+    case CONTEXT = 'context';
     case KATA = 'kata';
     case SCHEMA = 'schema';
     case SKILL = 'skill';
@@ -73,6 +74,7 @@ enum Types: string
             'capability' => array_merge(['class' => CapabilityScroll::class, 'plural' => 'capabilities', 'long_name' => 'capability', 'long_plural' => 'capabilities', 'extension' => 'capability', 'scheme' => 'capability://'], $codecConfig),
             'command' => array_merge(['class' => CommandScroll::class, 'plural' => 'commands', 'long_name' => 'command', 'long_plural' => 'commands', 'extension' => 'cmd', 'scheme' => 'cmd://'], $codecConfig),
             'config' => array_merge(['class' => ConfigScroll::class, 'plural' => 'configs', 'long_name' => 'configuration', 'long_plural' => 'configurations', 'extension' => 'config', 'scheme' => 'config://'], $codecConfig),
+            'context' => array_merge(['class' => ContextScroll::class, 'plural' => 'contexts', 'long_name' => 'context', 'long_plural' => 'contexts', 'extension' => 'ctx', 'scheme' => 'context://'], $codecConfig),
             'kata' => array_merge(['class' => KataScroll::class, 'plural' => 'katas', 'long_name' => 'kata', 'long_plural' => 'katas', 'extension' => 'kata', 'scheme' => 'kata://'], $codecConfig),
             'schema' => array_merge(['class' => SchemaScroll::class, 'plural' => 'schemas', 'long_name' => 'schema', 'long_plural' => 'schemas', 'extension' => 'schema', 'scheme' => 'schema://'], $codecConfig),
             'skill' => array_merge(['class' => SkillScroll::class, 'plural' => 'skills', 'long_name' => 'skill', 'long_plural' => 'skills', 'extension' => 'skill', 'scheme' => 'skill://'], $codecConfig),
@@ -86,6 +88,7 @@ enum Types: string
             self::CAPABILITY => CapabilityScroll::class,
             self::COMMAND => CommandScroll::class,
             self::CONFIG => ConfigScroll::class,
+            self::CONTEXT => ContextScroll::class,
             self::KATA => KataScroll::class,
             self::SCHEMA => SchemaScroll::class,
             self::SKILL => SkillScroll::class,
@@ -95,9 +98,7 @@ enum Types: string
     public function make(?EnvelopeContract $envelope = null, array $data = []): ScrollContract
     {
         $class = $this->className();
-        $instance = $envelope === null
-            ? new $class()
-            : $class::make($envelope, $data);
+        $instance = $envelope === null ? new $class() : $class::make($envelope, $data);
 
         if (!$instance instanceof ScrollContract) {
             throw new \UnexpectedValueException(sprintf('Scroll class [%s] does not implement ScrollContract.', $class));
@@ -117,6 +118,7 @@ enum Types: string
             self::CAPABILITY => 'capabilities',
             self::COMMAND => 'commands',
             self::CONFIG => 'configs',
+            self::CONTEXT => 'contexts',
             self::KATA => 'katas',
             self::SCHEMA => 'schemas',
             self::SKILL => 'skills',
@@ -130,6 +132,7 @@ enum Types: string
             self::APP => 'app',
             self::CAPABILITY => 'capability',
             self::CONFIG => 'config',
+            self::CONTEXT => 'ctx',
             self::KATA => 'kata',
             self::SCHEMA => 'schema',
             self::SKILL => 'skill',

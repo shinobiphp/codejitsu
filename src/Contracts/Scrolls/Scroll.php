@@ -6,6 +6,7 @@ namespace Codejitsu\Contracts\Scrolls;
 
 use Codejitsu\Contracts\Uri\Resolvable;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
+use Codejitsu\Graph\Graph;
 
 interface Scroll extends Resolvable
 {
@@ -24,8 +25,11 @@ interface Scroll extends Resolvable
     /** @return array<string, mixed> */
     public function toArray(): array;
 
+    public function graph(): Graph;
+
     public function ref(string $uri): Scroll;
 
+    /** @return array<string, mixed> */
     public function references(): array;
 
     public function __invoke(mixed ...$args): mixed;
