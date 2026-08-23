@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Codejitsu\Uri;
@@ -10,37 +11,18 @@ class Uri implements Stringable
 {
     public const DEFAULT_TARGET = 'local';
 
-    /**
-     * Tenant scope identifier, or null for global/system execution scope.
-     */
     public private(set) ?string $tenant;
-
-    /**
-     * Canonical singular scroll type (e.g., 'app', 'config', 'capability').
-     */
     public private(set) string $type;
-
-    /**
-     * Target node address or local identifier (e.g., 'local', 'archiq', '192.168.1.50:9000').
-     */
     public private(set) string $target;
-
-    /**
-     * Scroll version constraint, or null if targeting the latest version.
-     */
     public private(set) ?string $version;
-
     public private(set) ?string $path;
 
-    /**
-     * Query payload / metadata parameters array.
-     * @var array<string, mixed>
-     */
+    /** @var array<string> */
+    public private(set) array $sources;
+
+    /** @var array<string, mixed> */
     public array $query = [];
 
-    /**
-     * Virtual property hook: plural Codex registry key (e.g., 'apps', 'configs', 'capabilities').
-     */
     public string $key {
         get => match (true) {
             str_ends_with($this->type, 'y') => substr($this->type, 0, -1) . 'ies',
@@ -49,23 +31,14 @@ class Uri implements Stringable
         };
     }
 
-    /**
-     * Virtual property hook: checks if target is local node.
-     */
     public bool $isLocal {
         get => $this->target === self::DEFAULT_TARGET;
     }
 
-    /**
-     * Virtual property hook: checks if execution context is global (no tenant specified).
-     */
     public bool $isGlobal {
         get => $this->tenant === null;
     }
 
-    /**
-     * Virtual property hook: checks if targeting unconstrained / latest version.
-     */
     public bool $isLatest {
         get => $this->version === null;
     }
@@ -76,29 +49,55 @@ class Uri implements Stringable
         ?string $defaultVersion = null
     ) {
         $uriString = (string) $uri;
-        $parsed = parse_url($uriString);
+        $fragment = null;
+        $queryString = null;
 
-        $scheme      = $parsed['scheme'] ?? null;
-        $user        = $parsed['user'] ?? null;
-        $host        = $parsed['host'] ?? null;
-        $port        = isset($parsed['port']) ? ":{$parsed['port']}" : '';
-        $version     = $parsed['fragment'] ?? null;
-        $path        = $parsed['path'] ?? null;
-        $queryString = $parsed['query'] ?? null;
+        if (str_contains($uriString, '#')) {
+            [$uriString, $fragment] = explode('#', $uriString, 2);
+        }
+
+        if (str_contains($uriString, '?')) {
+            [$uriString, $queryString] = explode('?', $uriString, 2);
+        }
+
+        $sourceSelector = null;
+        $sourceSeparator = strrpos($uriString, '@');
+        if ($sourceSeparator !== false) {
+            $candidate = substr($uriString, $sourceSeparator + 1);
+            if ($candidate !== '' && preg_match('/^[A-Za-z0-9][A-Za-z0-9_.-]*$/', $candidate)) {
+                $sourceSelector = $candidate;
+                $uriString = substr($uriString, 0, $sourceSeparator);
+            }
+        }
+
+        $parsed = parse_url($uriString);
+        $scheme = $parsed['scheme'] ?? null;
 
         if (!$scheme) {
-            throw new InvalidArgumentException("Invalid Codejitsu URI: missing scheme in [{$uriString}]");
+            throw new InvalidArgumentException("Invalid Codejitsu URI: missing scheme in [{$uri}]");
         }
 
         $this->type = $this->normalizeType(strtolower($scheme));
+
+        $user = $parsed['user'] ?? null;
         $this->tenant = ($user !== null && $user !== '') ? strtolower($user) : $defaultTenant;
 
-        $targetHost = $host ? ($host . $port) : self::DEFAULT_TARGET;
-        $this->target = strtolower($targetHost);
+        $host = $parsed['host'] ?? null;
+        $port = isset($parsed['port']) ? ":{$parsed['port']}" : '';
+        $this->target = strtolower($host ? $host . $port : self::DEFAULT_TARGET);
 
-        // Version: null if fragment omitted or empty
-        $this->version = ($version !== null && $version !== '') ? $version : $defaultVersion;
-        $this->path = $path ? trim($path, '/') : null;
+        $this->path = isset($parsed['path']) && $parsed['path'] !== ''
+            ? trim($parsed['path'], '/')
+            : null;
+
+        $this->sources = $sourceSelector === null
+            ? []
+            : array_values(array_filter(
+                array_map('strtolower', explode('.', $sourceSelector)),
+                static fn (string $source): bool => $source !== '',
+            ));
+
+        $this->version = ($fragment !== null && $fragment !== '') ? $fragment : $defaultVersion;
 
         if ($queryString !== null && $queryString !== '') {
             parse_str($queryString, $this->query);
@@ -161,7 +160,11 @@ class Uri implements Stringable
             $uri .= "/{$this->path}";
         }
 
-        if (!empty($this->query)) {
+        if ($this->sources !== []) {
+            $uri .= '@' . implode('.', $this->sources);
+        }
+
+        if ($this->query !== []) {
             $uri .= '?' . http_build_query($this->query);
         }
 

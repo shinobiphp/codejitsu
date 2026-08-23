@@ -6,10 +6,21 @@ namespace Codejitsu\Contracts\Scrolls;
 
 use Codejitsu\Contracts\EnvelopeCodex;
 use Codejitsu\Enums\Scrolls\Types;
+use Codejitsu\Scrolls\IndexEntry;
 
 interface ScrollCodex extends EnvelopeCodex
 {
-    public function registerScroll(Scroll $scroll): static;
+    public function registerSource(string $source): static;
+
+    public function registerScroll(Scroll $scroll, ?string $source = null): static;
+
+    /**
+     * Query indexed Scroll metadata without hydrating additional resources.
+     *
+     * @param array<string, mixed> $criteria
+     * @return array<IndexEntry>
+     */
+    public function query(array $criteria = []): array;
 
     /**
      * Return a Codex containing only Scrolls of the specified type.

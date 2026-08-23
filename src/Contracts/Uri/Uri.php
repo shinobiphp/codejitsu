@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Codejitsu\Contracts\Uri;
@@ -12,17 +13,21 @@ interface Uri extends Stringable
     public string $target { get; }
     public ?string $version { get; }
     public ?string $path { get; }
-    
+
+    /** @var array<string> */
+    public array $sources { get; }
+
+    /** @var array<string, mixed> */
     public array $query { get; set; }
     public string $key { get; }
-    
+
     public bool $isLocal { get; }
     public bool $isGlobal { get; }
     public bool $isLatest { get; }
 
     public static function make(
-        string|self $uri, 
-        ?string $defaultTenant = null, 
+        string|self $uri,
+        ?string $defaultTenant = null,
         ?string $defaultVersion = null
     ): static;
 
