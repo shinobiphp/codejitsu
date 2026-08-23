@@ -190,36 +190,47 @@ Neuron-AI is the intended initial implementation substrate for Vessels/Sparks.
 
 Before implementing the Vessel/Spark slice, inspect the current Neuron-AI APIs/version and decide the narrowest adapter boundary that gives us real functionality without leaking Neuron-specific types throughout Codejitsu.
 
-## Command Scrolls / CLI / TUI — LOCKED DIRECTION
+## Sensei — Codejitsu's First Dogfooding Application — LOCKED DIRECTION
 
-The CLI should become a consumer of the same Scroll/Codex architecture rather than a permanently hardcoded command tree.
+**Sensei is the first official Codejitsu-native application for dogfooding the agentic development architecture.**
 
-Target conceptual flow:
+Sensei is not a dependency of Codejitsu and should not become a second framework layer. The dependency direction is:
 
 ```text
-cmd://...
-   -> Codex
-      -> Command Scroll
-         -> Vessel / capability / application behavior
+Codejitsu
+    ^
+    |
+  Sensei
 ```
 
-A Command Scroll should eventually describe enough information for the CLI to discover commands, help, arguments/options, validation, routing, and execution. Do not make the first implementation unnecessarily declarative or magical; establish the minimum useful Command Scroll contract first.
+Sensei should depend on and exercise Codejitsu's resource, execution, Vessel, and Spark contracts. Codejitsu must remain useful without Sensei.
 
-The CLI should provide a useful interactive TUI so development can happen through the system itself. The TUI is a presentation/interaction layer over Codex resources and Command Scrolls, not a separate command architecture.
+Sensei's purpose is to provide the developer cockpit through which Codejitsu can increasingly help build and maintain itself.
 
-The initial TUI should prioritize developer productivity over visual novelty: resource browsing, command discovery, context inspection, Vessel/Spark status, execution, logs/results, and easy navigation.
+Conceptually:
 
-## Intended Agentic Development Loop
+```text
+Codejitsu
+├── Kernel
+├── Codex
+├── Scrolls
+├── Graph
+├── Vessels
+├── Sparks
+└── Sensei
+    ├── Command Scrolls
+    ├── TUI
+    ├── development Vessels
+    └── development Sparks
+```
 
-The long-term goal is to make Codejitsu increasingly capable of helping build and maintain itself.
-
-The first useful dogfood loop should look like:
+The intended development loop is:
 
 ```text
 Developer
    |
    v
-Codejitsu TUI / Command Scroll
+Sensei TUI / Command Scroll
    |
    v
 Vessel (harness)
@@ -236,8 +247,58 @@ Spark (agent)
    |        +--> tests
    |
    v
-changes / tests / results
+changes / tests / review / results
 ```
+
+Sensei should therefore be the first serious proving ground for the architecture, rather than building a generic TUI in isolation and retrofitting the agentic workflow later.
+
+### Sensei boundaries
+
+- Sensei owns the developer-facing application experience.
+- Codejitsu owns the underlying contracts and runtime/resource architecture.
+- Sensei's TUI is a presentation/interaction layer, not a second command/resource architecture.
+- Sensei should discover resources and commands through Codejitsu's Codex and Scroll model wherever practical.
+- Sensei may define development-specific Vessels and Sparks, but those should exercise the same stable contracts intended for general use.
+- Sensei should eventually be able to inspect, plan, change, test, and review Codejitsu using targeted context and resource access.
+
+The long-term recursive loop is intentional:
+
+```text
+Sensei
+  -> Vessel
+    -> Spark
+      -> Codex
+        -> Codejitsu source/tests/context
+          -> changes
+            -> Sensei
+```
+
+This is the dogfooding objective, not permission to create a self-modifying autonomous system without review, permissions, traceability, or tests.
+
+## Command Scrolls / CLI / TUI — LOCKED DIRECTION
+
+The CLI should become a consumer of the same Scroll/Codex architecture rather than a permanently hardcoded command tree.
+
+Target conceptual flow:
+
+```text
+cmd://...
+   -> Codex
+      -> Command Scroll
+         -> Sensei / Vessel / capability / application behavior
+```
+
+A Command Scroll should eventually describe enough information for the CLI to discover commands, help, arguments/options, validation, routing, and execution. Do not make the first implementation unnecessarily declarative or magical; establish the minimum useful Command Scroll contract first.
+
+Sensei should provide the first useful interactive TUI over those Command Scrolls.
+
+The TUI should prioritize developer productivity over visual novelty: resource browsing, command discovery, context inspection, Vessel/Spark status, execution, logs/results, diffs, tests, and easy navigation.
+
+The TUI should be capable of becoming the main interactive cockpit for Sensei without making the TUI itself responsible for agent orchestration.
+
+## Intended Agentic Development Loop
+
+The long-term goal is to make Codejitsu increasingly capable of helping build and maintain itself through Sensei.
 
 A Spark working on Codejitsu should be able to receive a deliberately assembled Vessel containing the relevant context, code, tests, schemas, and capabilities instead of being dumped an indiscriminate repository snapshot.
 
@@ -290,12 +351,14 @@ These are intentional open questions. Resolve them explicitly from the existing 
 - Should command execution resolve to a capability, handler, Spark, Vessel action, or some combination?
 - How should nested command namespaces map onto URI paths?
 
-### TUI
+### Sensei/TUI
 
-- Which TUI library should be used?
+- Which TUI library should Sensei use?
 - Should the TUI itself be long-running/hot-state?
 - Which interactions need streaming output?
-- How should logs, agent reasoning summaries, tool calls, diffs, and test results be represented without exposing sensitive/internal chain-of-thought?
+- How should logs, agent summaries, tool calls, diffs, and test results be represented without exposing sensitive/internal chain-of-thought?
+- Which Sensei commands should be ordinary deterministic Codejitsu commands versus agent-backed operations?
+- How should human approval gates work before consequential mutations?
 
 ## Bad-Ass Design Principles
 
@@ -308,24 +371,28 @@ Keep these as design goals, not excuses for premature abstraction:
 5. **Sources should be replaceable.** Filesystem, tenant repositories, global repositories, remote stores, and future sources should implement the source boundary rather than leaking storage assumptions into Scrolls.
 6. **Codecs should be replaceable.** NEON, `.ctx`, JSON/YAML, or future codecs should converge on the canonical graph/resource model.
 7. **Agents should be replaceable.** Neuron-AI is the first substrate, not the permanent identity of a Spark.
-8. **The framework should dogfood itself.** The CLI/TUI should use Codex and Command Scrolls, and Sparks should use the same context/resource system developers use.
+8. **The framework should dogfood itself.** Sensei should use Codex and Command Scrolls, and Sparks should use the same context/resource system developers use.
 9. **Prefer boring infrastructure and sharp boundaries.** Do not build an AI orchestration cathedral when a small adapter and explicit contract will do.
 10. **Make failure observable.** Agent execution should produce structured events/results that can be inspected, replayed where safe, and tested.
 11. **Design for least privilege.** A Vessel should expose only the resources, capabilities, and permissions required for the Spark's task.
 12. **Optimize for feedback loops.** The system should make inspect -> plan -> change -> test -> review fast enough that using the agentic tooling is actually faster than bypassing it.
+13. **Human-in-the-loop by default for consequential changes.** Sensei can automate inspection and proposal aggressively, but code mutation, destructive operations, publishing, and other consequential actions should have explicit policy/approval boundaries until proven safe.
+14. **Sensei is the proving ground, not the architecture owner.** If Sensei needs a special mechanism, first ask whether it belongs in the underlying Codejitsu contract; do not silently create Sensei-only infrastructure that duplicates the framework.
 
 ## Next Slice
 
-After the merged Context Scroll/resource-graph work, build the agentic development vertical slice in this order unless repository evidence suggests a safer decomposition:
+After the merged Context Scroll/resource-graph work, build the agentic development vertical slice through Sensei in this order unless repository evidence suggests a safer decomposition:
 
 1. **Context Scroll consumption** — finish the `.ctx` source/discovery/index/query path sufficiently for a Vessel to request context by logical URI/query.
-2. **Vessel contract** — define and test the minimal Codejitsu-owned harness boundary.
-3. **Neuron-AI adapter** — integrate the current Neuron-AI runtime behind the Vessel boundary.
-4. **Spark contract** — define and test the minimal agent boundary and execution/result model.
-5. **Context-aware Spark** — prove a Spark can receive targeted `.ctx` resources plus selected code/tests through its Vessel.
-6. **Command Scroll** — define the smallest useful `cmd://` resource and make the CLI discover/execute it.
-7. **Developer TUI** — build a focused interactive interface over Codex, Command Scrolls, Vessels, and Sparks.
-8. **Dogfood** — create development-oriented Vessels/Sparks and use them against Codejitsu itself.
+2. **Sensei skeleton** — establish the smallest Codejitsu application boundary for Sensei without building the TUI yet.
+3. **Vessel contract** — define and test the minimal Codejitsu-owned harness boundary.
+4. **Neuron-AI adapter** — inspect and integrate the current Neuron-AI runtime behind the Vessel boundary.
+5. **Spark contract** — define and test the minimal agent boundary and execution/result model.
+6. **Context-aware Spark** — prove a Spark can receive targeted `.ctx` resources plus selected code/tests through its Vessel.
+7. **Sensei development Vessel/Spark** — create the first concrete developer-oriented pair and prove one useful task against Codejitsu itself.
+8. **Command Scroll** — define the smallest useful `cmd://` resource and make Sensei/CLI discover and execute it.
+9. **Developer TUI** — build a focused interactive interface over Codex, Command Scrolls, Vessels, and Sparks.
+10. **Dogfood** — use Sensei against Codejitsu for inspect -> plan -> change -> test -> review loops, with explicit human approval for consequential mutations.
 
 Each step should be independently testable and should avoid pulling later-stage concerns forward.
 
@@ -342,4 +409,7 @@ Each step should be independently testable and should avoid pulling later-stage 
 - Do not make the TUI a second application architecture.
 - Do not expose or persist model chain-of-thought; persist concise reasoning summaries, actions, tool calls, provenance, and results instead.
 - Do not start by building a generalized multi-agent swarm. Prove one Vessel + one Spark + one useful task first.
+- Keep Sensei above Codejitsu in dependency direction; Codejitsu must not depend on Sensei.
+- Prefer deterministic, inspectable commands for ordinary development operations; use agents where they add real value.
+- Require explicit policy/approval boundaries around consequential agent actions.
 - Stop and update `.context/current-state.ctx` after each coherent vertical slice so work can resume without reconstructing state from chat history.
