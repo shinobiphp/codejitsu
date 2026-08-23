@@ -14,8 +14,8 @@ These standards apply to Codejitsu source and context-driven implementation work
 - Prefer explicit return types and parameter types everywhere practical.
 - Prefer immutable objects and explicit state transitions over mutable shared state.
 - Prefer factories, strategies, policies, specifications, adapters, and composition when they provide a meaningful boundary; do not force patterns where a simple object is clearer.
-- Use attributes for declarative metadata and framework discovery, including resource discovery, handlers, capabilities, commands, listeners, and other extension points where reflection-based discovery is appropriate.
-- Keep discovery metadata declarative; avoid scattering registration knowledge through hard-coded class maps when attributes can express the relationship cleanly.
+- Use attributes for declarative metadata and PHP behavior discovery, including handlers, capabilities, commands, listeners, and other executable extension points where reflection-based discovery is appropriate.
+- Scroll resources are data resources, not PHP classes: discover Scrolls primarily by source path, filename, and extension. Do not require attributes merely to discover `.ctx`, `.neon`, or other resource files.
 - Use dependency injection rather than service locators or hidden global state.
 - Avoid static helpers except where static behavior is inherently part of bootstrap or framework initialization.
 - Keep public classes as behavioral contracts; use internal interfaces only when they provide a real internal wiring boundary.
@@ -47,17 +47,19 @@ These standards apply to Codejitsu source and context-driven implementation work
 
 ## Attributes and Discovery
 
-- Attributes are the preferred mechanism for declarative discovery metadata.
+- Attributes are the preferred mechanism for declarative discovery metadata for PHP behavior.
 - Discovery should inspect attributes and build an index/registry rather than require application classes to register themselves manually.
 - Attributes should express intent; execution behavior belongs in the discovered class/strategy, not inside the attribute.
-- Discovery must remain deterministic and cacheable.
 - Reflection should be isolated behind discovery/indexing boundaries so runtime consumers do not need to know how discovery works.
+- Resource Scroll discovery is different: Scrolls are source data, so path/filename/extension-based discovery is preferred.
+- Existing discovery strategies should be reused for PHP behavior discovery rather than creating parallel registration mechanisms.
+- Discovery must remain deterministic and cacheable.
 
 ## Design Patterns
 
 Use patterns where they solve an actual design problem:
 
-- **Strategy** for interchangeable algorithms, runtimes, resolution policies, or analysis behaviors.
+- **Strategy** for interchangeable algorithms, runtimes, resolution policies, discovery behaviors, or analysis behaviors.
 - **Factory** when construction varies by type, configuration, or discovered metadata.
 - **Policy/Specification** for composable rules and filtering decisions.
 - **Adapter** when translating an external/infrastructure API into a Codejitsu contract.
@@ -71,6 +73,7 @@ Prefer composition over inheritance. Inheritance should express a real substitut
 ## Resources and Scrolls
 
 - Scrolls are resources first; their storage representation is an implementation detail.
+- Scrolls are not required to be PHP classes in their source representation.
 - Keep logical resource identity separate from physical source location.
 - URI paths represent logical resource/reference paths.
 - URI `@source` selectors control resolution source/cascade and are not part of resource identity.
@@ -81,12 +84,13 @@ Prefer composition over inheritance. Inheritance should express a real substitut
 ## Architecture
 
 - Favor composition and explicit boundaries over convenience coupling.
-- Keep discovery, indexing, resolution, hydration, validation, and execution as distinct responsibilities.
+- Keep discovery, parsing, graph construction, indexing, resolution, hydration, validation, and execution as distinct responsibilities.
 - Codex is the resource indexing/query/resolution boundary; consumers should not bypass it to inspect discovery sources directly.
 - Query operations should operate on indexed metadata and should not require hydration of every matching resource.
 - Source precedence must remain deterministic and testable.
 - Keep infrastructure concerns behind contracts and adapters.
 - Prefer explicit dependency graphs over hidden coupling.
+- Physical source layout must not leak into logical URI semantics.
 
 ## Security and Reliability
 
@@ -104,3 +108,4 @@ Prefer composition over inheritance. Inheritance should express a real substitut
 - Every new architectural behavior should have a regression test.
 - Test source precedence explicitly, including explicit source selection and fallback chains.
 - Test discovered attributes as behavior, not merely reflection mechanics.
+- Test resource discovery by path, filename, and extension independently from PHP attribute discovery.
