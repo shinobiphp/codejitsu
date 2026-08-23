@@ -22,7 +22,13 @@ class Uri implements Stringable
 
     /** @var array<string, mixed> */
     public array $query = [];
-
+    public string $resourcePath {
+        get => trim(implode('/', array_filter([
+            $this->target === self::DEFAULT_TARGET ? null : $this->target,
+            $this->path,
+        ], static fn (?string $part): bool => $part !== null && $part !== '')), '/');
+    }
+    
     public string $key {
         get => match (true) {
             str_ends_with($this->type, 'y') => substr($this->type, 0, -1) . 'ies',

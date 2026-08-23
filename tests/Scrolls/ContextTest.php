@@ -16,7 +16,7 @@ final class ContextTest extends TestCase
         $scroll->hydrate([
             'name' => 'architecture/codex',
             'tags' => ['architecture', 'agent'],
-            'data' => '# Codex\n\nThe resource index.',
+            'data' => "# Codex\n\nThe resource index."
         ]);
 
         self::assertInstanceOf(Context::class, $scroll);
