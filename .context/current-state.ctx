@@ -2,17 +2,27 @@
 
 Updated: 2026-08-23
 
+## RESUME PROMPT
+
+> Resume Codejitsu development from this `current-state.ctx`. First inspect the repository's current `main` state and all relevant `.context` resources. Treat this document as architectural state, not as a command to blindly implement everything below. Review the existing implementation, tests, decisions, and code standards before making changes. Identify what is already implemented versus proposed. Then continue from **Next Slice** in the smallest coherent, testable vertical slice. Preserve the locked boundaries and resolve explicitly listed ambiguities before committing to architecture. Use modern PHP 8.4+ practices, TDD/behavior-driven tests, existing discovery strategies, and composition. Do not resurrect merged work or reopen settled decisions without evidence that the current code contradicts them.
+
 ## Status
 
-We are wrapping up the Context Scroll / canonical resource graph work and intentionally stopping here after CI is green and PR #7 is merged.
+The Context Scroll / canonical resource graph slice is complete, merged into `main`, and locally verified.
 
-## Branch / PR
+Current verified baseline:
 
-- Repository: `shinobiphp/codejitsu`
-- Working branch: `feat/context-scrolls`
-- PR: #7
-- PR title: `feat: add context scrolls and canonical resource graph`
-- Do not add new architecture to this PR. Fix only issues required for tests, correctness, or merge readiness.
+```text
+main
+31 tests
+94 assertions
+0 failures
+0 errors
+0 deprecations
+0 risky tests
+```
+
+The working tree was clean after restoring generated Composer artifacts. A fresh `composer install` followed by `composer test` reproduced the green suite.
 
 ## What Is Locked In
 
@@ -22,6 +32,8 @@ We are wrapping up the Context Scroll / canonical resource graph work and intent
 - Scroll discovery is primarily based on source path, filename, and extension.
 - Existing discovery strategies should be reused; do not introduce attribute-based discovery for `.ctx`, `.neon`, etc.
 - Context Scrolls use `.ctx` and may contain Markdown payloads.
+- Metadata outside the content payload should carry identity, version, type, tags, relationships, provenance, and other indexing/query material where appropriate.
+- A Scroll should be codec-independent once parsed into the canonical representation.
 
 ### PHP Discovery
 
@@ -38,9 +50,10 @@ Examples:
 ```text
 context://architecture/scrolls
 context://architecture/scrolls@tenant.global#1.0.0
+app://archiq/path/to/resource
 ```
 
-The path is a logical resource path. The `@source` selector controls source precedence/cascade and is not part of resource identity.
+The path is a logical resource path and may address nested resources. The `@source` selector controls source precedence/cascade and is not part of resource identity.
 
 Source cascade semantics:
 
@@ -49,7 +62,9 @@ Source cascade semantics:
 @global.tenant  => global, then tenant
 ```
 
-An omitted source uses the registered/default cascade order.
+An omitted source uses the registered/default cascade order, with the most recently registered source taking precedence.
+
+A source alias may identify a different physical Scroll source, such as a global Scroll repository versus a tenant-local repository. The same logical URI may therefore resolve against different sources without changing its logical identity.
 
 ### Physical Resource Layout
 
@@ -59,7 +74,7 @@ Different source layouts may represent the same logical resource:
 scrolls/context/architecture/scrolls.ctx
 ```
 
-or a nested resource representation under `architecture.ctx`.
+or a nested resource representation under another Scroll boundary.
 
 The source maps physical representation to logical resources. URI, Codex, and Scroll behavior must not depend on filesystem layout.
 
@@ -102,69 +117,229 @@ are normalized into named graph edges. The `$` is source-format syntax, not part
 
 The Codex is the resource indexing/query/resolution boundary.
 
-Querying should operate primarily on indexed metadata and logical resource paths without hydrating every matching resource.
+The Codex must support both direct resolution and search/query. Querying should operate primarily on indexed metadata and logical resource paths without hydrating every matching resource.
 
-The Codex should eventually support graph-aware relationship queries, but that is **future work**, not a reason to expand this PR.
+Source selection/cascade is a resolution concern and should remain composable with querying rather than being duplicated in each resource type.
 
-## Current Implementation
+The Codex should eventually support graph-aware relationship queries, but that is future work unless required by a concrete vertical slice.
 
-The branch contains the canonical graph primitives:
+## Context Scrolls
+
+`.context` is itself intended to become a first-class Scroll source rather than a collection of Markdown notes that agents have to rediscover manually.
+
+The target model is:
 
 ```text
-Codejitsu\Graph\Node
-Codejitsu\Graph\Edge
-Codejitsu\Graph\Graph
+.context/*.ctx
+      |
+      v
+ Context Scrolls
+      |
+      v
+ Canonical Graph
+      |
+      v
+ Codex
 ```
 
-Graph integrity requires referenced endpoints to exist and rejects duplicate node IDs.
+Markdown remains valuable as the human-readable content payload. Scroll metadata should make the content discoverable, filterable, versionable, source-aware, and relationship-aware.
 
-Scroll references are represented through the graph/reference model, while Codex resolution remains the boundary for resolving logical resource URIs.
+Do not prematurely require every existing `.md` file to be converted in one destructive migration. Establish the `.ctx` representation and conversion/discovery path first, then migrate useful context resources deliberately.
 
-## Code Standards
+## Vessel / Spark Architecture — LOCKED DIRECTION
 
-`.context/code-standards.md` is the engineering bar.
+### Vessel
 
-Important points:
+A **Vessel is the agent harness/container**.
 
-- PHP 8.4+
-- `declare(strict_types=1);`
-- constructor property promotion where appropriate
-- `readonly` where appropriate
-- PHP 8.4 property hooks where they express useful invariants/normalization
-- asymmetric visibility where appropriate
-- strong native typing
-- enums/value objects instead of primitive obsession where warranted
-- composition over inheritance
-- Strategy/Factory/Policy/Specification/Adapter/Decorator/Pipeline/Composite when they solve a real design problem
-- no cargo-cult patterns
-- dependency injection instead of hidden global state/service locators
-- no unnecessary `Interface`, `Helper`, or `Manager` naming
-- public classes represent behavioral contracts; internal interfaces only where a real boundary exists
-- attributes for PHP behavior discovery, not Scroll resource discovery
-- deterministic, cacheable discovery
-- tests for architectural behavior and regression cases
+It is responsible for providing the execution environment in which a Spark operates. A Vessel may assemble and govern:
 
-## Finish Line For This Work
+- Codex/resource access
+- selected Context Scrolls
+- code and repository resources
+- tools/capabilities
+- execution state
+- lifecycle
+- policy/permissions
+- tracing/observability
+- persistence/memory integration where required
+- failure/retry boundaries where required
 
-Do exactly this and then stop:
+A Vessel is **not** the agent itself and should not absorb the Spark's reasoning responsibilities.
 
-1. Verify the current branch and PR contents.
-2. Run the full PHPUnit suite / GitHub CI against the current head.
-3. Fix test or correctness failures only.
-4. Ensure `.ctx` naming and current-state documentation are consistent.
-5. Ensure the PR description accurately reflects the final implementation.
-6. Wait for a real green CI result on the final commit.
-7. Merge PR #7 into `main`.
-8. Do not start App Scrolls, capability/config/schema execution, or additional graph/query architecture in this PR.
+### Spark
 
-## Next Starting Point
+A **Spark is the agent** hosted/executed by a Vessel.
 
-After this PR is merged, the next major slice should build on the stabilized resource model:
+A Spark is responsible for goal/task-directed reasoning and action. It should request or consume context/resources through its Vessel rather than directly coupling itself to filesystem layout, global state, or the Codex implementation.
 
-1. App Scroll (`app://archiq/...`) as a logical resource tree.
-2. Complete source-backed Scroll resolution.
-3. Capability/config/schema Scroll execution.
-4. More complete Codex query language, including graph relationships where useful.
-5. Additional codecs and source implementations.
+Conceptually:
 
-When resuming, read this file first, then `.context/decisions/0004-canonical-scroll-graph.md` and `.context/code-standards.md` before changing architecture.
+```text
+Spark
+  -> Vessel
+      -> Codex
+          -> Scrolls / context / code / schemas / capabilities
+```
+
+### Neuron-AI
+
+Neuron-AI is the intended initial implementation substrate for Vessels/Sparks.
+
+**Important boundary:** Codejitsu should own the stable Vessel/Spark contracts and orchestration boundaries. Neuron-AI should be integrated behind an adapter/substrate boundary rather than becoming the definition of what a Vessel or Spark is.
+
+Before implementing the Vessel/Spark slice, inspect the current Neuron-AI APIs/version and decide the narrowest adapter boundary that gives us real functionality without leaking Neuron-specific types throughout Codejitsu.
+
+## Command Scrolls / CLI / TUI — LOCKED DIRECTION
+
+The CLI should become a consumer of the same Scroll/Codex architecture rather than a permanently hardcoded command tree.
+
+Target conceptual flow:
+
+```text
+cmd://...
+   -> Codex
+      -> Command Scroll
+         -> Vessel / capability / application behavior
+```
+
+A Command Scroll should eventually describe enough information for the CLI to discover commands, help, arguments/options, validation, routing, and execution. Do not make the first implementation unnecessarily declarative or magical; establish the minimum useful Command Scroll contract first.
+
+The CLI should provide a useful interactive TUI so development can happen through the system itself. The TUI is a presentation/interaction layer over Codex resources and Command Scrolls, not a separate command architecture.
+
+The initial TUI should prioritize developer productivity over visual novelty: resource browsing, command discovery, context inspection, Vessel/Spark status, execution, logs/results, and easy navigation.
+
+## Intended Agentic Development Loop
+
+The long-term goal is to make Codejitsu increasingly capable of helping build and maintain itself.
+
+The first useful dogfood loop should look like:
+
+```text
+Developer
+   |
+   v
+Codejitsu TUI / Command Scroll
+   |
+   v
+Vessel (harness)
+   |
+   v
+Spark (agent)
+   |
+   +----> Codex
+   |        |
+   |        +--> Context Scrolls
+   |        +--> source code
+   |        +--> schemas
+   |        +--> capabilities
+   |        +--> tests
+   |
+   v
+changes / tests / results
+```
+
+A Spark working on Codejitsu should be able to receive a deliberately assembled Vessel containing the relevant context, code, tests, schemas, and capabilities instead of being dumped an indiscriminate repository snapshot.
+
+This should optimize for **relevant context, deterministic resource resolution, traceability, and repeatability**, not simply maximum context-window size.
+
+## Ambiguities To Resolve Before They Become Architecture
+
+These are intentional open questions. Resolve them explicitly from the existing code, Neuron-AI's current API, and the smallest useful vertical slice before locking contracts.
+
+### Vessel lifecycle
+
+- Is a Vessel one-shot, resumable, or both?
+- What is the lifecycle/state machine?
+- Can a Vessel host multiple Sparks concurrently, or should the initial contract be one Spark per Vessel?
+- Where do cancellation, timeout, retry, and compensation belong?
+
+### Spark contract
+
+- What is the minimal stable Spark contract independent of Neuron-AI?
+- Is a Spark stateful across turns/executions?
+- How are goals, observations, actions, results, and errors represented?
+- How does a Spark request additional Codex resources?
+
+### Context assembly
+
+- Does the Vessel receive an explicit context manifest, query the Codex itself, or support both?
+- How are token/context budgets enforced?
+- How are conflicting Context Scrolls handled?
+- How do source cascades interact with explicitly selected resources?
+- What provenance must be retained so an agent can explain where context came from?
+
+### Tool/capability boundary
+
+- Does a Spark call capabilities directly through the Vessel?
+- Are tools represented as Capability Scrolls, PHP capabilities, or both?
+- What authorization/policy layer mediates tool use?
+- How are tool calls signed, traced, idempotent, retried, and compensated where appropriate?
+
+### Neuron-AI adapter
+
+- Which Neuron-AI abstractions are useful versus accidental coupling?
+- What should be Codejitsu-owned DTOs/events versus Neuron-owned runtime objects?
+- How do model/provider configuration and conversation state map into Vessel/Spark state?
+- What is the clean escape hatch if Neuron-AI is replaced later?
+
+### Command Scroll
+
+- Which command semantics belong in the Scroll versus PHP behavior discovered by attributes?
+- How much of argument parsing/validation should be declarative?
+- Should command execution resolve to a capability, handler, Spark, Vessel action, or some combination?
+- How should nested command namespaces map onto URI paths?
+
+### TUI
+
+- Which TUI library should be used?
+- Should the TUI itself be long-running/hot-state?
+- Which interactions need streaming output?
+- How should logs, agent reasoning summaries, tool calls, diffs, and test results be represented without exposing sensitive/internal chain-of-thought?
+
+## Bad-Ass Design Principles
+
+Keep these as design goals, not excuses for premature abstraction:
+
+1. **Everything discoverable should be queryable.** If a resource exists, the Codex should eventually be able to find it by URI, metadata, tags, source, type, or relationship.
+2. **Everything executable should be composable.** Capabilities, Commands, Vessels, and Sparks should compose through explicit contracts rather than hidden globals.
+3. **Everything agentic should be traceable.** Record resource provenance, tool/capability invocations, lifecycle events, outcomes, and errors without storing private model chain-of-thought.
+4. **Context should be intentional.** Prefer targeted Codex queries and manifests over blindly stuffing repositories into an agent context window.
+5. **Sources should be replaceable.** Filesystem, tenant repositories, global repositories, remote stores, and future sources should implement the source boundary rather than leaking storage assumptions into Scrolls.
+6. **Codecs should be replaceable.** NEON, `.ctx`, JSON/YAML, or future codecs should converge on the canonical graph/resource model.
+7. **Agents should be replaceable.** Neuron-AI is the first substrate, not the permanent identity of a Spark.
+8. **The framework should dogfood itself.** The CLI/TUI should use Codex and Command Scrolls, and Sparks should use the same context/resource system developers use.
+9. **Prefer boring infrastructure and sharp boundaries.** Do not build an AI orchestration cathedral when a small adapter and explicit contract will do.
+10. **Make failure observable.** Agent execution should produce structured events/results that can be inspected, replayed where safe, and tested.
+11. **Design for least privilege.** A Vessel should expose only the resources, capabilities, and permissions required for the Spark's task.
+12. **Optimize for feedback loops.** The system should make inspect -> plan -> change -> test -> review fast enough that using the agentic tooling is actually faster than bypassing it.
+
+## Next Slice
+
+After the merged Context Scroll/resource-graph work, build the agentic development vertical slice in this order unless repository evidence suggests a safer decomposition:
+
+1. **Context Scroll consumption** — finish the `.ctx` source/discovery/index/query path sufficiently for a Vessel to request context by logical URI/query.
+2. **Vessel contract** — define and test the minimal Codejitsu-owned harness boundary.
+3. **Neuron-AI adapter** — integrate the current Neuron-AI runtime behind the Vessel boundary.
+4. **Spark contract** — define and test the minimal agent boundary and execution/result model.
+5. **Context-aware Spark** — prove a Spark can receive targeted `.ctx` resources plus selected code/tests through its Vessel.
+6. **Command Scroll** — define the smallest useful `cmd://` resource and make the CLI discover/execute it.
+7. **Developer TUI** — build a focused interactive interface over Codex, Command Scrolls, Vessels, and Sparks.
+8. **Dogfood** — create development-oriented Vessels/Sparks and use them against Codejitsu itself.
+
+Each step should be independently testable and should avoid pulling later-stage concerns forward.
+
+## Guardrails For The Next Session
+
+- Start from `main` and verify the tree/test baseline before changing anything.
+- Read this file, `.context/code-standards.md`, the canonical graph decision, and relevant existing source/tests before designing new contracts.
+- Inspect the actual Neuron-AI dependency/API before deciding integration details.
+- Use existing discovery/source/Codex patterns instead of creating parallel infrastructure.
+- Write failing behavioral tests before implementation for new contracts.
+- Keep external/runtime dependencies behind narrow adapters.
+- Do not add attributes to Scroll files; use path/filename/extension discovery for data resources.
+- Do not turn the canonical graph into a generic everything-is-a-node object graph.
+- Do not make the TUI a second application architecture.
+- Do not expose or persist model chain-of-thought; persist concise reasoning summaries, actions, tool calls, provenance, and results instead.
+- Do not start by building a generalized multi-agent swarm. Prove one Vessel + one Spark + one useful task first.
+- Stop and update `.context/current-state.ctx` after each coherent vertical slice so work can resume without reconstructing state from chat history.
