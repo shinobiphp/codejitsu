@@ -47,8 +47,7 @@ final class ScrollDiscovery
                 throw new RuntimeException(sprintf('Unable to read Scroll resource [%s].', $path));
             }
 
-            $data = $this->parse($type, $payload, $root, $path);
-            $scrolls[] = $type->make(null, $data)->bind($this->codex ?? null);
+            $scrolls[] = $type->make(null, $this->parse($type, $payload, $root, $path));
         }
 
         return $scrolls;
