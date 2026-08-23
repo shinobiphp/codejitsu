@@ -22,38 +22,67 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 {
     protected array $scrolls = [];
 
+    /** @var array<string> */
+    protected array $sources = [];
+
     public function __construct(array $itemsOrEnvelopes = [])
     {
         parent::__construct(Codecs::NEON, $itemsOrEnvelopes);
+        $this->registerSource('default');
     }
 
-    public function load(string $root): static
+    public function registerSource(string $source): static
     {
-        foreach ((new ScrollDiscovery(new Neon()))->discover($root) as $scroll) {
-            $this->registerScroll($scroll);
+        $source = strtolower(trim($source));
+        if ($source === '' || !preg_match('/^[a-z0-9][a-z0-9_.-]*$/', $source)) {
+            throw new InvalidArgumentException(sprintf('Invalid Scroll source [%s].', $source));
+        }
+
+        if (!in_array($source, $this->sources, true)) {
+            $this->sources[] = $source;
         }
 
         return $this;
     }
 
-    public function registerScroll(ScrollContract $scroll): static
+    public function load(string $root, ?string $source = null): static
     {
-        $this->validate($scroll);
-        $scroll->bind($this);
-        $key = $this->identityKey($scroll);
-        $this->scrolls[$key] = $scroll;
-        $this->items[$key] = $scroll;
+        $source ??= $this->sources[array_key_last($this->sources)] ?? 'default';
+        $this->registerSource($source);
+
+        foreach ((new ScrollDiscovery(new Neon()))->discover($root) as $scroll) {
+            $this->registerScroll($scroll, $source);
+        }
+
         return $this;
     }
 
-    public function discover(StoreContract $store, array $discovered): static
+    public function registerScroll(ScrollContract $scroll, ?string $source = null): static
     {
+        $this->validate($scroll);
+        $source ??= $this->sources[array_key_last($this->sources)] ?? 'default';
+        $this->registerSource($source);
+
+        $scroll->bind($this);
+        $key = $this->identityKey($scroll);
+        $this->scrolls[$source][$key] = $scroll;
+        $this->items[$key] = $scroll;
+
+        return $this;
+    }
+
+    public function discover(StoreContract $store, array $discovered, ?string $source = null): static
+    {
+        $source ??= $this->sources[array_key_last($this->sources)] ?? 'default';
+        $this->registerSource($source);
+
         foreach ($discovered as $discoveredScroll) {
             $envelope = $store->getDiscovered($discoveredScroll);
             if ($envelope !== null) {
                 $this->loadEnvelope($envelope);
             }
         }
+
         return $this;
     }
 
@@ -132,17 +161,21 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         }
 
         $version = $parsed->version;
-        foreach ($this->all(true) as $scroll) {
-            if (!$scroll instanceof ScrollContract || $this->scrollType($scroll) !== $type) {
-                continue;
-            }
+        $sources = $this->sourceCascade($parsed);
 
-            if (strtolower($scroll->name) !== $name) {
-                continue;
-            }
+        foreach ($sources as $source) {
+            foreach ($this->scrolls[$source] ?? [] as $scroll) {
+                if (!$scroll instanceof ScrollContract || $this->scrollType($scroll) !== $type) {
+                    continue;
+                }
 
-            if ($version === null || $scroll->version === $version) {
-                return $scroll->bind($this);
+                if (strtolower($scroll->name) !== $name) {
+                    continue;
+                }
+
+                if ($version === null || $scroll->version === $version) {
+                    return $scroll->bind($this);
+                }
             }
         }
 
@@ -217,6 +250,22 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new InvalidArgumentException(sprintf('Invalid Scroll type [%s].', (string) $type));
         }
         return $normalized;
+    }
+
+    /** @return array<string> */
+    private function sourceCascade(Uri $uri): array
+    {
+        if ($uri->sources !== []) {
+            foreach ($uri->sources as $source) {
+                if (!in_array($source, $this->sources, true)) {
+                    throw new OutOfBoundsException(sprintf('Scroll source [%s] is not registered.', $source));
+                }
+            }
+
+            return $uri->sources;
+        }
+
+        return array_reverse($this->sources);
     }
 
     private function identityKey(ScrollContract $scroll): string
