@@ -24,6 +24,20 @@ final class GraphTest extends TestCase
         self::assertCount(1, $graph->outgoing('architecture'));
     }
 
+    public function testProvidesIncomingAndRelatedNodes(): void
+    {
+        $graph = new Graph();
+        $graph->add(new Node('architecture'));
+        $graph->add(new Node('scrolls'));
+        $graph->add(new Node('codex'));
+        $graph->connect(new Edge('architecture', 'scrolls', 'scrolls', 'contains'));
+        $graph->connect(new Edge('codex', 'scrolls', 'resources', 'indexes'));
+
+        self::assertCount(2, $graph->incoming('scrolls'));
+        self::assertSame('scrolls', $graph->related('architecture', 'scrolls')?->id);
+        self::assertCount(2, $graph->neighbors('scrolls'));
+    }
+
     public function testRejectsDuplicateNodes(): void
     {
         $graph = new Graph();
