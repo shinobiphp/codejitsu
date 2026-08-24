@@ -1,0 +1,16 @@
+{
+    "name": "shinobiphp/codejitsu-app",
+    "description": "Application adapters for Codejitsu",
+    "type": "library",
+    "require": {
+        "php": ">=8.4",
+        "shinobiphp/codejitsu-core": "*",
+        "shinobiphp/codejitsu-io": "*",
+        "openswoole/core": "^26.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codejitsu\\Apps\\": "src/Apps/"
+        }
+    }
+}

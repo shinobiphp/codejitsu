@@ -1,0 +1,14 @@
+{
+    "name": "shinobiphp/codejitsu-runtime",
+    "description": "Execution runtime and substrates for Codejitsu",
+    "type": "library",
+    "require": {
+        "php": ">=8.4",
+        "shinobiphp/codejitsu-core": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codejitsu\\Execution\\": "src/Execution/"
+        }
+    }
+}

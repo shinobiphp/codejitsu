@@ -1,0 +1,14 @@
+{
+    "name": "shinobiphp/codejitsu-io",
+    "description": "Input/output intents and translators for Codejitsu",
+    "type": "library",
+    "require": {
+        "php": ">=8.4",
+        "shinobiphp/codejitsu-core": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codejitsu\\IO\\": "src/IO/"
+        }
+    }
+}
