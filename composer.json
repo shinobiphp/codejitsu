@@ -22,9 +22,18 @@
         "phpunit/phpunit": "^13.3"
     },
     "license": "proprietary",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/*",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "autoload": {
         "psr-4": {
-            "Codejitsu\\": "src/"
+            "Codejitsu\\": "packages/core/src/"
         }
     },
     "autoload-dev": {

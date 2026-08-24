@@ -1,0 +1,29 @@
+{
+    "name": "shinobiphp/codejitsu-core",
+    "description": "Core resource and runtime substrate for Codejitsu",
+    "type": "library",
+    "require": {
+        "php": ">=8.4",
+        "psr/container": "^2.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/log": "^3.0",
+        "psr/simple-cache": "^3.0",
+        "symfony/console": "^8.1",
+        "symfony/dependency-injection": "^8.1",
+        "symfony/config": "^8.1",
+        "symfony/finder": "^8.1",
+        "symfony/filesystem": "^8.1",
+        "vlucas/phpdotenv": "^5.6",
+        "nette/neon": "^3.4",
+        "openswoole/core": "^26.2",
+        "opis/json-schema": "^2.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codejitsu\\": "src/"
+        }
+    }
+}
