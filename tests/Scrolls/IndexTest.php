@@ -32,6 +32,34 @@ final class IndexTest extends TestCase
         self::assertCount(1, $index->query(['attributes' => ['environment' => 'production']]));
     }
 
+    public function testPreservesRequestedSourcePrecedence(): void
+    {
+        $index = new Index();
+        $index->add(new IndexEntry(
+            'config',
+            'shinobi',
+            '1.0.0',
+            'global',
+            [],
+            ['value' => 'global'],
+            Uri::make('config://shinobi@global#1.0.0'),
+        ));
+        $index->add(new IndexEntry(
+            'config',
+            'shinobi',
+            '1.0.0',
+            'tenant',
+            [],
+            ['value' => 'tenant'],
+            Uri::make('config://shinobi@tenant#1.0.0'),
+        ));
+
+        $results = $index->query(['source' => ['tenant', 'global']]);
+
+        self::assertSame('tenant', $results[0]->source);
+        self::assertSame('global', $results[1]->source);
+    }
+
     public function testReplacesEntriesWithTheSameIdentity(): void
     {
         $index = new Index();
