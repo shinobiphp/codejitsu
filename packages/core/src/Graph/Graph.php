@@ -58,6 +58,15 @@ final class Graph
         ));
     }
 
+    /** @return list<Edge> */
+    public function incoming(string $id): array
+    {
+        return array_values(array_filter(
+            $this->edges,
+            static fn (Edge $edge): bool => $edge->to === $id,
+        ));
+    }
+
     public function edge(string $from, string $name): ?Edge
     {
         foreach ($this->edges as $edge) {
@@ -67,5 +76,30 @@ final class Graph
         }
 
         return null;
+    }
+
+    public function related(string $id, string $name): ?Node
+    {
+        $edge = $this->edge($id, $name);
+
+        return $edge === null ? null : $this->node($edge->to);
+    }
+
+    /** @return list<Node> */
+    public function neighbors(string $id): array
+    {
+        $ids = [];
+
+        foreach ($this->outgoing($id) as $edge) {
+            $ids[$edge->to] = true;
+        }
+
+        foreach ($this->incoming($id) as $edge) {
+            $ids[$edge->from] = true;
+        }
+
+        return array_values(array_filter(
+            array_map(fn (string $nodeId): ?Node => $this->node($nodeId), array_keys($ids)),
+        ));
     }
 }
