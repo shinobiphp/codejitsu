@@ -44,8 +44,11 @@ final class Index implements Countable, IteratorAggregate
     {
         $types = isset($criteria['type']) ? array_map('strtolower', (array) $criteria['type']) : null;
         $sources = isset($criteria['source'])
-            ? array_map('strtolower', (array) $criteria['source'])
+            ? array_values(array_unique(array_map('strtolower', (array) $criteria['source'])))
             : null;
+        $sourceRank = $sources === null
+            ? []
+            : array_flip($sources);
         $name = isset($criteria['name']) ? strtolower(trim((string) $criteria['name'], '/')) : null;
         $version = isset($criteria['version']) ? (string) $criteria['version'] : null;
         $tags = isset($criteria['tags']) ? array_map('strtolower', (array) $criteria['tags']) : [];
@@ -53,10 +56,8 @@ final class Index implements Countable, IteratorAggregate
             ? $criteria['attributes']
             : [];
 
-        $entries = $this->all();
-
-        return array_values(array_filter(
-            $entries,
+        $entries = array_values(array_filter(
+            $this->all(),
             static function (IndexEntry $entry) use ($types, $sources, $name, $version, $tags, $attributes): bool {
                 if ($types !== null && !in_array(strtolower($entry->type), $types, true)) {
                     return false;
@@ -87,6 +88,17 @@ final class Index implements Countable, IteratorAggregate
                 return true;
             },
         ));
+
+        if ($sources !== null) {
+            usort(
+                $entries,
+                static fn (IndexEntry $left, IndexEntry $right): int =>
+                    ($sourceRank[strtolower($left->source)] ?? PHP_INT_MAX)
+                    <=> ($sourceRank[strtolower($right->source)] ?? PHP_INT_MAX),
+            );
+        }
+
+        return $entries;
     }
 
     public function count(): int
