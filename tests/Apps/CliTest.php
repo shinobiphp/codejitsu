@@ -22,14 +22,18 @@ final class CliTest extends TestCase
         Kernel::destroy($this->kernelName);
     }
 
-    public function testNoArgumentsRenderUsage(): void
+    public function testNoArgumentsRenderGroupedUsage(): void
     {
         [$code, $output] = $this->runCli(['codejitsu']);
 
         self::assertSame(0, $code);
         self::assertStringContainsString('Available commands:', $output);
-        self::assertStringContainsString('hello', $output);
-        self::assertStringContainsString('scrolls:<subcommand>', $output);
+        self::assertStringContainsString('Scroll', $output);
+        self::assertStringContainsString('scroll:run <uri> [arguments]', $output);
+        self::assertStringContainsString('Scrolls', $output);
+        self::assertStringContainsString('scrolls:list', $output);
+        self::assertStringContainsString('Make', $output);
+        self::assertStringContainsString('make:scroll', $output);
     }
 
     public function testHelpFormsRenderUsage(): void
@@ -47,9 +51,20 @@ final class CliTest extends TestCase
         [$code, $output] = $this->runCli(['codejitsu', 'scrolls']);
 
         self::assertSame(0, $code);
-        self::assertStringContainsString('Usage: ./codejitsu scrolls:<subcommand>', $output);
+        self::assertStringContainsString('Usage:', $output);
+        self::assertStringContainsString('codejitsu scrolls:<subcommand> [arguments] [options]', $output);
         self::assertStringContainsString('scrolls:hello', $output);
         self::assertStringContainsString('Say hello through a nested Command Scroll.', $output);
+    }
+
+    public function testCommandHelpRendersTheResolvedNamespace(): void
+    {
+        [$code, $output] = $this->runCli(['codejitsu', 'scroll', '--help']);
+
+        self::assertSame(0, $code);
+        self::assertStringContainsString('codejitsu scroll:<subcommand> [arguments] [options]', $output);
+        self::assertStringContainsString('scroll:run <uri> [arguments]', $output);
+        self::assertStringContainsString('Execute a Scroll by URI.', $output);
     }
 
     public function testCommandExecutionResolvesSchemaAndCapabilityReferences(): void

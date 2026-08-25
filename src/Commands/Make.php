@@ -5,8 +5,14 @@ declare(strict_types=1);
 namespace Codejitsu\Commands;
 
 use Codejitsu\Codecs\Neon;
-use Codejitsu\ExecutionContext;
+use Codejitsu\Console\Editor;
+use Codejitsu\Console\Questioner;
+use Codejitsu\Console\TerminalEditor;
+use Codejitsu\Console\TerminalQuestioner;
 use Codejitsu\Enums\Scrolls\Types;
+use Codejitsu\ExecutionContext;
+use Codejitsu\Scrolls\ScrollCodex;
+use Codejitsu\SubstrateRegistry;
 use Codejitsu\Uri\Uri;
 use InvalidArgumentException;
 use RuntimeException;
@@ -19,9 +25,75 @@ final class Make
         $uri = array_values(array_filter($arguments, static fn (mixed $argument): bool => is_string($argument) && !str_starts_with($argument, '--')))[0] ?? null;
 
         if (!is_string($uri) || trim($uri) === '') {
-            throw new InvalidArgumentException('A Scroll URI is required.');
+            return self::interactive(
+                $context->codex,
+                new TerminalQuestioner(),
+                new TerminalEditor(),
+                $context->codex?->substrates() ?? self::defaultSubstrates(),
+            );
         }
 
+        return self::create($uri, $arguments);
+    }
+
+    public static function interactive(
+        ?ScrollCodex $codex,
+        Questioner $questioner,
+        Editor $editor,
+        SubstrateRegistry $registry,
+    ): string {
+        $type = Types::normalize($questioner->select('Scroll type', array_map(
+            static fn (Types $type): string => $type->value,
+            Types::cases(),
+        )), null);
+
+        if (!$type instanceof Types) {
+            throw new InvalidArgumentException('Invalid Scroll type selection.');
+        }
+
+        $name = trim($questioner->ask(sprintf('%s name/identifier: ', $type->value)));
+        if ($name === '') {
+            throw new InvalidArgumentException('Scroll name cannot be empty.');
+        }
+
+        $defaultVersion = self::nextVersion($codex, $type, $name);
+        $version = trim($questioner->ask(sprintf('Version [%s]: ', $defaultVersion), $defaultVersion));
+
+        $payload = [
+            'name' => $name,
+            'type' => $type->value,
+            'version' => $version,
+        ];
+
+        if ($type === Types::CAPABILITY) {
+            $substrate = $questioner->select('Substrate', $registry->names());
+            $payload['substrate'] = $substrate;
+            if ($substrate === 'wasm') {
+                $payload['sourceEncoding'] = 'base64';
+            }
+            $payload['source'] = $editor->edit(self::template($substrate));
+        } else {
+            $description = trim($questioner->ask('Description (optional): '));
+            if ($description !== '') {
+                $payload['description'] = $description;
+            }
+            $payload['content'] = $editor->edit(self::template($type->value));
+        }
+
+        $uri = $type->scheme() . $name . '#' . $version;
+        $path = self::path($type, $name);
+        self::ensureDirectory(dirname($path));
+        if (is_file($path)) {
+            throw new RuntimeException(sprintf('Scroll [%s] already exists at [%s].', $uri, $path));
+        }
+
+        self::write($path, $payload);
+
+        return sprintf("Created %s Scroll [%s].%s", $type->value, $uri, PHP_EOL);
+    }
+
+    private static function create(string $uri, array $arguments): string
+    {
         $parsed = Uri::make($uri, defaultVersion: '1.0.0');
         $type = Types::normalize($parsed->type, null);
         if (!$type instanceof Types) {
@@ -33,20 +105,16 @@ final class Make
             throw new InvalidArgumentException(sprintf('Scroll URI [%s] has no logical path.', $uri));
         }
 
-        $root = defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd() . DIRECTORY_SEPARATOR;
-        $directory = rtrim($root, '/\\') . DIRECTORY_SEPARATOR . 'scrolls' . DIRECTORY_SEPARATOR . $type->plural();
-        $filename = str_replace(['/', '\\'], '_', $name) . '.' . $type->extension();
-        $path = $directory . DIRECTORY_SEPARATOR . $filename;
-
+        $path = self::path($type, $name);
+        self::ensureDirectory(dirname($path));
         if (is_file($path)) {
             throw new RuntimeException(sprintf('Scroll [%s] already exists at [%s].', $uri, $path));
         }
 
-        if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
-            throw new RuntimeException(sprintf('Unable to create Scroll directory [%s].', $directory));
-        }
-
         $target = self::option($arguments, '--target=');
+        $source = self::option($arguments, '--source=');
+        $substrate = self::option($arguments, '--substrate=') ?? ($source !== null ? 'auto' : null);
+        $sourceEncoding = self::option($arguments, '--source-encoding=');
         $payload = [
             'name' => $name,
             'type' => $type->value,
@@ -57,11 +125,86 @@ final class Make
             $payload['target'] = $target;
         }
 
+        if ($source !== null) {
+            $payload['substrate'] = $substrate;
+            $payload['source'] = rtrim($source, "\r\n") . "\n";
+            if ($sourceEncoding !== null) {
+                $payload['sourceEncoding'] = $sourceEncoding;
+            }
+        }
+
+        self::write($path, $payload);
+
+        return sprintf("Created %s Scroll [%s].%s", $type->value, $uri, PHP_EOL);
+    }
+
+    private static function path(Types $type, string $name): string
+    {
+        $root = defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd() . DIRECTORY_SEPARATOR;
+        $directory = rtrim($root, '/\\') . DIRECTORY_SEPARATOR . 'scrolls' . DIRECTORY_SEPARATOR . $type->plural();
+        $filename = str_replace(['/', '\\'], '_', $name) . '.' . $type->extension();
+
+        return $directory . DIRECTORY_SEPARATOR . $filename;
+    }
+
+    private static function ensureDirectory(string $directory): void
+    {
+        if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
+            throw new RuntimeException(sprintf('Unable to create Scroll directory [%s].', $directory));
+        }
+    }
+
+    private static function write(string $path, array $payload): void
+    {
         if (file_put_contents($path, (new Neon())->encode($payload), LOCK_EX) === false) {
             throw new RuntimeException(sprintf('Unable to write Scroll [%s].', $path));
         }
+    }
 
-        return sprintf("Created %s Scroll [%s].%s", $type->value, $uri, PHP_EOL);
+    private static function nextVersion(?ScrollCodex $codex, Types $type, string $name): string
+    {
+        if ($codex === null) {
+            return '1.0.0';
+        }
+
+        $entries = $codex->query(['type' => $type->value, 'name' => $name]);
+        if ($entries === []) {
+            return '1.0.0';
+        }
+
+        $highest = [1, 0, 0];
+        foreach ($entries as $entry) {
+            $parts = array_map('intval', explode('.', $entry->version));
+            $parts = array_pad(array_slice($parts, 0, 3), 3, 0);
+            if ($parts > $highest) {
+                $highest = $parts;
+            }
+        }
+
+        return sprintf('%d.%d.%d', $highest[0], $highest[1], $highest[2] + 1);
+    }
+
+    private static function template(string $type): string
+    {
+        return match ($type) {
+            'php' => "<?php\n\nreturn null;\n",
+            'lua' => "return nil\n",
+            'javascript' => "undefined\n",
+            'wasm' => "",
+            'capability' => "<?php\n\nreturn null;\n",
+            'schema' => "# schema definition\n",
+            default => "# Scroll contents\n",
+        };
+    }
+
+    private static function defaultSubstrates(): SubstrateRegistry
+    {
+        $registry = new SubstrateRegistry();
+        $registry->register('php', new \Codejitsu\Substrate\Php());
+        $registry->register('lua', new \Codejitsu\Substrate\Lua());
+        $registry->register('javascript', new \Codejitsu\Substrate\Javascript());
+        $registry->register('wasm', new \Codejitsu\Substrate\Wasm());
+        return $registry;
     }
 
     private static function option(array $arguments, string $prefix): ?string

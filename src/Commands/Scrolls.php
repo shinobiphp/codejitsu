@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Codejitsu\Commands;
 
-use Codejitsu\Enums\Scrolls\Types;
+use Codejitsu\ExecutionContext;
 use Codejitsu\Scrolls\ScrollCodex;
 
 final class Scrolls
 {
-    public static function list(mixed $arguments = [], ?ScrollCodex $codex = null): string
+    public static function list(ExecutionContext $context): string
     {
-        if (!$codex instanceof ScrollCodex) {
-            throw new \LogicException('Scroll list capability requires a ScrollCodex.');
-        }
+        $codex = $context->codex ?? throw new \LogicException('Scroll list capability requires a ScrollCodex.');
 
         $entries = $codex->query();
         if ($entries === []) {

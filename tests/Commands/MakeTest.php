@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace Codejitsu\Tests\Commands;
 
+use Codejitsu\Codecs\Neon;
 use Codejitsu\Commands\Make;
+use Codejitsu\Console\Editor;
+use Codejitsu\Console\Questioner;
 use Codejitsu\ExecutionContext;
+use Codejitsu\Substrate\Php;
+use Codejitsu\SubstrateRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class MakeTest extends TestCase
@@ -40,6 +45,47 @@ final class MakeTest extends TestCase
         self::assertStringContainsString("version: '1.0.0'", $contents);
     }
 
+    public function testItCreatesValidMultilineExecutableSource(): void
+    {
+        Make::scroll(new ExecutionContext([
+            'capability://foo/bar',
+            '--source=<?php return "hello";',
+        ]));
+
+        $path = $this->directory . '/scrolls/capabilities/foo_bar.capability';
+        $contents = file_get_contents($path);
+
+        self::assertIsString($contents);
+        self::assertStringContainsString('substrate: auto', $contents);
+        self::assertStringContainsString('source: """', $contents);
+
+        $payload = (new Neon())->decode($contents);
+        self::assertSame('auto', $payload['substrate']);
+        self::assertSame("<?php return \"hello\";\n", $payload['source']);
+    }
+
+    public function testInteractiveCreationSelectsTypeSubstrateAndSource(): void
+    {
+        $registry = new SubstrateRegistry();
+        $registry->register('php', new Php());
+
+        $result = Make::interactive(
+            null,
+            new FakeQuestioner(['capability', 'hello/world', '', 'php']),
+            new FakeEditor('<?php return "hello";'),
+            $registry,
+        );
+
+        $path = $this->directory . '/scrolls/capabilities/hello_world.capability';
+        $contents = file_get_contents($path);
+
+        self::assertStringContainsString('Created capability Scroll [capability://hello/world#1.0.0].', $result);
+        self::assertFileExists($path);
+        self::assertIsString($contents);
+        self::assertStringContainsString('substrate: php', $contents);
+        self::assertStringContainsString('source: """', $contents);
+    }
+
     public function testItRejectsDuplicateScrolls(): void
     {
         Make::scroll(new ExecutionContext(['capability://foo/bar']));
@@ -64,5 +110,37 @@ final class MakeTest extends TestCase
         }
 
         rmdir($path);
+    }
+}
+
+final class FakeEditor implements Editor
+{
+    public function __construct(private readonly string $contents)
+    {
+    }
+
+    public function edit(string $initial = ''): string
+    {
+        return rtrim($this->contents, "\r\n") . "\n";
+    }
+}
+
+final class FakeQuestioner implements Questioner
+{
+    /** @param list<string> $answers */
+    public function __construct(private array $answers)
+    {
+    }
+
+    public function ask(string $question, string $default = ''): string
+    {
+        $answer = array_shift($this->answers);
+        return $answer === '' || $answer === null ? $default : $answer;
+    }
+
+    public function select(string $question, array $choices, int $default = 0): string
+    {
+        $answer = array_shift($this->answers);
+        return $answer === '' || $answer === null ? $choices[$default] : $answer;
     }
 }

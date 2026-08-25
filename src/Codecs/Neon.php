@@ -19,7 +19,7 @@ final class Neon extends Codec
     public function encode(array $payload): string
     {
         try {
-            return NeonParser::encode($payload);
+            return str_replace("'''", '"""', NeonParser::encode($payload));
         } catch (Throwable $e) {
             throw new InvalidArgumentException(
                 'Failed to encode payload to NEON: '
