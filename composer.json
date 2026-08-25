@@ -3,7 +3,66 @@
     "description": "Modern PHP 8.4+ framework/toolkit for composable, intent driven applications",
     "version": "1.0.0",
     "type": "library",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/core",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/discovery",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/scrolls",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/codex",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/config",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/schema",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/console",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "require": {
+        "php": ">=8.4",
+        "codejitsu/core": "*",
+        "codejitsu/discovery": "*",
+        "codejitsu/scrolls": "*",
+        "codejitsu/codex": "*",
+        "codejitsu/config": "*",
+        "codejitsu/schema": "*",
+        "codejitsu/console": "*",
         "psr/container": "^2.0",
         "psr/event-dispatcher": "^1.0",
         "psr/log": "^3.0",
