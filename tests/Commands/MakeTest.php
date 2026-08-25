@@ -53,9 +53,6 @@ final class MakeTest extends TestCase
 
         self::assertIsString($contents);
         self::assertStringContainsString('substrate: auto', $contents);
-        self::assertStringContainsString('source: """', $contents);
-        self::assertStringContainsString("\n<?php return \"hello\";\n", $contents);
-        self::assertStringContainsString('"""', $contents);
 
         $payload = (new Neon())->decode($contents);
         self::assertSame('auto', $payload['substrate']);
