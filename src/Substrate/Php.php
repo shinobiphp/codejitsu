@@ -17,12 +17,17 @@ final class Php implements Substrate
 
     public function execute(string $source, ExecutionContext $context): mixed
     {
-        $source = preg_replace('/^\s*<\?php\s*/', '', $source, 1, $count);
+        $source = preg_replace('/^\s*#![^\r\n]*\r?\n/', '', $source, 1);
         if ($source === null) {
             throw new LogicException('Unable to prepare PHP source.');
         }
 
-        if ($count === 0) {
+        $source = preg_replace('/^\s*<\?php\s*/', '', $source, 1, $phpTagCount);
+        if ($source === null) {
+            throw new LogicException('Unable to prepare PHP source.');
+        }
+
+        if ($phpTagCount === 0) {
             throw new LogicException('PHP source must begin with <?php.');
         }
 
