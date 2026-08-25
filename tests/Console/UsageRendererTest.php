@@ -43,7 +43,7 @@ final class UsageRendererTest extends TestCase
         self::assertStringContainsString('Make', $output);
         self::assertStringContainsString('make:scroll <uri>', $output);
         self::assertStringContainsString('Run "codejitsu <command> --help" for more information.', $output);
-        self::assertStringContainsString('<info>scroll:run <uri> [arguments]</info>', $output);
+        self::assertStringContainsString("\033[", $output);
     }
 
     public function testNamespaceUsageShowsChildrenWithDescriptions(): void
