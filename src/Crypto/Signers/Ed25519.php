@@ -26,6 +26,10 @@ final class Ed25519 implements SignerContract
 
     public function verify(string $payload, string $signature, string $publicKey): bool
     {
+        if (strlen($publicKey) === SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
+            $publicKey = sodium_crypto_sign_publickey_from_secretkey($publicKey);
+        }
+
         if (strlen($publicKey) !== SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
             throw new InvalidArgumentException('Ed25519 public key must be 32 bytes.');
         }
