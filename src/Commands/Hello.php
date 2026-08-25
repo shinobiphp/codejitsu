@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Codejitsu\Commands;
 
+use Codejitsu\ExecutionContext;
+
 final class Hello
 {
-    public static function run(mixed $arguments = []): string
+    public static function run(ExecutionContext $context): string
     {
+        $arguments = $context->arguments;
         $name = is_array($arguments)
             ? ($arguments[0] ?? 'shinobi')
             : ($arguments ?: 'shinobi');
