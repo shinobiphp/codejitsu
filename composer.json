@@ -6,6 +6,13 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "php": ">=8.4",
+        "shinobiphp/codejitsu-core": "*",
+        "shinobiphp/codejitsu-app": "*",
+        "shinobiphp/codejitsu-config": "*",
+        "shinobiphp/codejitsu-io": "*",
+        "shinobiphp/codejitsu-runtime": "*",
+        "shinobiphp/codejitsu-schema": "*",
         "psr/container": "^2.0",
         "psr/event-dispatcher": "^1.0",
         "psr/log": "^3.0",
@@ -35,12 +42,6 @@
     ],
     "autoload": {
         "psr-4": {
-            "Codejitsu\\Apps\\": "packages/app/src/Apps/",
-            "Codejitsu\\IO\\": "packages/io/src/IO/",
-            "Codejitsu\\Config\\": "packages/config/src/Config/",
-            "Codejitsu\\Configs\\": "packages/config/src/Config/",
-            "Codejitsu\\Schema\\": "packages/schema/src/Schema/",
-            "Codejitsu\\Execution\\": "packages/runtime/src/Execution/",
             "Codejitsu\\": "packages/core/src/"
         }
     },
