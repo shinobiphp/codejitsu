@@ -6,10 +6,10 @@ namespace Codejitsu\Scrolls\Lifecycle;
 
 use Codejitsu\Contracts\Crypto\Sealer as SealerContract;
 use Codejitsu\Contracts\Crypto\Signer as SignerContract;
+use Codejitsu\Contracts\Envelope as EnvelopeContract;
 use Codejitsu\Crypto\Key;
 use Codejitsu\Crypto\Seal;
 use Codejitsu\Crypto\Signature;
-use Codejitsu\Envelope;
 use Codejitsu\Scrolls\Scroll;
 use InvalidArgumentException;
 use LogicException;
@@ -149,17 +149,13 @@ final class Lifecycle
         return $items;
     }
 
-    private function envelope(Scroll $scroll): Envelope
+    private function envelope(Scroll $scroll): EnvelopeContract
     {
-        $envelope = $scroll->getEnvelope();
-        if (!$envelope instanceof Envelope) {
-            throw new LogicException(sprintf(
-                'Scroll [%s] has no mutable Envelope and cannot participate in lifecycle operations.',
+        return $scroll->getEnvelope()
+            ?? throw new LogicException(sprintf(
+                'Scroll [%s] has no envelope and cannot participate in lifecycle operations.',
                 $scroll->name,
             ));
-        }
-
-        return $envelope;
     }
 
     /** @param iterable<Scroll> $scrolls @return list<Scroll> */
