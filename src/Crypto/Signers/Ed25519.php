@@ -4,32 +4,41 @@ declare(strict_types=1);
 
 namespace Codejitsu\Crypto\Signers;
 
-class Ed25519
+use Codejitsu\Contracts\Crypto\Signer as SignerContract;
+use Codejitsu\Enums\Crypto\SignatureAlgorithms;
+use InvalidArgumentException;
+
+final class Ed25519 implements SignerContract
 {
-    public function __construct(
-        private readonly ?string $privateKey = null,
-        private readonly ?string $publicKey = null
-    ) {}
-
-    public function sign(string $message, ?string $privateKey = null): string
+    public function algorithm(): SignatureAlgorithms
     {
-        $key = $privateKey ?? $this->privateKey;
-        if ($key === null) {
-            throw new \InvalidArgumentException('Private key is required.');
-        }
-
-        // Implementation of signing...
-        return '';
+        return SignatureAlgorithms::ED25519;
     }
 
-    public function verify(string $message, string $signature, ?string $publicKey = null): bool
+    public function sign(string $payload, string $secretKey): string
     {
-        $key = $publicKey ?? $this->publicKey;
-        if ($key === null) {
-            throw new \InvalidArgumentException('Public key is required.');
+        if (strlen($secretKey) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
+            throw new InvalidArgumentException('Ed25519 secret key must be 64 bytes.');
         }
 
-        // Implementation of verification...
-        return true;
+        return base64_encode(sodium_crypto_sign_detached($payload, $secretKey));
+    }
+
+    public function verify(string $payload, string $signature, string $publicKey): bool
+    {
+        if (strlen($publicKey) === SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
+            $publicKey = sodium_crypto_sign_publickey_from_secretkey($publicKey);
+        }
+
+        if (strlen($publicKey) !== SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
+            throw new InvalidArgumentException('Ed25519 public key must be 32 bytes.');
+        }
+
+        $decoded = base64_decode($signature, true);
+        if ($decoded === false || strlen($decoded) !== SODIUM_CRYPTO_SIGN_BYTES) {
+            return false;
+        }
+
+        return sodium_crypto_sign_verify_detached($decoded, $payload, $publicKey);
     }
 }
