@@ -22,6 +22,19 @@ final class PhpSubstrateTest extends TestCase
         self::assertSame('Hello world', $result);
     }
 
+    public function testItExecutesPhpSourceWithAShebang(): void
+    {
+        $substrate = new Php();
+
+        self::assertSame(
+            'Hello world',
+            $substrate->execute(
+                "#!/usr/bin/env php\n<?php return 'Hello ' . \$context->arguments[0];",
+                new ExecutionContext(['world']),
+            ),
+        );
+    }
+
     public function testItDetectsPhpFromTheOpeningTag(): void
     {
         self::assertSame('php', Php::detect('<?php return true;'));
