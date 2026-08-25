@@ -8,10 +8,11 @@ use Codejitsu\Crypto\Key;
 use Codejitsu\Crypto\Sealers\Sodium;
 use Codejitsu\Crypto\Signers\Ed25519;
 use Codejitsu\Enums\Identity\Types as IdentityTypes;
+use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use Codejitsu\Identity\Identifier;
 use Codejitsu\Identity\Identity;
 use Codejitsu\Metadata;
-use Codejitsu\Envelope;
+use Codejitsu\Scrolls\Envelope;
 use Codejitsu\Scrolls\Lifecycle\Canonicalizer;
 use Codejitsu\Scrolls\Lifecycle\Lifecycle;
 use Codejitsu\Scrolls\Types\Command;
@@ -96,6 +97,8 @@ final class LifecycleTest extends TestCase
         );
         $envelope = new Envelope(
             $name,
+            '1.0.0',
+            ScrollTypes::COMMAND,
             '',
             $metadata,
         );
