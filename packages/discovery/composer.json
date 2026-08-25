@@ -1,0 +1,17 @@
+{
+    "name": "codejitsu/discovery",
+    "description": "Codejitsu resource discovery and source registration",
+    "type": "library",
+    "require": {
+        "php": ">=8.4",
+        "codejitsu/core": "self.version",
+        "symfony/finder": "^8.1",
+        "symfony/filesystem": "^8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codejitsu\\Discovery\\": "../../src/Discovery/",
+            "Codejitsu\\Contracts\\Discovery\\": "../../src/Contracts/Discovery/"
+        }
+    }
+}
