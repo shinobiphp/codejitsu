@@ -20,10 +20,10 @@ final class Javascript implements Substrate
         if ($source === null) {
             throw new LogicException('Unable to prepare JavaScript source.');
         }
-
-        $v8 = new \V8Js('Codejitsu', [
-            'arguments' => $context->arguments,
-        ], [], true);
+$v8 = new \V8Js(
+    'Codejitsu',
+    ['arguments' => $context->arguments],
+);
 
         return $v8->executeString(
             $source,

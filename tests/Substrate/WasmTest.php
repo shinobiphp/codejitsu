@@ -17,8 +17,7 @@ final class WasmTest extends TestCase
             self::markTestSkipped('Wasmtime is not installed.');
         }
 
-        $module = 'AGFzbQEAAAABBQFgAAF/AwIBAAcHAQNydW4AAAoGAQQAQQNL';
-
+	$module = 'AGFzbQEAAAABBQFgAAF/AwIBAAcHAQNydW4AAAoGAQQAQQML';
         self::assertSame(3, (new Wasm())->execute($module, new ExecutionContext()));
     }
 }
