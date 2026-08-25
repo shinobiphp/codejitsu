@@ -61,7 +61,7 @@ final class Make
 
         if ($source !== null) {
             $payload['substrate'] = $substrate;
-            $payload['source'] = $source;
+            $payload['source'] = rtrim($source, "\r\n") . "\n";
         }
 
         if (file_put_contents($path, (new Neon())->encode($payload), LOCK_EX) === false) {
