@@ -1,5 +1,9 @@
+lib
 lib/
 lib/*
 composer.lock
 vendor/
 vendor/*
+.phpunit.cache/
+bin/php-parse
+bin/phpunit
