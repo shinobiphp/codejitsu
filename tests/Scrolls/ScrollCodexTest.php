@@ -56,4 +56,38 @@ NEON);
             @rmdir($root);
         }
     }
+
+    public function testItResolvesAndInvokesACommandThroughItsCapabilityReference(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'codejitsu-scrolls-' . bin2hex(random_bytes(4));
+        mkdir($root . '/commands', 0777, true);
+        mkdir($root . '/capabilities', 0777, true);
+
+        file_put_contents($root . '/commands/hello.cmd', <<<'NEON'
+name: hello
+type: command
+capability: capability://hello
+NEON);
+        file_put_contents($root . '/capabilities/hello.capability', <<<'NEON'
+name: hello
+type: capability
+target: Codejitsu\Commands\Hello::run
+NEON);
+
+        try {
+            $codex = (new ScrollCodex())->load($root);
+            $command = $codex->resolve('command://hello#1.0.0');
+
+            self::assertInstanceOf(Command::class, $command);
+            self::assertSame("Hello, ninja!" . PHP_EOL, $command('ninja'));
+            self::assertSame("Hello, ninja!" . PHP_EOL, $codex->invoke('command', 'hello#1.0.0', 'ninja'));
+        } finally {
+            foreach (glob($root . '/*/hello.*') ?: [] as $file) {
+                @unlink($file);
+            }
+            @rmdir($root . '/commands');
+            @rmdir($root . '/capabilities');
+            @rmdir($root);
+        }
+    }
 }
