@@ -1,6 +1,7 @@
 {
     "name": "codejitsu/core",
     "description": "Codejitsu core runtime and foundational contracts",
+    "version": "1.0.0",
     "type": "library",
     "require": {
         "php": ">=8.4",
