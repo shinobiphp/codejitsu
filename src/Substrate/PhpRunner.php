@@ -34,9 +34,8 @@ final class PhpRunner
             $stderr = '';
             $deadline = microtime(true) + ($context->policy->timeoutMilliseconds / 1000);
 
-            foreach ($pipes as $pipe) {
-                stream_set_blocking($pipe, false);
-            }
+            stream_set_blocking($pipes[1], false);
+            stream_set_blocking($pipes[2], false);
 
             while (true) {
                 $status = proc_get_status($process);
@@ -59,7 +58,6 @@ final class PhpRunner
             $stderr .= stream_get_contents($pipes[2]) ?: '';
             fclose($pipes[1]);
             fclose($pipes[2]);
-            fclose($pipes[0]);
             $exitCode = proc_close($process);
 
             if ($exitCode !== 0) {
@@ -106,13 +104,18 @@ final class PhpRunner
         $disabled = implode(',', [
             'exec', 'passthru', 'shell_exec', 'system', 'proc_open', 'popen',
             'pcntl_exec', 'putenv', 'dl', 'mail', 'fsockopen', 'pfsockopen',
+            'stream_socket_client', 'stream_socket_server', 'stream_socket_accept',
             'curl_exec', 'curl_multi_exec', 'socket_connect', 'socket_create',
+            'get_headers',
         ]);
 
         $command = [
             PHP_BINARY,
             '-d', 'memory_limit=' . $policy->memoryBytes,
             '-d', 'open_basedir=' . $directory,
+            '-d', 'allow_url_fopen=0',
+            '-d', 'allow_url_include=0',
+            '-d', 'ffi.enable=false',
             '-d', 'disable_functions=' . $disabled,
             $runner,
             $payload,
