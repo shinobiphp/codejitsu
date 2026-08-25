@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Codejitsu\Tests\Substrate;
 
 use Codejitsu\Substrate\Detector;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class DetectorTest extends TestCase
@@ -14,7 +15,7 @@ final class DetectorTest extends TestCase
         self::assertSame('php', (new Detector())->detect('<?php return 1;'));
     }
 
-    /** @dataProvider shebangs */
+    #[DataProvider('shebangs')]
     public function testDetectsShebang(string $source, string $expected): void
     {
         self::assertSame($expected, (new Detector())->detect($source));
