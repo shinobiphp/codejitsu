@@ -35,6 +35,7 @@ final class UsageRenderer
         $output = '<comment>Codejitsu</comment>' . PHP_EOL . PHP_EOL;
         $output .= '<info>Usage:</info>' . PHP_EOL;
         $output .= '  codejitsu <command> [arguments] [options]' . PHP_EOL . PHP_EOL;
+        $output .= '<info>Available commands:</info>' . PHP_EOL . PHP_EOL;
 
         foreach ($groups as $command) {
             $output .= $this->group($command);
@@ -42,7 +43,10 @@ final class UsageRenderer
 
         if ($standalone !== []) {
             $output .= '<info>Other</info>' . PHP_EOL;
-            $output .= $this->commands($standalone) . PHP_EOL;
+            foreach ($standalone as $command) {
+                $output .= $this->line($command->usage(), $command->description());
+            }
+            $output .= PHP_EOL;
         }
 
         $output .= 'Run "codejitsu <command> --help" for more information.' . PHP_EOL;
@@ -58,17 +62,16 @@ final class UsageRenderer
             $this->escape($command->name . ':<subcommand>'),
         ) . PHP_EOL . PHP_EOL;
 
-        $children = [];
-        foreach ($command->commands() as $name => $definition) {
-            if (is_array($definition)) {
-                $children[$name] = $definition;
-            }
-        }
+        $children = $command->commands();
         ksort($children);
 
         if ($children !== []) {
             $output .= '<info>Available commands:</info>' . PHP_EOL;
             foreach ($children as $name => $definition) {
+                if (!is_array($definition)) {
+                    continue;
+                }
+
                 $qualified = $command->name . ':' . $name;
                 $usage = is_string($definition['usage'] ?? null) && $definition['usage'] !== ''
                     ? $definition['usage']
@@ -87,39 +90,34 @@ final class UsageRenderer
     private function group(Command $command): string
     {
         $output = '<info>' . $this->escape(ucfirst($command->name)) . '</info>' . PHP_EOL;
-        $output .= $this->commands(array_map(
-            static fn (array $definition, string $name): array => [
-                ...$definition,
-                'name' => $command->name . ':' . $name,
-            ],
-            $command->commands(),
-            array_keys($command->commands()),
-        ));
+        $children = $command->commands();
+        ksort($children);
+
+        foreach ($children as $name => $definition) {
+            if (!is_array($definition)) {
+                continue;
+            }
+
+            $qualified = $command->name . ':' . $name;
+            $usage = is_string($definition['usage'] ?? null) && $definition['usage'] !== ''
+                ? $definition['usage']
+                : $qualified;
+            $description = is_string($definition['description'] ?? null)
+                ? $definition['description']
+                : '';
+
+            $output .= $this->line($usage, $description);
+        }
 
         return $output . PHP_EOL;
     }
 
-    /** @param array<string, Command> $commands */
-    private function commands(array $commands): string
-    {
-        $output = '';
-        foreach ($commands as $command) {
-            $output .= $this->line($command->usage(), $command->description());
-        }
-
-        return $output;
-    }
-
-    /** @param array<string, mixed> $definition */
     private function line(string $usage, string $description): string
     {
-        $usage = $this->escape($usage);
-        $description = $this->escape($description);
-
         return sprintf(
             '  <info>%-34s</info> %s%s',
-            $usage,
-            $description,
+            $this->escape($usage),
+            $this->escape($description),
             PHP_EOL,
         );
     }
