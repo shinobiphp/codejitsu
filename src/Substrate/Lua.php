@@ -16,6 +16,11 @@ final class Lua implements Substrate
             throw new LogicException('LuaSandbox extension is not installed.');
         }
 
+        $source = preg_replace('/^\s*#![^\r\n]*\r?\n/', '', $source, 1);
+        if ($source === null) {
+            throw new LogicException('Unable to prepare Lua source.');
+        }
+
         $sandbox = new \LuaSandbox();
         $sandbox->setMemoryLimit($context->policy->memoryBytes);
         $sandbox->setCPULimit($context->policy->timeoutMilliseconds / 1000);
