@@ -33,6 +33,14 @@ final class Capability extends Scroll
         ));
     }
 
+    public function __invoke(mixed ...$args): mixed
+    {
+        return $this->execute(new ExecutionContext(
+            count($args) === 1 ? $args[0] : $args,
+            $this->codex,
+        ));
+    }
+
     public function execute(ExecutionContext $context): mixed
     {
         $target = $this->target();
