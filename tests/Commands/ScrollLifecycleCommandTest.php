@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Codejitsu\Tests\Commands;
 
 use Codejitsu\Commands\ScrollLifecycle;
-use Codejitsu\Crypto\Key;
-use Codejitsu\Envelope;
+use Codejitsu\Enums\Identity\Types as IdentityTypes;
+use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use Codejitsu\ExecutionContext;
 use Codejitsu\Identity\Identifier;
 use Codejitsu\Identity\Identity;
-use Codejitsu\Enums\Identity\Types as IdentityTypes;
 use Codejitsu\Metadata;
+use Codejitsu\Scrolls\Envelope;
 use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\Scrolls\Types\Command;
 use PHPUnit\Framework\TestCase;
@@ -68,6 +68,8 @@ final class ScrollLifecycleCommandTest extends TestCase
     {
         $envelope = new Envelope(
             $name,
+            '1.0.0',
+            ScrollTypes::COMMAND,
             '',
             new Metadata(new Identity(IdentityTypes::Scroll, new Identifier($name))),
         );
