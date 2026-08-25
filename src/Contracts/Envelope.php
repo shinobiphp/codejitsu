@@ -12,14 +12,14 @@ use Codejitsu\Metadata;
 interface Envelope
 {
     public string $name { get; }
-    
-    public string $data { get; }
+
+    public string $data { get; set; }
 
     public Metadata $metadata { get; }
 
-    public ?Seal $seal { get; }
+    public ?Seal $seal { get; set; }
 
-    public ?Signature $signature { get; }
+    public ?Signature $signature { get; set; }
 
     public Codec $codec { get; }
 
