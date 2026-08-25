@@ -1,0 +1,3 @@
+name: make-scroll
+type: capability
+target: Codejitsu\\Commands\\Make::scroll
