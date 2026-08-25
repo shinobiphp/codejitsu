@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Codejitsu\Commands;
 
+use Codejitsu\Codecs\Neon;
 use Codejitsu\ExecutionContext;
 use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\Uri\Uri;
@@ -56,8 +57,7 @@ final class Make
             $payload['target'] = $target;
         }
 
-        $content = self::encode($payload);
-        if (file_put_contents($path, $content, LOCK_EX) === false) {
+        if (file_put_contents($path, (new Neon())->encode($payload), LOCK_EX) === false) {
             throw new RuntimeException(sprintf('Unable to write Scroll [%s].', $path));
         }
 
@@ -74,22 +74,5 @@ final class Make
         }
 
         return null;
-    }
-
-    private static function encode(array $payload): string
-    {
-        $lines = [];
-        foreach ($payload as $key => $value) {
-            $lines[] = sprintf('%s: %s', $key, is_string($value) ? self::quote($value) : $value);
-        }
-
-        return implode(PHP_EOL, $lines) . PHP_EOL;
-    }
-
-    private static function quote(string $value): string
-    {
-        return preg_match('/^[A-Za-z0-9_.\\\\/:.-]+$/', $value) === 1
-            ? $value
-            : "'" . str_replace("'", "''", $value) . "'";
     }
 }
