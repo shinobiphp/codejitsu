@@ -11,6 +11,10 @@ use Codejitsu\Contracts\App;
 use Codejitsu\Enums\Environment;
 use Codejitsu\Kernel\Kernel;
 use Codejitsu\Scrolls\ScrollCodex;
+use Codejitsu\Substrate\Javascript;
+use Codejitsu\Substrate\Lua;
+use Codejitsu\Substrate\Php;
+use Codejitsu\Substrate\Wasm;
 
 final class Boot
 {
@@ -45,6 +49,7 @@ final class Boot
     ): Cli {
         $root = $rootDir ?? (defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd());
         $scrolls = $codex ?? new ScrollCodex();
+        self::registerSubstrates($scrolls);
         $scrolls->load($root . DIRECTORY_SEPARATOR . 'scrolls');
 
         $kernel = Kernel::instance($name ?? 'cli', $scrolls);
@@ -59,7 +64,9 @@ final class Boot
         ?string $rootDir = null,
         ?Environment $environment = null,
     ): Swoole {
-        $kernel = Kernel::instance($name ?? 'swoole', $codex ?? new ScrollCodex());
+        $scrolls = $codex ?? new ScrollCodex();
+        self::registerSubstrates($scrolls);
+        $kernel = Kernel::instance($name ?? 'swoole', $scrolls);
         $kernel->boot($rootDir, $environment);
         return new Swoole($kernel, $host, $port);
     }
@@ -70,9 +77,20 @@ final class Boot
         ?string $rootDir = null,
         ?Environment $environment = null,
     ): Web {
-        $kernel = Kernel::instance($name ?? 'web', $codex ?? new ScrollCodex());
+        $scrolls = $codex ?? new ScrollCodex();
+        self::registerSubstrates($scrolls);
+        $kernel = Kernel::instance($name ?? 'web', $scrolls);
         $kernel->boot($rootDir, $environment);
         return new Web($kernel);
+    }
+
+    private static function registerSubstrates(ScrollCodex $scrolls): void
+    {
+        $registry = $scrolls->substrates();
+        $registry->register('php', new Php());
+        $registry->register('lua', new Lua());
+        $registry->register('javascript', new Javascript());
+        $registry->register('wasm', new Wasm());
     }
 
     /** @return array{0: ?string, 1: ?Environment} */
