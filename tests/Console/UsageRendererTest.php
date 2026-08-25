@@ -12,7 +12,7 @@ final class UsageRendererTest extends TestCase
 {
     public function testTopLevelUsageGroupsNamespacesAndShowsChildren(): void
     {
-        $renderer = new UsageRenderer();
+        $renderer = new UsageRenderer(true);
 
         $scroll = $this->command('scroll', 'Manage and execute Scrolls.', [
             'run' => [
@@ -32,7 +32,7 @@ final class UsageRendererTest extends TestCase
             ],
         ]);
 
-        $output = new UsageRenderer()->render([
+        $output = new UsageRenderer(true)->render([
             'scroll' => $scroll,
             'make' => $make,
         ]);
