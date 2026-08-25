@@ -1,0 +1,219 @@
+# Codejitsu TODO
+
+> Living implementation checklist. `.context/` records architectural intent; code and tests are authoritative for what is actually implemented.
+>
+> Updated: 2026-08-25
+
+## Current Position
+
+The Context Scroll / canonical resource graph slice is complete and merged into `main`. The repository now has the initial package workspace under `packages/` and the current architectural direction is recorded in `.context/architecture/`, `.context/decisions/`, `.context/current-state.ctx`, and `.context/roadmap/current.md`.
+
+The old root `todo.md` was stale: several items described pre-graph architecture and conflicted with the current `ScrollCodex`/resource model. Those items are intentionally replaced by the checklist below rather than carried forward as zombie TODOs.
+
+## MVP Goal
+
+Finish Codejitsu as a small, package-oriented POC with:
+
+- a clean package workspace/monorepo boundary
+- `ScrollCodex` as the single discovery/index/resolution boundary
+- source-aware URI resolution and lightweight metadata queries
+- first-class resource references/graph behavior
+- a complete Scroll-driven CLI
+- package management exposed through Command Scrolls
+- a green behavioral test suite
+- no required OpenSwoole dependency
+- a clean boundary so `shinobiphp/shinobi` can begin as the next repository/runtime layer
+
+## 1. Package Workspace
+
+Current packages present:
+
+- [x] `packages/core`
+- [x] `packages/discovery`
+- [x] `packages/scrolls`
+- [x] `packages/codex`
+- [x] `packages/config`
+- [x] `packages/schema`
+- [x] `packages/console`
+
+Remaining:
+
+- [ ] Verify each package has the correct Composer metadata and dependency direction.
+- [ ] Map remaining root `src/` ownership explicitly before moving code.
+- [ ] Move/mirror independently meaningful code into package boundaries without breaking the public `Codejitsu\\` namespace where practical.
+- [ ] Make the root package the development/compatibility aggregate rather than a second architectural layer.
+- [ ] Verify clean Composer installation and package autoloading.
+- [ ] Do not create empty packages merely for symmetry; Crypto, DB, AI, OpenSwoole, and future agent concepts remain root/MVP concerns until their contracts are proven.
+
+## 2. Codejitsu Runtime Boundary
+
+- [ ] Remove `openswoole/core` from Codejitsu's required dependency graph.
+- [ ] Remove or relocate genuinely OpenSwoole-specific runtime behavior from the Codejitsu MVP path.
+- [ ] Add a regression test proving Codejitsu CLI/bootstrap works without OpenSwoole.
+- [ ] Keep long-running runtime/orchestration concerns for Shinobi.
+
+## 3. Codex Discovery, Index & Cache
+
+`ScrollCodex` is the single discovery/index/resolution boundary.
+
+- [ ] Make complete Scroll discovery Codex-owned.
+- [ ] Discover every supported Scroll type from configured roots.
+- [ ] Register every discovery origin as a named source.
+- [ ] Introduce/finish lightweight `IndexEntry` metadata separate from hydrated Scroll instances.
+- [ ] Query by type, name, version, tags, attributes, source, and URI/path without hydration.
+- [ ] Preserve source provenance in indexed metadata.
+- [ ] Add persistent cache/index storage.
+- [ ] Validate cache freshness with a manifest/fingerprint.
+- [ ] Add explicit cache rebuild/clear operations.
+- [ ] Expose cache operations through Command Scrolls.
+- [ ] Add behavioral tests proving metadata queries do not hydrate candidates.
+
+## 4. Source-Aware URI Resolution
+
+Logical resource identity is independent of physical source layout.
+
+- [x] `@source` selectors are part of URI resolution, not logical identity.
+- [x] Explicit source cascades are left-to-right.
+- [x] Implicit resolution uses reverse registration order.
+- [x] Preserve source provenance.
+- [ ] Finish/verify the Codex-owned implementation and integration tests.
+
+Examples:
+
+```text
+register @global
+register @tenant
+
+config://app
+  -> @tenant -> @global
+
+config://app@tenant.global
+  -> @tenant -> @global
+
+config://app@global.tenant
+  -> @global -> @tenant
+```
+
+## 5. Resource Graph & References
+
+- [x] Canonical Scroll representation is a semantic resource graph rather than a codec-specific array or compiler AST.
+- [x] Named references normalize into graph relationships.
+- [x] References are resolved lazily through the Codex.
+- [ ] Make dependency/reference inspection sufficiently first-class for dependent resources to be inspected before execution.
+- [ ] Add resource relationship queries where required by a concrete vertical slice.
+- [ ] Preserve provenance through graph/index operations.
+
+Example:
+
+```text
+cmd://hello
+  ├── schema://hello
+  └── capability://hello
+```
+
+## 6. Context Scrolls
+
+`.context/` is intended to become a first-class Scroll source rather than a pile of Markdown agents have to rediscover manually.
+
+- [ ] Establish/finish `.ctx` discovery and indexing as a normal Codex source.
+- [ ] Support Markdown payloads inside Context Scrolls.
+- [ ] Make context queryable by logical URI, metadata, source, and relationship.
+- [ ] Preserve human-readable Markdown while making metadata machine-discoverable.
+- [ ] Avoid a destructive bulk conversion of existing `.md` context files; migrate deliberately.
+- [ ] Prove a consumer can request targeted context without loading the entire repository.
+
+## 7. CLI / Command Scrolls
+
+Target flow:
+
+```text
+argv
+  -> CliIntent
+  -> ScrollCodex
+  -> Command Scroll
+  -> Schema
+  -> Capability
+  -> execution
+```
+
+- [ ] Discover and list Command Scrolls through the Codex.
+- [ ] Resolve commands by canonical colon-separated names such as `scrolls:cache:rebuild`.
+- [ ] Execute commands through the same Scroll/Codex path; do not introduce a second command framework.
+- [ ] Generate namespace help/listing from command metadata without hydrating every child.
+- [ ] Make `bin/codejitsu` exercise the real path end-to-end.
+- [ ] Add behavioral CLI integration coverage.
+
+## 8. Package Management
+
+Add a minimal package-management abstraction as composition over Composer, not as a replacement dependency solver.
+
+- [ ] Create the package-management boundary only after the core package workspace is stable.
+- [ ] Define minimal package metadata/manifest contracts.
+- [ ] Implement package discovery/list/info.
+- [ ] Implement install/remove/update through an explicit Composer boundary.
+- [ ] Produce structured, traceable results and propagate failures cleanly.
+- [ ] Add disposable-fixture tests.
+
+Expose through Command Scrolls:
+
+- [ ] `pkg:list`
+- [ ] `pkg:info`
+- [ ] `pkg:install`
+- [ ] `pkg:remove`
+- [ ] `pkg:update`
+
+Each command should use the existing Schema + Capability + Command Scroll execution path.
+
+## 9. Contracts & Serialization
+
+These are not the old pre-graph TODOs; only pursue them where the current implementation or a concrete vertical slice requires them.
+
+- [ ] Formalize Scroll identity as a value object where the current code does not already provide the needed boundary.
+- [ ] Strengthen Envelope/Scroll serialization contracts.
+- [ ] Keep codecs replaceable: NEON, `.ctx`, JSON/YAML, and future formats converge on the canonical resource model.
+- [ ] Keep discovery separate from hydration and execution.
+- [ ] Remove genuinely deprecated pre-graph Codice/store/per-type registry structures if any remain in the active implementation.
+- [ ] Add signed/traceable resource provenance only when it belongs to the proven Codejitsu boundary; cryptographic provenance is post-MVP unless required earlier.
+
+## 10. Documentation / Context Integrity
+
+- [ ] Keep `.context/current-state.ctx` synchronized with the actual repository baseline.
+- [ ] Keep `.context/roadmap/current.md` synchronized with implemented vs planned work.
+- [ ] Update architecture docs when package boundaries or resource contracts become locked.
+- [ ] Add an ADR documenting the MVP package workspace/monorepo boundary and why not every subsystem is extracted yet.
+- [ ] Update glossary only with terminology that has become a stable Codejitsu concept.
+- [ ] Treat `.context/` as architectural/project memory, not as a substitute for tests or code.
+
+## 11. MVP Verification
+
+Before declaring Codejitsu MVP complete:
+
+- [ ] Clean Composer install succeeds without OpenSwoole.
+- [ ] Selected packages install and autoload correctly.
+- [ ] Scroll discovery/index/source-aware resolution/references work through `ScrollCodex`.
+- [ ] Metadata queries do not require hydration of every candidate.
+- [ ] Command Scrolls drive the CLI end-to-end.
+- [ ] Namespace help/listing comes from discovered command metadata.
+- [ ] All `pkg:*` commands execute through the same Command Scroll path.
+- [ ] Full PHPUnit suite is green.
+- [ ] CLI smoke test is green.
+- [ ] `.context/` clearly distinguishes implemented Codejitsu behavior from future Shinobi/Sensei/Vessel/Spark work.
+- [ ] A clean Codejitsu checkout can serve as the dependency foundation for `shinobiphp/shinobi`.
+
+## Explicitly Post-MVP
+
+Do **not** block Codejitsu MVP on:
+
+- Spark/agent abstractions
+- Vessel implementation
+- Sensei TUI or code-generation workflows
+- model/provider integrations
+- OpenSwoole long-running runtime
+- async event/outbox/retry/compensation infrastructure
+- distributed/service-node resolution
+- MCP integration
+- ArchIQ integration
+- semantic/vector search
+- cryptographically signed resource provenance
+
+These belong to the later Shinobi/agentic roadmap unless a concrete Codejitsu requirement moves one back into scope.
