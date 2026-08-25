@@ -1,0 +1,19 @@
+{
+    "name": "codejitsu/console",
+    "description": "Codejitsu CLI application and input/output translation",
+    "version": "1.0.0",
+    "type": "library",
+    "require": {
+        "php": ">=8.4",
+        "codejitsu/core": "self.version",
+        "codejitsu/codex": "self.version",
+        "symfony/console": "^8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codejitsu\\Apps\\": "../../src/Apps/",
+            "Codejitsu\\IO\\": "../../src/IO/",
+            "Codejitsu\\Commands\\": "../../src/Commands/"
+        }
+    }
+}

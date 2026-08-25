@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Codejitsu\Tests\Scrolls\Types;
 
+use Codejitsu\ExecutionContext;
 use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\Scrolls\Types\Capability;
 use Codejitsu\Scrolls\Types\Command;
@@ -40,9 +41,9 @@ final class CommandTest extends TestCase
 
         $capability = (new Capability())->hydrate([
             'name' => 'hello',
-            'target' => static fn (array $arguments): string => sprintf(
+            'target' => static fn (ExecutionContext $context): string => sprintf(
                 'Hello, %s!',
-                $arguments[0] ?? 'shinobi',
+                $context->arguments[0] ?? 'shinobi',
             ),
         ]);
 
@@ -124,9 +125,9 @@ final class CommandTest extends TestCase
 
         $capability = (new Capability())->hydrate([
             'name' => 'hello',
-            'target' => static fn (array $arguments): string => sprintf(
+            'target' => static fn (ExecutionContext $context): string => sprintf(
                 'Hello, %s!',
-                $arguments[0] ?? 'shinobi',
+                $context->arguments[0] ?? 'shinobi',
             ),
         ]);
 

@@ -1,0 +1,18 @@
+{
+    "name": "codejitsu/core",
+    "description": "Codejitsu core runtime and foundational contracts",
+    "version": "1.0.0",
+    "type": "library",
+    "require": {
+        "php": ">=8.4",
+        "psr/container": "^2.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/log": "^3.0",
+        "psr/simple-cache": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codejitsu\\": "../../src/"
+        }
+    }
+}

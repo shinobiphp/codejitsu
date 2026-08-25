@@ -1,0 +1,3 @@
+name: scrolls-list
+type: capability
+target: Codejitsu\Commands\Scrolls::list

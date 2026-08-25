@@ -1,0 +1,16 @@
+{
+    "name": "codejitsu/schema",
+    "description": "Codejitsu schema resources and validation",
+    "version": "1.0.0",
+    "type": "library",
+    "require": {
+        "php": ">=8.4",
+        "codejitsu/core": "self.version",
+        "opis/json-schema": "^2.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codejitsu\\Schema\\": "../../src/Schema/"
+        }
+    }
+}
