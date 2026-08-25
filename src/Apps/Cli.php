@@ -16,6 +16,7 @@ use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\Scrolls\Types\Command;
 use Closure;
 use OutOfBoundsException;
+use Symfony\Component\Console\Formatter\OutputFormatter;
 
 final class Cli implements App
 {
@@ -168,15 +169,15 @@ final class Cli implements App
     {
         $output = '<comment>Codejitsu</comment>' . PHP_EOL . PHP_EOL;
         $output .= '<info>Usage:</info>' . PHP_EOL;
-        $output .= '  ' . $command->usage() . PHP_EOL . PHP_EOL;
+        $output .= '  ' . OutputFormatter::escape($command->usage()) . PHP_EOL . PHP_EOL;
 
         if ($command->description() !== '') {
             $output .= '<info>Description:</info>' . PHP_EOL;
-            $output .= '  ' . $command->description() . PHP_EOL;
+            $output .= '  ' . OutputFormatter::escape($command->description()) . PHP_EOL;
         }
 
         $output .= PHP_EOL . 'Run "codejitsu <command> --help" for more information.' . PHP_EOL;
-        $output = (new \Symfony\Component\Console\Formatter\OutputFormatter(true))->format($output);
+        $output = $this->usageRenderer->format($output);
 
         if ($stream === STDOUT) {
             echo $output;
