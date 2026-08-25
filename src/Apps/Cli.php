@@ -11,8 +11,10 @@ use Codejitsu\IO\CliIntent;
 use Codejitsu\IO\Translators\Cli as CliTranslator;
 use Codejitsu\Kernel\Kernel;
 use Codejitsu\Pipeline\Pipeline;
+use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\Scrolls\Types\Command;
 use Closure;
+use OutOfBoundsException;
 
 final class Cli implements App
 {
@@ -45,7 +47,7 @@ final class Cli implements App
             return 0;
         }
 
-        $command = $this->resolve($intent->action, $commands);
+        $command = $this->resolve($intent->action);
         if (!$command instanceof Command) {
             fwrite(STDERR, sprintf("Unknown command [%s].%s", $intent->action, PHP_EOL));
             $this->renderUsage($commands, STDERR);
@@ -70,15 +72,18 @@ final class Cli implements App
         return is_int($result) ? $result : 0;
     }
 
-    /** @param array<string, Command> $commands */
-    private function resolve(string $name, array $commands): ?Command
+    private function resolve(string $name): ?Command
     {
-        $parts = array_values(array_filter(explode(':', strtolower(trim($name))), static fn (string $part): bool => $part !== ''));
+        $parts = array_values(array_filter(
+            explode(':', strtolower(trim($name))),
+            static fn (string $part): bool => $part !== '',
+        ));
         if ($parts === []) {
             return null;
         }
 
-        $command = $commands[array_shift($parts)] ?? null;
+        $codex = $this->kernelInstance->scrolls;
+        $command = $this->resolveCommand($codex, array_shift($parts));
         if (!$command instanceof Command) {
             return null;
         }
@@ -95,6 +100,17 @@ final class Cli implements App
         }
 
         return $command;
+    }
+
+    private function resolveCommand(ScrollCodex $codex, string $name): ?Command
+    {
+        try {
+            $command = $codex->resolve('command://' . trim($name, '/'));
+        } catch (OutOfBoundsException) {
+            return null;
+        }
+
+        return $command instanceof Command ? $command : null;
     }
 
     /** @return array<string, Command> */
