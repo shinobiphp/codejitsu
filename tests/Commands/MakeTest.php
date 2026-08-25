@@ -40,6 +40,21 @@ final class MakeTest extends TestCase
         self::assertStringContainsString("version: '1.0.0'", $contents);
     }
 
+    public function testItCanCreateAnExecutableSourceScroll(): void
+    {
+        Make::scroll(new ExecutionContext([
+            'capability://foo/bar',
+            '--source=<?php return "hello";',
+        ]));
+
+        $path = $this->directory . '/scrolls/capabilities/foo_bar.capability';
+        $contents = file_get_contents($path);
+
+        self::assertIsString($contents);
+        self::assertStringContainsString('substrate: auto', $contents);
+        self::assertStringContainsString('source:', $contents);
+    }
+
     public function testItRejectsDuplicateScrolls(): void
     {
         Make::scroll(new ExecutionContext(['capability://foo/bar']));
