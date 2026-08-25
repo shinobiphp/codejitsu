@@ -88,7 +88,7 @@ final class Make
 
     private static function quote(string $value): string
     {
-        return preg_match('/^[A-Za-z0-9_.\\\\:-]+$/', $value) === 1
+        return preg_match('/^[A-Za-z0-9_.\\\\/:.-]+$/', $value) === 1
             ? $value
             : "'" . str_replace("'", "''", $value) . "'";
     }
