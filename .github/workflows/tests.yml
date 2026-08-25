@@ -20,7 +20,7 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --ignore-platform-req=ext-openswoole
+        run: composer update --no-interaction --prefer-dist --ignore-platform-req=ext-openswoole
 
       - name: Run tests
         run: composer test
