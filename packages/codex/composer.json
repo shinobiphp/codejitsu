@@ -1,6 +1,7 @@
 {
     "name": "codejitsu/codex",
     "description": "Codejitsu resource indexing, resolution, and graph navigation",
+    "version": "1.0.0",
     "type": "library",
     "require": {
         "php": ">=8.4",
