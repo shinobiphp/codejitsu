@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Codejitsu\Scrolls\Types;
 
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
+use Codejitsu\ExecutionContext;
 use Codejitsu\Scrolls\Scroll;
 use InvalidArgumentException;
 use LogicException;
@@ -95,10 +96,6 @@ final class Command extends Scroll
             return $target;
         }
 
-        if (is_string($target) && is_callable($target)) {
-            return $target;
-        }
-
         throw new LogicException(sprintf('Command [%s] has no executable target.', $this->name));
     }
 
@@ -113,7 +110,7 @@ final class Command extends Scroll
         }
 
         if (($capability = $this->capability()) !== null) {
-            return $this->ref($capability)($payload, $this->codex);
+            return $this->ref($capability)(new ExecutionContext($payload, $this->codex));
         }
 
         if ($this->isNamespace()) {
