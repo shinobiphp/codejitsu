@@ -12,6 +12,7 @@ use Codejitsu\Contracts\Scrolls\ScrollCodex as ScrollCodexContract;
 use Codejitsu\Contracts\Scrolls\Store as StoreContract;
 use Codejitsu\Enums\Codecs;
 use Codejitsu\Enums\Scrolls\Types;
+use Codejitsu\SubstrateRegistry;
 use Codejitsu\Uri\Resolved;
 use Codejitsu\Uri\Uri;
 use InvalidArgumentException;
@@ -25,10 +26,24 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
     /** @var array<string> */
     protected array $sources = [];
 
+    private SubstrateRegistry $substrates;
+
     public function __construct(array $itemsOrEnvelopes = [])
     {
         parent::__construct(Codecs::NEON, $itemsOrEnvelopes);
+        $this->substrates = new SubstrateRegistry();
         $this->registerSource('default');
+    }
+
+    public function substrates(): SubstrateRegistry
+    {
+        return $this->substrates;
+    }
+
+    public function withSubstrates(SubstrateRegistry $substrates): static
+    {
+        $this->substrates = $substrates;
+        return $this;
     }
 
     public function registerSource(string $source): static
