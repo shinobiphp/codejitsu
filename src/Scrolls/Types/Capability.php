@@ -8,6 +8,8 @@ use Codejitsu\Contracts\Invokable;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use Codejitsu\ExecutionContext;
 use Codejitsu\Scrolls\Scroll;
+use Codejitsu\Substrate\Detector;
+use Codejitsu\Substrate\Php;
 use InvalidArgumentException;
 use LogicException;
 
@@ -44,6 +46,21 @@ final class Capability extends Scroll
 
     public function execute(ExecutionContext $context): mixed
     {
+        if (isset($this->attributes['source'])) {
+            $source = $this->attributes['source'];
+            if (!is_string($source) || trim($source) === '') {
+                throw new InvalidArgumentException('Capability source must be a non-empty string.');
+            }
+
+            $name = strtolower(trim((string) ($this->attributes['substrate'] ?? 'auto')));
+            $name = $name === 'auto' ? (new Detector())->detect($source) : $name;
+
+            return match ($name) {
+                'php' => (new Php())->execute($source, $context),
+                default => throw new LogicException(sprintf('Unsupported substrate [%s].', $name)),
+            };
+        }
+
         return ($this->target())($context);
     }
 
@@ -51,6 +68,14 @@ final class Capability extends Scroll
     {
         if (isset($data['target']) && !is_string($data['target']) && !$data['target'] instanceof Invokable && !is_callable($data['target'])) {
             throw new InvalidArgumentException('Capability target must be callable or a callable string.');
+        }
+
+        if (isset($data['source']) && !is_string($data['source'])) {
+            throw new InvalidArgumentException('Capability source must be a string.');
+        }
+
+        if (isset($data['substrate']) && !is_string($data['substrate'])) {
+            throw new InvalidArgumentException('Capability substrate must be a string.');
         }
 
         return parent::hydrate($data);
