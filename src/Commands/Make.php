@@ -47,6 +47,8 @@ final class Make
         }
 
         $target = self::option($arguments, '--target=');
+        $source = self::option($arguments, '--source=');
+        $substrate = self::option($arguments, '--substrate=') ?? ($source !== null ? 'auto' : null);
         $payload = [
             'name' => $name,
             'type' => $type->value,
@@ -55,6 +57,11 @@ final class Make
 
         if ($target !== null) {
             $payload['target'] = $target;
+        }
+
+        if ($source !== null) {
+            $payload['substrate'] = $substrate;
+            $payload['source'] = $source;
         }
 
         if (file_put_contents($path, (new Neon())->encode($payload), LOCK_EX) === false) {
