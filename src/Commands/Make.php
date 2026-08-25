@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Codejitsu\Commands;
 
 use Codejitsu\Codecs\Neon;
-use Codejitsu\ExecutionContext;
 use Codejitsu\Enums\Scrolls\Types;
+use Codejitsu\ExecutionContext;
 use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\SubstrateRegistry;
 use Codejitsu\Uri\Uri;
@@ -24,10 +24,10 @@ final class Make
             return self::interactive($context);
         }
 
-        return self::create($context, $uri, $arguments);
+        return self::create($uri, $arguments);
     }
 
-    private static function create(ExecutionContext $context, string $uri, array $arguments): string
+    private static function create(string $uri, array $arguments): string
     {
         $parsed = Uri::make($uri, defaultVersion: '1.0.0');
         $type = Types::normalize($parsed->type, null);
@@ -56,6 +56,7 @@ final class Make
         $target = self::option($arguments, '--target=');
         $source = self::option($arguments, '--source=');
         $substrate = self::option($arguments, '--substrate=') ?? ($source !== null ? 'auto' : null);
+        $sourceEncoding = self::option($arguments, '--source-encoding=');
         $payload = [
             'name' => $name,
             'type' => $type->value,
@@ -69,6 +70,9 @@ final class Make
         if ($source !== null) {
             $payload['substrate'] = $substrate;
             $payload['source'] = rtrim($source, "\r\n") . "\n";
+            if ($sourceEncoding !== null) {
+                $payload['sourceEncoding'] = $sourceEncoding;
+            }
         }
 
         self::write($path, $payload);
@@ -93,7 +97,7 @@ final class Make
         }
         $type = $types[$index];
 
-        $name = trim(self::prompt(sprintf('%s name/identifier: ', $type->long_name())));
+        $name = trim(self::prompt(sprintf('%s name/identifier: ', $type->value)));
         if ($name === '') {
             throw new InvalidArgumentException('Scroll name cannot be empty.');
         }
@@ -118,9 +122,15 @@ final class Make
             $substrateIndex = (int) self::prompt('Substrate [1]: ', '1') - 1;
             $substrate = $substrates[$substrateIndex] ?? 'php';
             $payload['substrate'] = $substrate;
+            if ($substrate === 'wasm') {
+                $payload['sourceEncoding'] = 'base64';
+            }
             $payload['source'] = self::edit(self::template($substrate));
         } else {
-            $payload['description'] = self::prompt('Description (optional): ');
+            $description = self::prompt('Description (optional): ');
+            if ($description !== '') {
+                $payload['description'] = $description;
+            }
             $payload['content'] = self::edit(self::template($type->value));
         }
 
@@ -183,8 +193,7 @@ final class Make
 
         try {
             file_put_contents($path, $contents, LOCK_EX);
-            $command = $editor . ' ' . escapeshellarg($path);
-            passthru($command, $exitCode);
+            passthru($editor . ' ' . escapeshellarg($path), $exitCode);
             if ($exitCode !== 0) {
                 throw new RuntimeException(sprintf('Editor exited with status %d.', $exitCode));
             }
@@ -206,7 +215,7 @@ final class Make
             'php' => "<?php\n\nreturn null;\n",
             'lua' => "return nil\n",
             'javascript' => "undefined\n",
-            'wasm' => "# base64-encoded WASM module exporting `run`\n",
+            'wasm' => "",
             'capability' => "<?php\n\nreturn null;\n",
             'schema' => "# schema definition\n",
             default => "# Scroll contents\n",
