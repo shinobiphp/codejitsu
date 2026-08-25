@@ -16,6 +16,11 @@ final class Javascript implements Substrate
             throw new LogicException('V8Js extension is not installed.');
         }
 
+        $source = preg_replace('/^\s*#![^\r\n]*\r?\n/', '', $source, 1);
+        if ($source === null) {
+            throw new LogicException('Unable to prepare JavaScript source.');
+        }
+
         $v8 = new \V8Js('Codejitsu', [
             'arguments' => $context->arguments,
         ], [], true);
