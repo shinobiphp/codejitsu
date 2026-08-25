@@ -113,7 +113,7 @@ final class Command extends Scroll
         }
 
         if (($capability = $this->capability()) !== null) {
-            return $this->ref($capability)($payload);
+            return $this->ref($capability)($payload, $this->codex);
         }
 
         if ($this->isNamespace()) {
