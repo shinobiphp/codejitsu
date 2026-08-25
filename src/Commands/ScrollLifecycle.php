@@ -52,7 +52,13 @@ final class ScrollLifecycle
             default => throw new LogicException(sprintf('Unknown lifecycle operation [%s].', $operation)),
         };
 
-        return sprintf('%s %d Scroll(s).%s', ucfirst($operation), count($scrolls), PHP_EOL);
+        $action = match ($operation) {
+            'sign' => 'Signed',
+            'seal' => 'Sealed',
+            'unseal' => 'Unsealed',
+        };
+
+        return sprintf('%s %d Scroll(s).%s', $action, count($scrolls), PHP_EOL);
     }
 
     private function verifyAll(ExecutionContext $context): bool
