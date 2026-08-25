@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Codejitsu\Tests\Commands;
 
+use Codejitsu\Codecs\Neon;
 use Codejitsu\Commands\Make;
 use Codejitsu\ExecutionContext;
 use PHPUnit\Framework\TestCase;
@@ -40,7 +41,7 @@ final class MakeTest extends TestCase
         self::assertStringContainsString("version: '1.0.0'", $contents);
     }
 
-    public function testItCanCreateAnExecutableSourceScroll(): void
+    public function testItCreatesValidMultilineExecutableSource(): void
     {
         Make::scroll(new ExecutionContext([
             'capability://foo/bar',
@@ -52,7 +53,13 @@ final class MakeTest extends TestCase
 
         self::assertIsString($contents);
         self::assertStringContainsString('substrate: auto', $contents);
-        self::assertStringContainsString('source:', $contents);
+        self::assertStringContainsString('source: """', $contents);
+        self::assertStringContainsString("\n<?php return \"hello\";\n", $contents);
+        self::assertStringContainsString('"""', $contents);
+
+        $payload = (new Neon())->decode($contents);
+        self::assertSame('auto', $payload['substrate']);
+        self::assertSame('<?php return "hello";', $payload['source']);
     }
 
     public function testItRejectsDuplicateScrolls(): void
