@@ -1,6 +1,7 @@
 {
     "name": "codejitsu/config",
     "description": "Codejitsu configuration resources and stores",
+    "version": "1.0.0",
     "type": "library",
     "require": {
         "php": ">=8.4",
