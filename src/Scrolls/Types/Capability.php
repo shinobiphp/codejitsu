@@ -6,6 +6,7 @@ namespace Codejitsu\Scrolls\Types;
 
 use Codejitsu\Contracts\Invokable;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
+use Codejitsu\ExecutionContext;
 use Codejitsu\Scrolls\Scroll;
 use InvalidArgumentException;
 use LogicException;
@@ -32,15 +33,11 @@ final class Capability extends Scroll
         ));
     }
 
-    public function execute(mixed ...$args): mixed
+    public function execute(ExecutionContext $context): mixed
     {
         $target = $this->target();
 
-        if (is_string($target)) {
-            return $target(...$args);
-        }
-
-        return $target(...$args);
+        return $target($context);
     }
 
     public function hydrate(array $data): static
