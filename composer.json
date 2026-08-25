@@ -4,55 +4,13 @@
     "version": "1.0.0",
     "type": "library",
     "repositories": [
-        {
-            "type": "path",
-            "url": "packages/core",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "packages/discovery",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "packages/scrolls",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "packages/codex",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "packages/config",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "packages/schema",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "packages/console",
-            "options": {
-                "symlink": true
-            }
-        }
+        {"type": "path", "url": "packages/core", "options": {"symlink": true}},
+        {"type": "path", "url": "packages/discovery", "options": {"symlink": true}},
+        {"type": "path", "url": "packages/scrolls", "options": {"symlink": true}},
+        {"type": "path", "url": "packages/codex", "options": {"symlink": true}},
+        {"type": "path", "url": "packages/config", "options": {"symlink": true}},
+        {"type": "path", "url": "packages/schema", "options": {"symlink": true}},
+        {"type": "path", "url": "packages/console", "options": {"symlink": true}}
     ],
     "require": {
         "php": ">=8.4",
@@ -74,7 +32,6 @@
         "symfony/filesystem": "^8.1",
         "vlucas/phpdotenv": "^5.6",
         "nette/neon": "^3.4",
-        "openswoole/core": "^26.2",
         "opis/json-schema": "^2.6"
     },
     "require-dev": {
@@ -82,30 +39,14 @@
     },
     "license": "proprietary",
     "autoload": {
-        "psr-4": {
-            "Codejitsu\\": "src/"
-        }
+        "psr-4": {"Codejitsu\\": "src/"}
     },
     "autoload-dev": {
-        "psr-4": {
-            "Codejitsu\\Tests\\": "tests/"
-        }
+        "psr-4": {"Codejitsu\\Tests\\": "tests/"}
     },
-    "authors": [
-        {
-            "name": "Shinobi PHP",
-            "email": "shinobiphp@gmail.com"
-        }
-    ],
-    "config": {
-        "bin-dir": "./bin/",
-        "vendor-dir": "./lib/"
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-main": "1.0.x-dev"
-        }
-    },
+    "authors": [{"name": "Shinobi PHP", "email": "shinobiphp@gmail.com"}],
+    "config": {"bin-dir": "./bin/", "vendor-dir": "./lib/"},
+    "extra": {"branch-alias": {"dev-main": "1.0.x-dev"}},
     "scripts": {
         "test": "phpunit --enforce-time-limit --default-time-limit=10",
         "test:coverage": "phpunit --coverage-text --enforce-time-limit --default-time-limit=10"
