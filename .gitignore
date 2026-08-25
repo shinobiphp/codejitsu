@@ -1,0 +1,8 @@
+/vendor/
+/lib/
+
+/.phpunit.cache/
+
+# Composer binaries
+/bin/phpunit
+/bin/php-parse

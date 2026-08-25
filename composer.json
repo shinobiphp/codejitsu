@@ -3,6 +3,8 @@
     "description": "Modern PHP 8.4+ framework/toolkit for composable, intent driven applications",
     "version": "1.0.0",
     "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "psr/container": "^2.0",
         "psr/event-dispatcher": "^1.0",
