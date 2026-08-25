@@ -26,6 +26,7 @@ abstract class Scroll implements ScrollContract
     protected ?ScrollCodex $codex = null;
     protected array $attributes = [];
     protected ?string $dynamicName = null;
+    protected ?string $dynamicVersion = null;
     protected array $dynamicTags = [];
     private ?Graph $graph = null;
 
@@ -42,7 +43,16 @@ abstract class Scroll implements ScrollContract
         }
     }
 
-    public string $version { get => static::VERSION; }
+    public string $version {
+        get => $this->dynamicVersion ?? static::VERSION;
+        set(string $value) {
+            $value = trim($value);
+            if (!preg_match('/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/', $value)) {
+                throw new InvalidArgumentException(sprintf('Invalid Scroll version [%s].', $value));
+            }
+            $this->dynamicVersion = $value;
+        }
+    }
 
     public ScrollTypes|string $type {
         get => static::TYPE
@@ -131,6 +141,13 @@ abstract class Scroll implements ScrollContract
                 throw new InvalidArgumentException('Scroll name must be a string.');
             }
             $this->name = $data['name'];
+        }
+
+        if (isset($data['version'])) {
+            if (!is_string($data['version'])) {
+                throw new InvalidArgumentException('Scroll version must be a string.');
+            }
+            $this->version = $data['version'];
         }
 
         if (isset($data['tags'])) {
