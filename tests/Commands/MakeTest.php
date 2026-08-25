@@ -56,7 +56,7 @@ final class MakeTest extends TestCase
 
         $payload = (new Neon())->decode($contents);
         self::assertSame('auto', $payload['substrate']);
-        self::assertSame('<?php return "hello";', $payload['source']);
+        self::assertSame('<?php return "hello";\n', $payload['source']);
     }
 
     public function testItRejectsDuplicateScrolls(): void
