@@ -37,10 +37,7 @@ final class Capability extends Scroll
     {
         $context = count($args) === 1 && $args[0] instanceof ExecutionContext
             ? $args[0]
-            : new ExecutionContext(
-                count($args) === 1 ? $args[0] : $args,
-                $this->codex,
-            );
+            : new ExecutionContext($args, $this->codex);
 
         return $this->execute($context);
     }

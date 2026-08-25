@@ -1,6 +1,6 @@
 name: scroll
 type: command
-description: Manage Scroll lifecycle state.
+description: Manage and execute Scrolls.
 usage: 'scroll:<subcommand> [arguments] [options]'
 commands:
     sign:
@@ -19,3 +19,7 @@ commands:
         description: Verify the signature of one Scroll or every discovered Scroll.
         usage: 'scroll:verify <uri|--all>'
         capability: capability://scroll-verify
+    run:
+        description: Execute a Scroll by URI.
+        usage: 'scroll:run <uri> [arguments]'
+        capability: capability://scroll-run
