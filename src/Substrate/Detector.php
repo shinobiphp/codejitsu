@@ -20,18 +20,20 @@ final class Detector
             return 'php';
         }
 
-        if (preg_match('/^#!\s*\/usr\/bin\/env\s+([a-zA-Z0-9._-]+)/', $firstLine, $matches) === 1) {
-            return strtolower($matches[1]);
-        }
-
-        if (preg_match('/^#!\s*\/usr\/bin\/([a-zA-Z0-9._-]+)/', $firstLine, $matches) === 1) {
-            return strtolower($matches[1]);
+        if (preg_match('/^#!\s*(?:\/usr\/bin\/env\s+)?(?:\/usr\/bin\/)?([a-zA-Z0-9._-]+)/', $firstLine, $matches) === 1) {
+            return match (strtolower($matches[1])) {
+                'js', 'node', 'javascript' => 'javascript',
+                'wasmtime' => 'wasm',
+                'lua' => 'lua',
+                'php' => 'php',
+                default => strtolower($matches[1]),
+            };
         }
 
         if ($this->default === '') {
             throw new InvalidArgumentException('Unable to detect a substrate.');
         }
 
-        return $this->default;
+        return strtolower($this->default);
     }
 }
