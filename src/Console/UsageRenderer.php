@@ -9,10 +9,14 @@ use Symfony\Component\Console\Formatter\OutputFormatter;
 
 final class UsageRenderer
 {
-    public function __construct(
-        private readonly OutputFormatter $formatter = new OutputFormatter(true),
-    ) {
+    public function __construct(?bool $decorated = null)
+    {
+        $this->formatter = new OutputFormatter(
+            $decorated ?? (defined('STDOUT') && stream_isatty(STDOUT)),
+        );
     }
+
+    private readonly OutputFormatter $formatter;
 
     /** @param array<string, Command> $commands */
     public function render(array $commands): string
@@ -84,6 +88,11 @@ final class UsageRenderer
             }
         }
 
+        return $this->formatter->format($output);
+    }
+
+    public function format(string $output): string
+    {
         return $this->formatter->format($output);
     }
 
