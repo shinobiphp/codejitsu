@@ -9,7 +9,9 @@ use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use Codejitsu\ExecutionContext;
 use Codejitsu\Scrolls\Scroll;
 use Codejitsu\Substrate\Detector;
+use Codejitsu\Substrate\Php;
 use Codejitsu\Substrate\Resolver;
+use Codejitsu\SubstrateRegistry;
 use InvalidArgumentException;
 use LogicException;
 
@@ -52,15 +54,14 @@ final class Capability extends Scroll
                 throw new InvalidArgumentException('Capability source must be a non-empty string.');
             }
 
-            if ($this->codex === null) {
-                throw new LogicException(sprintf(
-                    'Capability [%s] requires a bound ScrollCodex for substrate execution.',
-                    $this->name,
-                ));
+            $registry = $this->codex?->substrates();
+            if ($registry === null) {
+                $registry = new SubstrateRegistry();
+                $registry->register('php', new Php());
             }
 
             $requested = strtolower(trim((string) ($this->attributes['substrate'] ?? 'auto')));
-            $substrate = (new Resolver($this->codex->substrates(), new Detector()))->resolve($requested, $source);
+            $substrate = (new Resolver($registry, new Detector()))->resolve($requested, $source);
 
             return $substrate->execute($source, $context);
         }
