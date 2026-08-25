@@ -35,17 +35,19 @@ final class Capability extends Scroll
 
     public function __invoke(mixed ...$args): mixed
     {
-        return $this->execute(new ExecutionContext(
-            count($args) === 1 ? $args[0] : $args,
-            $this->codex,
-        ));
+        $context = count($args) === 1 && $args[0] instanceof ExecutionContext
+            ? $args[0]
+            : new ExecutionContext(
+                count($args) === 1 ? $args[0] : $args,
+                $this->codex,
+            );
+
+        return $this->execute($context);
     }
 
     public function execute(ExecutionContext $context): mixed
     {
-        $target = $this->target();
-
-        return $target($context);
+        return ($this->target())($context);
     }
 
     public function hydrate(array $data): static
