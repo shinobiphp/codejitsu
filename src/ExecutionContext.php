@@ -11,6 +11,7 @@ final readonly class ExecutionContext
     public function __construct(
         public mixed $arguments,
         public ?ScrollCodex $codex = null,
+        public ExecutionPolicy $policy = new ExecutionPolicy(),
     ) {
     }
 }
