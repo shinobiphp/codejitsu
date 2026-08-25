@@ -15,7 +15,7 @@ final class DetectorTest extends TestCase
 
         self::assertSame('php', $detector->detect("#!/usr/bin/env php\nreturn true;"));
         self::assertSame('lua', $detector->detect("#!/usr/bin/env lua\nreturn true"));
-        self::assertSame('node', $detector->detect("#!/usr/bin/node\nconsole.log('ok');"));
+        self::assertSame('javascript', $detector->detect("#!/usr/bin/node\nconsole.log('ok');"));
     }
 
     public function testItFallsBackToPhp(): void
