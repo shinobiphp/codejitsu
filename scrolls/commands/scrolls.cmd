@@ -8,3 +8,7 @@ commands:
         usage: 'scrolls:hello [name]'
         schema: schema://hello
         capability: capability://hello
+    list:
+        description: List registered Scroll resources.
+        usage: 'scrolls:list'
+        capability: capability://scrolls-list
