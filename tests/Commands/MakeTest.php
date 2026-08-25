@@ -31,11 +31,13 @@ final class MakeTest extends TestCase
     {
         $result = Make::scroll(new ExecutionContext(['capability://foo/bar']));
         $path = $this->directory . '/scrolls/capabilities/foo_bar.capability';
+        $contents = file_get_contents($path);
 
         self::assertStringContainsString('Created capability Scroll [capability://foo/bar].', $result);
         self::assertFileExists($path);
-        self::assertStringContainsString("name: 'foo/bar'", file_get_contents($path));
-        self::assertStringContainsString("version: 1.0.0", file_get_contents($path));
+        self::assertIsString($contents);
+        self::assertStringContainsString('name: foo/bar', $contents);
+        self::assertStringContainsString("version: '1.0.0'", $contents);
     }
 
     public function testItRejectsDuplicateScrolls(): void
