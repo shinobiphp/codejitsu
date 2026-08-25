@@ -34,8 +34,8 @@ final class MakeTest extends TestCase
 
         self::assertStringContainsString('Created capability Scroll [capability://foo/bar].', $result);
         self::assertFileExists($path);
-        self::assertStringContainsString('name: 'foo/bar'', file_get_contents($path));
-        self::assertStringContainsString('version: '1.0.0'', file_get_contents($path));
+        self::assertStringContainsString("name: 'foo/bar'", file_get_contents($path));
+        self::assertStringContainsString("version: 1.0.0", file_get_contents($path));
     }
 
     public function testItRejectsDuplicateScrolls(): void
