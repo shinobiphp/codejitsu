@@ -25,6 +25,17 @@ final class Command extends Scroll
         return (string) ($this->attributes['usage'] ?? $this->name);
     }
 
+    /** @return list<string> */
+    public function usageArguments(): array
+    {
+        preg_match_all('/(<[^>]+>|\[[^\]]+\])/', $this->usage(), $matches);
+
+        return array_map(
+            static fn (string $token): string => trim($token, '<>[]'),
+            $matches[1] ?? [],
+        );
+    }
+
     /** @return array<string, array<string, mixed>> */
     public function commands(): array
     {
