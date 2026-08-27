@@ -99,9 +99,13 @@ final class Command extends Scroll
         return is_string($reference) && trim($reference) !== '' ? trim($reference) : null;
     }
 
-    public function target(): callable
+    public function target(): callable|string
     {
         $target = $this->attributes['target'] ?? null;
+
+        if (is_string($target) && trim($target) !== '') {
+            return trim($target);
+        }
 
         if (is_callable($target)) {
             return $target;
@@ -142,7 +146,16 @@ final class Command extends Scroll
             return $child->execute(...array_slice($payload, 1));
         }
 
-        return ($this->target())(...$args);
+        $target = $this->target();
+        if (is_string($target) && class_exists($target)) {
+            $target = new $target();
+        }
+
+        if (!is_callable($target)) {
+            throw new LogicException(sprintf('Command [%s] target is not callable.', $this->name));
+        }
+
+        return $target(...$args);
     }
 
     public function references(): array
