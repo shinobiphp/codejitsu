@@ -42,8 +42,16 @@ final class Symfony implements Driver
             return 0;
         }
 
+        $input = new ArgvInput($argv);
         $output = new BufferedOutput();
-        $status = $application->run(new ArgvInput($argv), $output);
+        $name = $input->getFirstArgument();
+
+        if (is_string($name) && $application->has($name)) {
+            $status = $application->find($name)->run($input, $output);
+        } else {
+            $status = $application->run($input, $output);
+        }
+
         echo $output->fetch();
 
         return $status;
@@ -84,7 +92,14 @@ final class Symfony implements Driver
             $console->setCode(function (InputInterface $input, $output) use ($command, $execute): int {
                 $payload = [];
                 foreach ($command->usageArguments() as $argument) {
-                    $payload[] = $input->getArgument($argument);
+                    $value = $input->getArgument($argument);
+                    if ($value !== null) {
+                        if (is_array($value)) {
+                            $payload = [...$payload, ...$value];
+                        } else {
+                            $payload[] = $value;
+                        }
+                    }
                 }
 
                 foreach ($command->usageOptions() as $option) {
@@ -166,11 +181,10 @@ final class Symfony implements Driver
 
     private function renderNamespace(Command $command): void
     {
-        $usage = 'codejitsu ' . $command->name . ':<subcommand> [arguments] [options]';
         $output = sprintf(
-            "Description:\n  %s\n\nUsage:\n  %s\n\nAvailable commands:\n",
+            "Description:\n  %s\n\nUsage:\n  codejitsu %s:<subcommand> [arguments] [options]\n\nAvailable commands:\n",
             $command->description(),
-            $usage,
+            $command->name,
         );
 
         foreach ($command->commands() as $name => $definition) {
@@ -184,6 +198,7 @@ final class Symfony implements Driver
             }
 
             $output .= sprintf("  %-18s%s\n", $child->name, $child->description());
+            $output .= sprintf("    %s\n", $child->usage());
         }
 
         echo $output;
