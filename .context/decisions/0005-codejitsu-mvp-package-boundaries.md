@@ -1,0 +1,27 @@
+# ADR 0005: Codejitsu MVP Package Boundaries
+
+## Status
+
+Accepted
+
+## Context
+
+Codejitsu is evolving from a single PHP package into a package-oriented framework/toolkit. The current repository already contains a Composer workspace boundary for `core`, `discovery`, `scrolls`, `codex`, `config`, `schema`, and `console` packages. These packages may remain thin while their ownership boundaries stabilize.
+
+## Decision
+
+The MVP keeps the package workspace in one repository using Composer path repositories where development wiring requires them. The root `shinobiphp/codejitsu` package remains distributable and is not treated as a substitute for the package boundaries.
+
+Only boundaries already demonstrated by current source ownership are established. AI, database, cryptography, agent, Vessel, Spark, Sensei, and Shinobi runtime concerns are not forced into packages merely for symmetry.
+
+Package management is exposed through the existing Command Scroll mechanism. The initial `pkg:list`, `pkg:info`, `pkg:install`, `pkg:remove`, and `pkg:update` commands delegate PHP dependency operations to Composer rather than implementing a second dependency solver.
+
+Long-running OpenSwoole concerns remain outside Codejitsu and belong to Shinobi.
+
+## Consequences
+
+- Package boundaries can evolve without immediately creating multiple repositories.
+- The root package remains consumable independently of the development workspace.
+- Composer remains authoritative for PHP dependency resolution.
+- Command Scrolls remain the single CLI extension mechanism.
+- Future package extraction is an organizational step rather than an architectural rewrite.
