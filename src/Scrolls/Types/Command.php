@@ -30,10 +30,27 @@ final class Command extends Scroll
     {
         preg_match_all('/(<[^>]+>|\[[^\]]+\])/', $this->usage(), $matches);
 
-        return array_map(
-            static fn (string $token): string => trim($token, '<>[]'),
-            $matches[1] ?? [],
-        );
+        return array_values(array_filter(
+            array_map(static fn (string $token): string => trim($token, '<>[]'), $matches[1] ?? []),
+            static fn (string $token): bool => !str_starts_with($token, '--'),
+        ));
+    }
+
+    /** @return list<string> */
+    public function usageOptions(): array
+    {
+        preg_match_all('/(\[[^\]]*--[^\]]+\]|<[^>]*--[^>]+>)/', $this->usage(), $matches);
+        $options = [];
+
+        foreach ($matches[1] ?? [] as $token) {
+            $token = trim($token, '<>[]');
+            if (str_contains($token, ' ')) {
+                $token = strtok($token, ' ') ?: $token;
+            }
+            $options[] = ltrim($token, '-');
+        }
+
+        return array_values(array_unique($options));
     }
 
     /** @return array<string, array<string, mixed>> */

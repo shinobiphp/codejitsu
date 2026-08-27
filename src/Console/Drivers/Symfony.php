@@ -9,6 +9,7 @@ use Codejitsu\Scrolls\Types\Command;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -20,11 +21,9 @@ final class Symfony implements Driver
         $registered = [];
 
         foreach ($commands as $command) {
-            if (!$command instanceof Command) {
-                continue;
+            if ($command instanceof Command) {
+                $this->register($application, $command, $registered);
             }
-
-            $this->register($application, $command, $registered);
         }
 
         return $application->run(new ArgvInput($argv));
@@ -42,12 +41,7 @@ final class Symfony implements Driver
 
         if ($command->isNamespace()) {
             foreach ($command->commands() as $name => $definition) {
-                if (!is_array($definition)) {
-                    continue;
-                }
-
-                $child = $command->child((string) $name);
-                if ($child instanceof Command) {
+                if (is_array($definition) && ($child = $command->child((string) $name)) instanceof Command) {
                     $this->register($application, $child, $registered);
                 }
             }
@@ -63,11 +57,20 @@ final class Symfony implements Driver
                 return 0;
             });
         } else {
-            $this->defineArguments($console, $command->usage());
+            $this->defineArguments($console, $command);
             $console->setCode(function (InputInterface $input, OutputInterface $output) use ($command): int {
                 $payload = [];
                 foreach ($command->usageArguments() as $argument) {
                     $payload[] = $input->getArgument($argument);
+                }
+
+                foreach ($command->usageOptions() as $option) {
+                    $value = $input->getOption($option);
+                    if ($value !== null && $value !== false) {
+                        $payload[] = is_array($value)
+                            ? sprintf('--%s=%s', $option, implode(',', $value))
+                            : sprintf('--%s=%s', $option, $value);
+                    }
                 }
 
                 $result = $command->execute(...$payload);
@@ -83,21 +86,18 @@ final class Symfony implements Driver
         $registered[$command->name] = true;
     }
 
-    private function defineArguments(\Symfony\Component\Console\Command\Command $console, string $usage): void
+    private function defineArguments(\Symfony\Component\Console\Command\Command $console, Command $command): void
     {
-        preg_match_all('/(<[^>]+>|\[[^\]]+\])/', $usage, $matches);
+        foreach ($command->usageArguments() as $argument) {
+            $array = $argument === 'arguments';
+            $console->addArgument(
+                $argument,
+                $array ? InputArgument::OPTIONAL | InputArgument::IS_ARRAY : InputArgument::OPTIONAL,
+            );
+        }
 
-        foreach ($matches[1] as $index => $token) {
-            $name = trim($token, '<>[]');
-            $optional = $token[0] === '[';
-            $array = $name === 'arguments';
-
-            $mode = $optional ? InputArgument::OPTIONAL : InputArgument::REQUIRED;
-            if ($array) {
-                $mode |= InputArgument::IS_ARRAY;
-            }
-
-            $console->addArgument($name, $mode);
+        foreach ($command->usageOptions() as $option) {
+            $console->addOption($option, null, InputOption::VALUE_REQUIRED);
         }
     }
 }
