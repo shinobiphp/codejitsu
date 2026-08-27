@@ -14,6 +14,7 @@ final class PackagesTest extends TestCase
     {
         $directory = sys_get_temp_dir() . '/codejitsu-package-test-' . bin2hex(random_bytes(6));
         mkdir($directory, 0777, true);
+        $workingDirectory = getcwd();
 
         try {
             file_put_contents($directory . '/composer.json', json_encode([
@@ -26,12 +27,16 @@ final class PackagesTest extends TestCase
                 ],
             ], JSON_THROW_ON_ERROR));
 
-            $result = Packages::list(new ExecutionContext([null, $directory]));
+            chdir($directory);
+            $result = Packages::list(new ExecutionContext());
 
             self::assertStringContainsString('vendor/alpha', $result);
             self::assertStringContainsString('vendor/zeta', $result);
             self::assertStringContainsString('>=8.4', $result);
         } finally {
+            if ($workingDirectory !== false) {
+                chdir($workingDirectory);
+            }
             @unlink($directory . '/composer.json');
             @rmdir($directory);
         }
