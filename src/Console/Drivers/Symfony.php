@@ -15,14 +15,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final class Symfony implements Driver
 {
-    public function run(array $argv, iterable $commands): int
+    public function run(array $argv, iterable $commands, callable $execute): int
     {
         $application = new Application('Codejitsu');
         $registered = [];
 
         foreach ($commands as $command) {
             if ($command instanceof Command) {
-                $this->register($application, $command, $registered);
+                $this->register($application, $command, $registered, $execute);
             }
         }
 
@@ -30,7 +30,7 @@ final class Symfony implements Driver
     }
 
     /** @param array<string, bool> $registered */
-    private function register(Application $application, Command $command, array &$registered): void
+    private function register(Application $application, Command $command, array &$registered, callable $execute): void
     {
         if (isset($registered[$command->name])) {
             return;
@@ -47,7 +47,7 @@ final class Symfony implements Driver
 
             foreach ($command->commands() as $name => $definition) {
                 if (is_array($definition) && ($child = $command->child((string) $name)) instanceof Command) {
-                    $this->register($application, $child, $registered);
+                    $this->register($application, $child, $registered, $execute);
                 }
             }
 
@@ -63,7 +63,7 @@ final class Symfony implements Driver
             });
         } else {
             $this->defineArguments($console, $command);
-            $console->setCode(function (InputInterface $input, OutputInterface $output) use ($command): int {
+            $console->setCode(function (InputInterface $input, OutputInterface $output) use ($command, $execute): int {
                 $payload = [];
                 foreach ($command->usageArguments() as $argument) {
                     $payload[] = $input->getArgument($argument);
@@ -78,7 +78,7 @@ final class Symfony implements Driver
                     }
                 }
 
-                $result = $command->execute(...$payload);
+                $result = $execute($command, $payload);
                 if (is_string($result) && $result !== '') {
                     $output->write($result);
                 }
@@ -115,8 +115,7 @@ final class Symfony implements Driver
         }
 
         foreach ($command->usageOptions() as $option) {
-            $name = str_contains($option, '=') ? substr($option, 0, strpos($option, '=')) : $option;
-            $console->addOption($name, null, InputOption::VALUE_REQUIRED);
+            $console->addOption($option, null, InputOption::VALUE_REQUIRED);
         }
     }
 }

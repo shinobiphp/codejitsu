@@ -9,5 +9,5 @@ use Codejitsu\Scrolls\Types\Command;
 interface Driver
 {
     /** @param iterable<Command> $commands */
-    public function run(array $argv, iterable $commands): int;
+    public function run(array $argv, iterable $commands, callable $execute): int;
 }

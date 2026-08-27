@@ -116,7 +116,7 @@ final class RecordingDriver implements Driver
     /** @var list<object> */
     public array $commands = [];
 
-    public function run(array $argv, iterable $commands): int
+    public function run(array $argv, iterable $commands, callable $execute): int
     {
         $this->argv = $argv;
         $this->commands = iterator_to_array($commands, false);

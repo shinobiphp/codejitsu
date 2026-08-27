@@ -7,7 +7,10 @@ namespace Codejitsu\Apps;
 use Codejitsu\Console\Drivers\Symfony;
 use Codejitsu\Contracts\App;
 use Codejitsu\Contracts\Console\Driver;
+use Codejitsu\Contracts\Intent;
 use Codejitsu\Contracts\Middleware;
+use Codejitsu\IO\CliIntent;
+use Codejitsu\IO\Translators\Cli as CliTranslator;
 use Codejitsu\Kernel\Kernel;
 use Codejitsu\Pipeline\Pipeline;
 use Codejitsu\Scrolls\Types\Command;
@@ -49,7 +52,21 @@ final class Cli implements App
             $argv = [];
         }
 
-        return $this->driver->run(array_values($argv), $this->commands());
+        $intent = CliTranslator::translate(array_values($argv));
+
+        return $this->driver->run(
+            array_values($argv),
+            $this->commands(),
+            function (Command $command, array $payload) use ($intent): mixed {
+                $request = $intent->withPayload($payload);
+
+                return $this->pipeline->send($request, function (Intent $i) use ($command): mixed {
+                    return $i instanceof CliIntent
+                        ? $command->execute(...$i->payload)
+                        : $command->execute($i);
+                });
+            },
+        );
     }
 
     /** @return list<Command> */
