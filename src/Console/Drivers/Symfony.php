@@ -19,6 +19,7 @@ final class Symfony implements Driver
     public function run(array $argv, iterable $commands, callable $execute): int
     {
         $application = new Application('Codejitsu');
+        $application->setAutoExit(false);
         $registered = [];
 
         foreach ($commands as $command) {
