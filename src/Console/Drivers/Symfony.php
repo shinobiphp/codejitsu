@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 final class Symfony implements Driver
 {
@@ -28,7 +28,11 @@ final class Symfony implements Driver
             }
         }
 
-        return $application->run(new ArgvInput($argv));
+        $output = new BufferedOutput();
+        $status = $application->run(new ArgvInput($argv), $output);
+        echo $output->fetch();
+
+        return $status;
     }
 
     /** @param array<string, bool> $registered */
@@ -48,7 +52,7 @@ final class Symfony implements Driver
             $console = new SymfonyCommand($command->name);
             $console->setDescription($command->description());
             $console->setHelp($this->namespaceHelp($command));
-            $console->setCode(static function (InputInterface $input, OutputInterface $output) use ($command): int {
+            $console->setCode(static function (InputInterface $input, $output) use ($command): int {
                 $output->writeln('<info>Available commands:</info>');
                 foreach ($command->commands() as $name => $definition) {
                     if (is_array($definition)) {
@@ -63,7 +67,7 @@ final class Symfony implements Driver
             $console->setDescription(trim($command->usage() . ' — ' . $command->description(), ' —'));
             $console->setHelp($command->usage());
             $this->defineArguments($console, $command);
-            $console->setCode(function (InputInterface $input, OutputInterface $output) use ($command, $execute): int {
+            $console->setCode(function (InputInterface $input, $output) use ($command, $execute): int {
                 $payload = [];
                 foreach ($command->usageArguments() as $argument) {
                     $payload[] = $input->getArgument($argument);
