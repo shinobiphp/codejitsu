@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 final class Symfony implements Driver
 {
@@ -42,16 +43,8 @@ final class Symfony implements Driver
             return 0;
         }
 
-        $input = new ArgvInput($argv);
         $output = new BufferedOutput();
-        $name = $input->getFirstArgument();
-
-        if (is_string($name) && $application->has($name)) {
-            $status = $application->find($name)->run($input, $output);
-        } else {
-            $status = $application->run($input, $output);
-        }
-
+        $status = $application->run(new ArgvInput($argv), $output);
         echo $output->fetch();
 
         return $status;
@@ -74,7 +67,7 @@ final class Symfony implements Driver
             $console = new SymfonyCommand($command->name);
             $console->setDescription($command->description());
             $console->setHelp($this->namespaceHelp($command));
-            $console->setCode(static function (InputInterface $input, $output) use ($command): int {
+            $console->setCode(static function (InputInterface $input, OutputInterface $output) use ($command): int {
                 $output->writeln('<info>Available commands:</info>');
                 foreach ($command->commands() as $name => $definition) {
                     if (is_array($definition)) {
@@ -89,7 +82,7 @@ final class Symfony implements Driver
             $console->setDescription(trim($command->usage() . ' — ' . $command->description(), ' —'));
             $console->setHelp($command->usage());
             $this->defineArguments($console, $command);
-            $console->setCode(function (InputInterface $input, $output) use ($command, $execute): int {
+            $console->setCode(function (InputInterface $input, OutputInterface $output) use ($command, $execute): int {
                 $payload = [];
                 foreach ($command->usageArguments() as $argument) {
                     $value = $input->getArgument($argument);
@@ -181,10 +174,11 @@ final class Symfony implements Driver
 
     private function renderNamespace(Command $command): void
     {
+        $usage = 'codejitsu ' . $command->name . ':<subcommand> [arguments] [options]';
         $output = sprintf(
-            "Description:\n  %s\n\nUsage:\n  codejitsu %s:<subcommand> [arguments] [options]\n\nAvailable commands:\n",
+            "Description:\n  %s\n\nUsage:\n  %s\n\nAvailable commands:\n",
             $command->description(),
-            $command->name,
+            $usage,
         );
 
         foreach ($command->commands() as $name => $definition) {
@@ -197,8 +191,8 @@ final class Symfony implements Driver
                 continue;
             }
 
-            $output .= sprintf("  %-18s%s\n", $child->name, $child->description());
-            $output .= sprintf("    %s\n", $child->usage());
+            $output .= sprintf("  %-14s %s\n", $child->name, $child->description());
+            $output .= sprintf("%-17s%s\n", '', $child->usage());
         }
 
         echo $output;
@@ -206,15 +200,7 @@ final class Symfony implements Driver
 
     private function namespaceHelp(Command $command): string
     {
-        $help = $command->usage() . PHP_EOL . PHP_EOL;
-        $help .= '<info>Available commands:</info>' . PHP_EOL;
-        foreach ($command->commands() as $name => $definition) {
-            if (is_array($definition)) {
-                $help .= sprintf('  %s:%s', $command->name, $name) . PHP_EOL;
-            }
-        }
-
-        return $help;
+        return 'codejitsu ' . $command->name . ':<subcommand> [arguments] [options]';
     }
 
     private function defineArguments(SymfonyCommand $console, Command $command): void
