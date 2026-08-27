@@ -7,10 +7,11 @@ namespace Codejitsu\Console\Drivers;
 use Codejitsu\Contracts\Console\Driver;
 use Codejitsu\Scrolls\Types\Command;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 final class Symfony implements Driver
@@ -36,21 +37,16 @@ final class Symfony implements Driver
             return;
         }
 
-        $console = new \Symfony\Component\Console\Command\Command($command->name);
-        $console->setDescription($command->isNamespace()
-            ? $command->description()
-            : trim($command->usage() . ' — ' . $command->description(), ' —'));
-        $console->setHelp($command->usage());
-
         if ($command->isNamespace()) {
-            $console->setHelp($this->namespaceHelp($command));
-
             foreach ($command->commands() as $name => $definition) {
                 if (is_array($definition) && ($child = $command->child((string) $name)) instanceof Command) {
                     $this->register($application, $child, $registered, $execute);
                 }
             }
 
+            $console = new SymfonyCommand($command->name);
+            $console->setDescription($command->description());
+            $console->setHelp($this->namespaceHelp($command));
             $console->setCode(static function (InputInterface $input, OutputInterface $output) use ($command): int {
                 $output->writeln('<info>Available commands:</info>');
                 foreach ($command->commands() as $name => $definition) {
@@ -62,6 +58,9 @@ final class Symfony implements Driver
                 return 0;
             });
         } else {
+            $console = new SymfonyCommand($command->name);
+            $console->setDescription(trim($command->usage() . ' — ' . $command->description(), ' —'));
+            $console->setHelp($command->usage());
             $this->defineArguments($console, $command);
             $console->setCode(function (InputInterface $input, OutputInterface $output) use ($command, $execute): int {
                 $payload = [];
@@ -87,7 +86,7 @@ final class Symfony implements Driver
             });
         }
 
-        $application->add($console);
+        $application->addCommand($console);
         $registered[$command->name] = true;
     }
 
@@ -104,7 +103,7 @@ final class Symfony implements Driver
         return $help;
     }
 
-    private function defineArguments(\Symfony\Component\Console\Command\Command $console, Command $command): void
+    private function defineArguments(SymfonyCommand $console, Command $command): void
     {
         foreach ($command->usageArguments() as $argument) {
             $array = $argument === 'arguments';
