@@ -37,9 +37,14 @@ final class Symfony implements Driver
         }
 
         $console = new \Symfony\Component\Console\Command\Command($command->name);
-        $console->setDescription($command->description());
+        $console->setDescription($command->isNamespace()
+            ? $command->description()
+            : trim($command->usage() . ' — ' . $command->description(), ' —'));
+        $console->setHelp($command->usage());
 
         if ($command->isNamespace()) {
+            $console->setHelp($this->namespaceHelp($command));
+
             foreach ($command->commands() as $name => $definition) {
                 if (is_array($definition) && ($child = $command->child((string) $name)) instanceof Command) {
                     $this->register($application, $child, $registered);
@@ -86,6 +91,19 @@ final class Symfony implements Driver
         $registered[$command->name] = true;
     }
 
+    private function namespaceHelp(Command $command): string
+    {
+        $help = $command->usage() . PHP_EOL . PHP_EOL;
+        $help .= '<info>Available commands:</info>' . PHP_EOL;
+        foreach ($command->commands() as $name => $definition) {
+            if (is_array($definition)) {
+                $help .= sprintf('  %s:%s', $command->name, $name) . PHP_EOL;
+            }
+        }
+
+        return $help;
+    }
+
     private function defineArguments(\Symfony\Component\Console\Command\Command $console, Command $command): void
     {
         foreach ($command->usageArguments() as $argument) {
@@ -97,7 +115,8 @@ final class Symfony implements Driver
         }
 
         foreach ($command->usageOptions() as $option) {
-            $console->addOption($option, null, InputOption::VALUE_REQUIRED);
+            $name = str_contains($option, '=') ? substr($option, 0, strpos($option, '=')) : $option;
+            $console->addOption($name, null, InputOption::VALUE_REQUIRED);
         }
     }
 }

@@ -39,15 +39,17 @@ final class Command extends Scroll
     /** @return list<string> */
     public function usageOptions(): array
     {
-        preg_match_all('/(\[[^\]]*--[^\]]+\]|<[^>]*--[^>]+>)/', $this->usage(), $matches);
+        preg_match_all('/(?:<|\[)(--[^\]>]+)(?:>|\])/', $this->usage(), $matches);
         $options = [];
 
-        foreach ($matches[1] ?? [] as $token) {
-            $token = trim($token, '<>[]');
-            if (str_contains($token, ' ')) {
-                $token = strtok($token, ' ') ?: $token;
+        foreach ($matches[1] ?? [] as $option) {
+            $option = ltrim(trim($option), '-');
+            if (str_contains($option, '=')) {
+                $option = substr($option, 0, strpos($option, '='));
             }
-            $options[] = ltrim($token, '-');
+            if ($option !== '') {
+                $options[] = $option;
+            }
         }
 
         return array_values(array_unique($options));
