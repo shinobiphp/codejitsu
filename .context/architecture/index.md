@@ -2,7 +2,7 @@
 
 Read these in order when getting oriented:
 
-1. `README.md` — purpose, authority, and structure
+1. `../../README.md` — public project entrypoint, purpose, and development workflow
 2. `agent-context.md` — how to use and maintain the living context
 3. `architecture/overview.md` — system shape
 4. `architecture/scrolls.md` — Scroll model

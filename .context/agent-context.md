@@ -6,13 +6,14 @@ This directory is Codejitsu's shared architectural memory. Any human or AI agent
 
 Before making a non-trivial architectural change:
 
-1. Read `.context/README.md`.
+1. Read the repository `README.md`.
 2. Read `.context/agent-context.md`.
-3. Read the relevant documents under `architecture/` and `concepts/`.
-4. Read relevant decision records under `decisions/`.
-5. Read `roadmap/` when the change affects planned work.
-6. Read `ideas.md` when exploring alternatives or proposing new directions.
-7. Inspect the current source/contracts before assuming the documentation is current.
+3. Read `.context/current-state.ctx`.
+4. Read the relevant documents under `architecture/` and `concepts/`.
+5. Read relevant decision records under `decisions/`.
+6. Read `roadmap/` when the change affects planned work.
+7. Read `ideas.md` when exploring alternatives or proposing new directions.
+8. Inspect the current source/contracts before assuming the documentation is current.
 
 The repository's source code and tests define current behavior. Context documents explain intent, terminology, constraints, and rationale.
 
