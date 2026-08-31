@@ -11,6 +11,7 @@ final readonly class IndexEntry
     /**
      * @param array<string> $tags
      * @param array<string, mixed> $attributes
+     * @param array<string> $references
      */
     public function __construct(
         public string $type,
@@ -20,5 +21,6 @@ final readonly class IndexEntry
         public array $tags,
         public array $attributes,
         public Uri $uri,
+        public array $references = [],
     ) {}
 }

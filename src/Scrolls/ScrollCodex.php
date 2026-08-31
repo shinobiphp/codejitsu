@@ -118,10 +118,16 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 
         $name = isset($criteria['name']) ? strtolower((string) $criteria['name']) : null;
         $path = isset($criteria['path']) ? trim(strtolower((string) $criteria['path']), '/') : null;
+        $pathPrefix = isset($criteria['path_prefix'])
+            ? trim(strtolower((string) $criteria['path_prefix']), '/')
+            : null;
         $version = isset($criteria['version']) ? (string) $criteria['version'] : null;
         $tags = isset($criteria['tags']) ? array_map('strtolower', (array) $criteria['tags']) : [];
         $attributes = isset($criteria['attributes']) && is_array($criteria['attributes'])
             ? $criteria['attributes']
+            : [];
+        $references = isset($criteria['references'])
+            ? array_map(static fn (mixed $uri): string => strtolower(trim((string) $uri)), (array) $criteria['references'])
             : [];
 
         $entries = [];
@@ -145,6 +151,12 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
                     continue;
                 }
 
+                if ($pathPrefix !== null
+                    && $scrollName !== $pathPrefix
+                    && !str_starts_with($scrollName, $pathPrefix . '/')) {
+                    continue;
+                }
+
                 if ($version !== null && $scroll->version !== $version) {
                     continue;
                 }
@@ -156,6 +168,11 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
                 $data = $scroll->toArray();
                 $metadata = array_diff_key($data, array_flip(['name', 'type', 'version', 'tags']));
                 if ($attributes !== [] && !$this->matchesAttributes($metadata, $attributes)) {
+                    continue;
+                }
+
+                $referenceUris = $this->referenceUris($metadata['references'] ?? []);
+                if ($references !== [] && array_diff($references, $referenceUris) !== []) {
                     continue;
                 }
 
@@ -173,6 +190,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
                         $source,
                         $scroll->version,
                     )),
+                    $referenceUris,
                 );
             }
         }
@@ -387,6 +405,24 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         }
 
         return true;
+    }
+
+    /** @return array<string> */
+    private function referenceUris(mixed $references): array
+    {
+        if (!is_array($references)) {
+            return [];
+        }
+
+        $uris = [];
+        foreach ($references as $reference) {
+            $uri = is_string($reference) ? $reference : ($reference['uri'] ?? null);
+            if (is_string($uri) && trim($uri) !== '') {
+                $uris[] = strtolower(trim($uri));
+            }
+        }
+
+        return array_values(array_unique($uris));
     }
 
     private function identityKey(ScrollContract $scroll): string
