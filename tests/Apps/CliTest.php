@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Codejitsu\Tests\Apps;
 
 use Codejitsu\Boot;
+use Codejitsu\Contracts\Console\Driver;
 use Codejitsu\Kernel\Kernel;
 use PHPUnit\Framework\TestCase;
 
@@ -83,6 +84,17 @@ final class CliTest extends TestCase
         self::assertSame("Hello, B!\n", $output);
     }
 
+    public function testCustomDriverCanReplaceConsoleImplementation(): void
+    {
+        $driver = new RecordingDriver();
+        $app = Boot::cli($this->kernelName, rootDir: dirname(__DIR__, 2));
+        $app = $app->withDriver($driver);
+
+        self::assertSame(42, $app->run(['codejitsu', 'hello', 'B']));
+        self::assertSame(['codejitsu', 'hello', 'B'], $driver->argv);
+        self::assertNotEmpty($driver->commands);
+    }
+
     /** @param list<string> $argv */
     private function runCli(array $argv): array
     {
@@ -93,5 +105,22 @@ final class CliTest extends TestCase
         $output = ob_get_clean() ?: '';
 
         return [$code, $output];
+    }
+}
+
+final class RecordingDriver implements Driver
+{
+    /** @var list<string> */
+    public array $argv = [];
+
+    /** @var list<object> */
+    public array $commands = [];
+
+    public function run(array $argv, iterable $commands, callable $execute): int
+    {
+        $this->argv = $argv;
+        $this->commands = iterator_to_array($commands, false);
+
+        return 42;
     }
 }

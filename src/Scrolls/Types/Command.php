@@ -25,6 +25,36 @@ final class Command extends Scroll
         return (string) ($this->attributes['usage'] ?? $this->name);
     }
 
+    /** @return list<string> */
+    public function usageArguments(): array
+    {
+        preg_match_all('/(<[^>]+>|\[[^\]]+\])/', $this->usage(), $matches);
+
+        return array_values(array_filter(
+            array_map(static fn (string $token): string => trim($token, '<>[]'), $matches[1] ?? []),
+            static fn (string $token): bool => !str_starts_with($token, '--'),
+        ));
+    }
+
+    /** @return list<string> */
+    public function usageOptions(): array
+    {
+        preg_match_all('/(?:<|\[)(--[^\]>]+)(?:>|\])/', $this->usage(), $matches);
+        $options = [];
+
+        foreach ($matches[1] ?? [] as $option) {
+            $option = ltrim(trim($option), '-');
+            if (str_contains($option, '=')) {
+                $option = substr($option, 0, strpos($option, '='));
+            }
+            if ($option !== '') {
+                $options[] = $option;
+            }
+        }
+
+        return array_values(array_unique($options));
+    }
+
     /** @return array<string, array<string, mixed>> */
     public function commands(): array
     {
@@ -88,9 +118,13 @@ final class Command extends Scroll
         return is_string($reference) && trim($reference) !== '' ? trim($reference) : null;
     }
 
-    public function target(): callable
+    public function target(): callable|string
     {
         $target = $this->attributes['target'] ?? null;
+
+        if (is_string($target) && trim($target) !== '') {
+            return trim($target);
+        }
 
         if (is_callable($target)) {
             return $target;
@@ -131,7 +165,16 @@ final class Command extends Scroll
             return $child->execute(...array_slice($payload, 1));
         }
 
-        return ($this->target())(...$args);
+        $target = $this->target();
+        if (is_string($target) && class_exists($target)) {
+            $target = new $target();
+        }
+
+        if (!is_callable($target)) {
+            throw new LogicException(sprintf('Command [%s] target is not callable.', $this->name));
+        }
+
+        return $target(...$args);
     }
 
     public function references(): array
