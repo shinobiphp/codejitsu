@@ -22,6 +22,12 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 {
     protected array $scrolls = [];
 
+    /** @var array<string, array<string, IndexEntry>> */
+    protected array $index = [];
+
+    /** @var array<string, array<string, DiscoveredResource>> */
+    protected array $resources = [];
+
     /** @var array<string> */
     protected array $sources = [];
 
@@ -71,8 +77,8 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         $source ??= $this->sources[array_key_last($this->sources)] ?? 'default';
         $this->registerSource($source);
 
-        foreach ((new ScrollDiscovery($this->types))->discover($root) as $scroll) {
-            $this->registerScroll($scroll, $source);
+        foreach ((new ScrollDiscovery($this->types))->discover($root) as $resource) {
+            $this->registerResource($resource, $source);
         }
 
         return $this;
@@ -88,6 +94,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         $key = $this->identityKey($scroll);
         $this->scrolls[$source][$key] = $scroll;
         $this->items[$key] = $scroll;
+        $this->index[$source][$key] = $this->indexEntryFromScroll($scroll, $source, $key);
 
         return $this;
     }
@@ -114,7 +121,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             }
         }
 
-        $name = isset($criteria['name']) ? strtolower((string) $criteria['name']) : null;
+        $name = isset($criteria['name']) ? strtolower(trim((string) $criteria['name'], '/')) : null;
         $path = isset($criteria['path']) ? trim(strtolower((string) $criteria['path']), '/') : null;
         $pathPrefix = isset($criteria['path_prefix'])
             ? trim(strtolower((string) $criteria['path_prefix']), '/')
@@ -127,69 +134,51 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         $references = isset($criteria['references'])
             ? array_map(static fn (mixed $uri): string => strtolower(trim((string) $uri)), (array) $criteria['references'])
             : [];
+        $uri = isset($criteria['uri']) ? strtolower(trim((string) $criteria['uri'])) : null;
 
         $entries = [];
         foreach ($sources as $source) {
-            foreach ($this->scrolls[$source] ?? [] as $scroll) {
-                if (!$scroll instanceof ScrollContract) {
+            foreach ($this->index[$source] ?? [] as $entry) {
+                if ($types !== null && !in_array($entry->type, $types, true)) {
                     continue;
                 }
 
-                $scrollType = $this->scrollType($scroll);
-                if ($types !== null && !in_array($scrollType->name, $types, true)) {
+                $entryName = strtolower(trim($entry->name, '/'));
+                if ($name !== null && $entryName !== $name) {
                     continue;
                 }
 
-                $scrollName = strtolower(trim($scroll->name, '/'));
-                if ($name !== null && $scrollName !== $name) {
-                    continue;
-                }
-
-                if ($path !== null && $scrollName !== $path) {
+                if ($path !== null && $entryName !== $path) {
                     continue;
                 }
 
                 if ($pathPrefix !== null
-                    && $scrollName !== $pathPrefix
-                    && !str_starts_with($scrollName, $pathPrefix . '/')) {
+                    && $entryName !== $pathPrefix
+                    && !str_starts_with($entryName, $pathPrefix . '/')) {
                     continue;
                 }
 
-                if ($version !== null && $scroll->version !== $version) {
+                if ($version !== null && $entry->version !== $version) {
                     continue;
                 }
 
-                if ($tags !== [] && array_diff($tags, array_map('strtolower', $scroll->tags)) !== []) {
+                if ($tags !== [] && array_diff($tags, array_map('strtolower', $entry->tags)) !== []) {
                     continue;
                 }
 
-                $data = $scroll->toArray();
-                $metadata = array_diff_key($data, array_flip(['name', 'type', 'version', 'tags']));
-                if ($attributes !== [] && !$this->matchesAttributes($metadata, $attributes)) {
+                if ($attributes !== [] && !$this->matchesAttributes($entry->attributes, $attributes)) {
                     continue;
                 }
 
-                $referenceUris = $this->referenceUris($metadata['references'] ?? []);
-                if ($references !== [] && array_diff($references, $referenceUris) !== []) {
+                if ($references !== [] && array_diff($references, $entry->references) !== []) {
                     continue;
                 }
 
-                $entries[] = new IndexEntry(
-                    $scrollType->name,
-                    $scroll->name,
-                    $scroll->version,
-                    $source,
-                    $scroll->tags,
-                    $metadata,
-                    Uri::make(sprintf(
-                        '%s%s@%s#%s',
-                        $scrollType->scheme,
-                        $scroll->name,
-                        $source,
-                        $scroll->version,
-                    )),
-                    $referenceUris,
-                );
+                if ($uri !== null && strtolower((string) $entry->uri) !== $uri) {
+                    continue;
+                }
+
+                $entries[] = $entry;
             }
         }
 
@@ -216,32 +205,26 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         $target = $this->typeDefinition($type);
 
         $result = new static(types: $this->types);
-        foreach ($this->all(true) as $scroll) {
-            if ($scroll instanceof ScrollContract && $this->scrollType($scroll)->name === $target->name) {
-                $result->registerScroll($scroll);
-            }
+        foreach ($this->query(['type' => $target->name]) as $entry) {
+            $result->registerScroll($this->resolve((string) $entry->uri), $entry->source);
         }
         return $result;
     }
 
     public function withTag(string $tag): static
     {
-        $result = new static();
-        foreach ($this->all(true) as $scroll) {
-            if ($scroll instanceof ScrollContract && in_array($tag, $scroll->tags, true)) {
-                $result->registerScroll($scroll);
-            }
+        $result = new static(types: $this->types);
+        foreach ($this->query(['tags' => [$tag]]) as $entry) {
+            $result->registerScroll($this->resolve((string) $entry->uri), $entry->source);
         }
         return $result;
     }
 
     public function withTags(array $tags): static
     {
-        $result = new static();
-        foreach ($this->all(true) as $scroll) {
-            if ($scroll instanceof ScrollContract && empty(array_diff($tags, $scroll->tags))) {
-                $result->registerScroll($scroll);
-            }
+        $result = new static(types: $this->types);
+        foreach ($this->query(['tags' => $tags]) as $entry) {
+            $result->registerScroll($this->resolve((string) $entry->uri), $entry->source);
         }
         return $result;
     }
@@ -254,15 +237,10 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         }
 
         if (!str_contains($value, '://')) {
-            $matches = array_values(array_filter(
-                $this->all(true),
-                static fn (mixed $scroll): bool =>
-                    $scroll instanceof ScrollContract
-                    && strtolower(trim($scroll->name, '/')) === strtolower(trim($value, '/')),
-            ));
+            $matches = $this->query(['name' => $value]);
 
             return match (count($matches)) {
-                1 => $matches[0],
+                1 => $this->hydrateEntry($matches[0]),
                 0 => throw new OutOfBoundsException(sprintf('Scroll [%s] not found in Codex.', $uri)),
                 default => throw new InvalidArgumentException(sprintf(
                     'Scroll name [%s] is ambiguous; resolve it by URI.',
@@ -286,17 +264,17 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         $sources = $this->sourceCascade($parsed);
 
         foreach ($sources as $source) {
-            foreach ($this->scrolls[$source] ?? [] as $scroll) {
-                if (!$scroll instanceof ScrollContract || $this->scrollType($scroll)->name !== $type->name) {
+            foreach ($this->index[$source] ?? [] as $entry) {
+                if ($entry->type !== $type->name) {
                     continue;
                 }
 
-                if (strtolower(trim($scroll->name, '/')) !== $name) {
+                if (strtolower(trim($entry->name, '/')) !== $name) {
                     continue;
                 }
 
-                if ($version === null || $scroll->version === $version) {
-                    return $scroll->bind($this);
+                if ($version === null || $entry->version === $version) {
+                    return $this->hydrateEntry($entry);
                 }
             }
         }
@@ -422,6 +400,62 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             trim($scroll->name, '/'),
             $scroll->version,
         ));
+    }
+
+    private function registerResource(DiscoveredResource $resource, string $source): void
+    {
+        $key = $this->identityKeyFrom($resource->type->name, $resource->name, $resource->version);
+        $this->resources[$source][$key] = $resource;
+        $this->index[$source][$key] = new IndexEntry(
+            $resource->type->name,
+            $resource->name,
+            $resource->version,
+            $source,
+            $resource->tags,
+            $resource->attributes,
+            Uri::make(sprintf('%s%s@%s#%s', $resource->type->scheme, $resource->name, $source, $resource->version)),
+            $resource->references,
+            $key,
+            $resource->locator,
+        );
+    }
+
+    private function indexEntryFromScroll(ScrollContract $scroll, string $source, string $key): IndexEntry
+    {
+        $type = $this->scrollType($scroll);
+        $data = $scroll->toArray();
+        $attributes = array_diff_key($data, array_flip(['name', 'type', 'version', 'tags']));
+        return new IndexEntry(
+            $type->name,
+            $scroll->name,
+            $scroll->version,
+            $source,
+            $scroll->tags,
+            $attributes,
+            Uri::make(sprintf('%s%s@%s#%s', $type->scheme, $scroll->name, $source, $scroll->version)),
+            $this->referenceUris($attributes['references'] ?? []),
+            $key,
+        );
+    }
+
+    private function hydrateEntry(IndexEntry $entry): ScrollContract
+    {
+        if (($this->scrolls[$entry->source][$entry->key] ?? null) instanceof ScrollContract) {
+            return $this->scrolls[$entry->source][$entry->key]->bind($this);
+        }
+        $resource = $this->resources[$entry->source][$entry->key] ?? null;
+        if (!$resource instanceof DiscoveredResource) {
+            throw new OutOfBoundsException(sprintf('Scroll [%s] has no registered loader.', $entry->uri));
+        }
+        $scroll = $resource->hydrate()->bind($this);
+        $this->scrolls[$entry->source][$entry->key] = $scroll;
+        $this->items[$entry->key] = $scroll;
+        return $scroll;
+    }
+
+    private function identityKeyFrom(string $type, string $name, string $version): string
+    {
+        return strtolower(sprintf('%s:%s#%s', $type, trim($name, '/'), $version));
     }
 
     private function typeDefinition(Types|string $type): TypeDefinition

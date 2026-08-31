@@ -72,9 +72,13 @@ final class Cli implements App
     /** @return list<Command> */
     private function commands(): array
     {
-        return array_values(array_filter(
-            $this->kernelInstance->scrolls->all(true),
-            static fn (mixed $scroll): bool => $scroll instanceof Command,
-        ));
+        $commands = [];
+        foreach ($this->kernelInstance->scrolls->query(['type' => 'command']) as $entry) {
+            $command = $this->kernelInstance->scrolls->resolve((string) $entry->uri);
+            if ($command instanceof Command) {
+                $commands[] = $command;
+            }
+        }
+        return $commands;
     }
 }

@@ -22,5 +22,7 @@ final readonly class IndexEntry
         public array $attributes,
         public Uri $uri,
         public array $references = [],
+        public string $key = '',
+        public ?string $locator = null,
     ) {}
 }

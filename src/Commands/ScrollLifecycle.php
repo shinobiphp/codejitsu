@@ -86,10 +86,14 @@ final class ScrollLifecycle
         ))[0] ?? null;
 
         if ($all) {
-            return array_values(array_filter(
-                $codex->all(true),
-                static fn (mixed $scroll): bool => $scroll instanceof Scroll,
-            ));
+            $scrolls = [];
+            foreach ($codex->query() as $entry) {
+                $scroll = $codex->resolve((string) $entry->uri);
+                if ($scroll instanceof Scroll) {
+                    $scrolls[] = $scroll;
+                }
+            }
+            return $scrolls;
         }
 
         if (!is_string($target) || trim($target) === '') {

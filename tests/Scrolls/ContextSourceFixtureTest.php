@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Codejitsu\Tests\Scrolls;
 
 use Codejitsu\Scrolls\ScrollDiscovery;
+use Codejitsu\Scrolls\DiscoveredResource;
 use Codejitsu\Scrolls\TypeRegistry;
 use Codejitsu\Scrolls\Types\Context;
 use FilesystemIterator;
@@ -38,10 +39,12 @@ final class ContextSourceFixtureTest extends TestCase
         try {
             $scrolls = (new ScrollDiscovery(TypeRegistry::builtins()))->discover($root);
             self::assertCount(1, $scrolls);
-            self::assertInstanceOf(Context::class, $scrolls[0]);
+            self::assertInstanceOf(DiscoveredResource::class, $scrolls[0]);
             self::assertSame('architecture/codex', $scrolls[0]->name);
             self::assertSame(['architecture'], $scrolls[0]->tags);
-            self::assertSame($markdown, $scrolls[0]->content());
+            $context = $scrolls[0]->hydrate();
+            self::assertInstanceOf(Context::class, $context);
+            self::assertSame($markdown, $context->content());
         } finally {
             unlink($root . '/architecture/codex.ctx');
             rmdir($root . '/architecture');

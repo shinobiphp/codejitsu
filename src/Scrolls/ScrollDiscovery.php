@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Codejitsu\Scrolls;
 
-use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -17,14 +16,14 @@ final class ScrollDiscovery
         private readonly TypeRegistry $types,
     ) {}
 
-    /** @return list<ScrollContract> */
+    /** @return list<DiscoveredResource> */
     public function discover(string $root): array
     {
         if (!is_dir($root)) {
             return [];
         }
 
-        $scrolls = [];
+        $resources = [];
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
         );
@@ -45,10 +44,29 @@ final class ScrollDiscovery
                 throw new RuntimeException(sprintf('Unable to read Scroll resource [%s].', $path));
             }
 
-            $scrolls[] = $type->make(null, $this->parse($type, $payload, $root, $path));
+            $data = $this->parse($type, $payload, $root, $path);
+            $name = strtolower(trim((string) ($data['name'] ?? pathinfo($path, PATHINFO_FILENAME)), '/'));
+            $data['name'] = $name;
+            $version = (string) ($data['version'] ?? '1.0.0');
+            $tags = array_values(array_unique(array_map(
+                static fn (mixed $tag): string => strtolower(trim((string) $tag)),
+                is_array($data['tags'] ?? null) ? $data['tags'] : [],
+            )));
+            $attributes = array_diff_key($data, array_flip(['name', 'type', 'version', 'tags']));
+
+            $resources[] = new DiscoveredResource(
+                $type,
+                $name,
+                $version,
+                $tags,
+                $attributes,
+                $this->referenceUris($attributes['references'] ?? []),
+                ltrim(str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen(rtrim($root, '/\\')))), '/'),
+                static fn () => $type->make(null, $data),
+            );
         }
 
-        return $scrolls;
+        return $resources;
     }
 
     private function parse(TypeDefinition $type, string $payload, string $root, string $path): array
@@ -65,7 +83,6 @@ final class ScrollDiscovery
                 'name' => $name,
                 'data' => $payload,
                 'tags' => $segments,
-                'source' => $path,
             ];
         }
 
@@ -78,5 +95,21 @@ final class ScrollDiscovery
                 $e->getMessage(),
             ), previous: $e);
         }
+    }
+
+    /** @return array<string> */
+    private function referenceUris(mixed $references): array
+    {
+        if (!is_array($references)) {
+            return [];
+        }
+        $uris = [];
+        foreach ($references as $reference) {
+            $uri = is_string($reference) ? $reference : ($reference['uri'] ?? null);
+            if (is_string($uri) && trim($uri) !== '') {
+                $uris[] = strtolower(trim($uri));
+            }
+        }
+        return array_values(array_unique($uris));
     }
 }
