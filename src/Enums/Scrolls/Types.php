@@ -142,7 +142,7 @@ enum Types: string
 
     public function scheme(): string
     {
-        return $this->value . '://';
+        return ($this === self::COMMAND ? 'cmd' : $this->value) . '://';
     }
 
     public function definition(): TypeDefinition

@@ -9,6 +9,8 @@ use Codejitsu\Contracts\Scrolls\Store as StoreContract;
 use Codejitsu\Enums\Codecs;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use Codejitsu\Scrolls\Envelope;
+use Codejitsu\Scrolls\TypeDefinition;
+use Codejitsu\Scrolls\TypeRegistry;
 use Codejitsu\Metadata;
 use RuntimeException;
 
@@ -18,6 +20,7 @@ final class Filesystem implements StoreContract
         protected string $baseDir,
         protected ?string $extension = null,
         protected Codecs $codec = Codecs::NEON,
+        protected ?TypeRegistry $types = null,
     ) {
         $this->baseDir = rtrim(
             $baseDir,
@@ -26,22 +29,15 @@ final class Filesystem implements StoreContract
     }
 
     public function getDirectory(
-        ScrollTypes $type,
+        ScrollTypes|string $type,
     ): string {
-        $subDir = method_exists(
-            $type,
-            'plural',
-        )
-            ? $type->plural()
-            : $type->value;
-
         return $this->baseDir
             . DIRECTORY_SEPARATOR
-            . strtolower($subDir);
+            . $this->definition($type)->plural;
     }
 
     public function resolveExtension(
-        ScrollTypes $type,
+        ScrollTypes|string $type,
     ): string {
         if ($this->extension !== null) {
             return ltrim(
@@ -50,18 +46,15 @@ final class Filesystem implements StoreContract
             );
         }
 
-        return match ($type) {
-            ScrollTypes::APP,
-            ScrollTypes::CAPABILITY,
-            ScrollTypes::CONFIG,
-            ScrollTypes::KATA,
-            ScrollTypes::SCHEMA,
-            ScrollTypes::SKILL => 'neon',
-        };
+        $builtin = $type instanceof ScrollTypes ? $type : ScrollTypes::tryFrom(strtolower($type));
+        if ($builtin instanceof ScrollTypes && !in_array($builtin, [ScrollTypes::COMMAND, ScrollTypes::CONTEXT], true)) {
+            return 'neon';
+        }
+        return $this->definition($type)->extension;
     }
 
     public function has(
-        ScrollTypes $type,
+        ScrollTypes|string $type,
         string $name,
     ): bool {
         return is_file(
@@ -73,7 +66,7 @@ final class Filesystem implements StoreContract
     }
 
     public function get(
-        ScrollTypes $type,
+        ScrollTypes|string $type,
         string $name,
     ): ?EnvelopeContract {
         $path = $this->getPath(
@@ -107,7 +100,7 @@ final class Filesystem implements StoreContract
      * @return array<string, EnvelopeContract>
      */
     public function all(
-        ScrollTypes $type,
+        ScrollTypes|string $type,
     ): array {
         $directory = $this->getDirectory($type);
 
@@ -150,7 +143,7 @@ final class Filesystem implements StoreContract
     }
 
     public function save(
-        ScrollTypes $type,
+        ScrollTypes|string $type,
         string $name,
         EnvelopeContract $envelope,
     ): void {
@@ -201,12 +194,14 @@ final class Filesystem implements StoreContract
     protected function encodeEnvelope(
         EnvelopeContract $envelope,
     ): string {
-        $codec = $this->codec->make();
+        $codec = $this->definition($envelope->scrollType)->makeCodec();
 
         $data = [
             'name' => $envelope->name,
             'version' => $envelope->version,
-            'scrollType' => $envelope->scrollType->value,
+            'scrollType' => $envelope->scrollType instanceof ScrollTypes
+                ? $envelope->scrollType->value
+                : $envelope->scrollType,
             'data' => $envelope->data,
             'metadata' => $envelope->metadata,
             'codec' => $envelope->codec->value,
@@ -219,10 +214,10 @@ final class Filesystem implements StoreContract
 
     protected function decodeEnvelope(
         string $payload,
-        ScrollTypes $expectedType,
+        ScrollTypes|string $expectedType,
         string $expectedName,
     ): EnvelopeContract {
-        $codec = $this->codec->make();
+        $codec = $this->definition($expectedType)->makeCodec();
 
         $decoded = $codec->decode($payload);
 
@@ -247,12 +242,8 @@ final class Filesystem implements StoreContract
             );
         }
 
-        $scrollType = ScrollTypes::normalize(
-            $decoded['scrollType'] ?? null,
-            null,
-        );
-
-        if (!$scrollType instanceof ScrollTypes) {
+        $scrollTypeName = strtolower(trim((string) ($decoded['scrollType'] ?? '')));
+        if (!$this->registry()->has($scrollTypeName)) {
             throw new RuntimeException(
                 sprintf(
                     'Invalid Scroll type in envelope [%s].',
@@ -261,18 +252,32 @@ final class Filesystem implements StoreContract
             );
         }
 
-        if ($scrollType !== $expectedType) {
+        $expectedTypeName = $expectedType instanceof ScrollTypes ? $expectedType->value : strtolower($expectedType);
+        if ($scrollTypeName !== $expectedTypeName) {
             throw new RuntimeException(
                 sprintf(
                     'Envelope [%s] is type [%s], expected [%s].',
                     $expectedName,
-                    $scrollType->value,
-                    $expectedType->value,
+                    $scrollTypeName,
+                    $expectedTypeName,
                 ),
             );
         }
 
         $metadata = $decoded['metadata'] ?? null;
+
+        if (is_array($metadata)) {
+            $identity = new \Codejitsu\Identity\Identity(
+                \Codejitsu\Enums\Identity\Types::Scroll,
+                new \Codejitsu\Identity\Identifier($name),
+                \Codejitsu\ValueObjects\Version::fromString((string) ($decoded['version'] ?? '1.0.0')),
+            );
+            $restored = new Metadata($identity);
+            foreach ($metadata as $key => $value) {
+                $restored->set($key, $value);
+            }
+            $metadata = $restored;
+        }
 
         if (!$metadata instanceof Metadata) {
             throw new RuntimeException(
@@ -286,7 +291,7 @@ final class Filesystem implements StoreContract
         return new Envelope(
             name: $name,
             version: (string) ($decoded['version'] ?? ''),
-            scrollType: $scrollType,
+            scrollType: ScrollTypes::tryFrom($scrollTypeName) ?? $scrollTypeName,
             data: (string) ($decoded['data'] ?? ''),
             metadata: $metadata,
             seal: $decoded['seal'] ?? null,
@@ -298,7 +303,7 @@ final class Filesystem implements StoreContract
     }
 
     protected function getPath(
-        ScrollTypes $type,
+        ScrollTypes|string $type,
         string $name,
     ): string {
         $name = trim($name);
@@ -340,9 +345,8 @@ final class Filesystem implements StoreContract
             );
         }
 
-        $decoded = $this->codec
-            ->make()
-            ->decode($payload);
+        $definition = $this->definition($scroll->type);
+        $decoded = $definition->makeCodec()->decode($payload);
 
         if (!is_array($decoded)) {
             throw new RuntimeException(
@@ -381,7 +385,7 @@ final class Filesystem implements StoreContract
 
         $metadata->set('name', $name);
         $metadata->set('version', $version);
-        $metadata->set('type', $scroll->type->value);
+        $metadata->set('type', $definition->name);
         $metadata->set('path', $scroll->path);
         $metadata->set('extension', $scroll->extension);
 
@@ -391,7 +395,17 @@ final class Filesystem implements StoreContract
             scrollType: $scroll->type,
             data: $payload,
             metadata: $metadata,
-            codec: $this->codec,
+            codec: $definition->codec,
         );
+    }
+
+    protected function definition(ScrollTypes|string $type): TypeDefinition
+    {
+        return $this->registry()->get($type instanceof ScrollTypes ? $type->value : $type);
+    }
+
+    protected function registry(): TypeRegistry
+    {
+        return $this->types ??= TypeRegistry::builtins();
     }
 }

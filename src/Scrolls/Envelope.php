@@ -18,7 +18,7 @@ final class Envelope
     public function __construct(
         string $name,
         public string $version,
-        public ScrollTypes $scrollType,
+        public ScrollTypes|string $scrollType,
         string $data,
         Metadata $metadata,
         ?SealContract $seal = null,

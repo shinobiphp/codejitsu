@@ -7,6 +7,7 @@ namespace Codejitsu\Scrolls;
 use Codejitsu\Contracts\Scrolls\Envelope;
 use Codejitsu\Contracts\Scrolls\Scroll;
 use Codejitsu\Enums\Codecs;
+use Codejitsu\Contracts\Codec;
 use InvalidArgumentException;
 use UnexpectedValueException;
 
@@ -51,6 +52,15 @@ final readonly class TypeDefinition
             $scroll->hydrate($data);
         }
         return $scroll;
+    }
+
+    public function makeCodec(): Codec
+    {
+        return match ($this->codec) {
+            Codecs::JSON => new \Codejitsu\Codecs\Json(),
+            Codecs::NEON => new \Codejitsu\Codecs\Neon(),
+            Codecs::PHP => new \Codejitsu\Codecs\Php(),
+        };
     }
 
     private static function token(string $value, string $field): string

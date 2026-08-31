@@ -78,7 +78,12 @@ final class TypeRegistry implements TypeRegistryContract
         $scheme = self::normalize($scheme);
         $scheme = str_ends_with($scheme, '://') ? $scheme : $scheme . '://';
         $name = $this->schemes[$scheme] ?? null;
-        return $name === null ? null : $this->definitions[$name];
+        if ($name !== null) {
+            return $this->definitions[$name];
+        }
+
+        $legacy = Types::normalize(substr($scheme, 0, -3), null);
+        return $legacy instanceof Types ? ($this->definitions[$legacy->value] ?? null) : null;
     }
 
     public function all(): array

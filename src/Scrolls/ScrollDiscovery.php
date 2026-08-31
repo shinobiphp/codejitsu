@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Codejitsu\Scrolls;
 
-use Codejitsu\Codecs\Neon;
-use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
@@ -16,7 +14,7 @@ use Throwable;
 final class ScrollDiscovery
 {
     public function __construct(
-        private readonly Neon $codec,
+        private readonly TypeRegistry $types,
     ) {}
 
     /** @return list<ScrollContract> */
@@ -36,8 +34,8 @@ final class ScrollDiscovery
                 continue;
             }
 
-            $type = $this->typeForExtension($file->getExtension());
-            if (!$type instanceof Types) {
+            $type = $this->types->forExtension($file->getExtension());
+            if (!$type instanceof TypeDefinition) {
                 continue;
             }
 
@@ -53,22 +51,9 @@ final class ScrollDiscovery
         return $scrolls;
     }
 
-    private function typeForExtension(string $extension): ?Types
+    private function parse(TypeDefinition $type, string $payload, string $root, string $path): array
     {
-        $extension = strtolower($extension);
-
-        foreach (Types::cases() as $type) {
-            if ($type->extension() === $extension) {
-                return $type;
-            }
-        }
-
-        return null;
-    }
-
-    private function parse(Types $type, string $payload, string $root, string $path): array
-    {
-        if ($type === Types::CONTEXT) {
+        if ($type->name === 'context') {
             $relative = ltrim(str_replace($root, '', $path), DIRECTORY_SEPARATOR);
             $name = preg_replace('/\.ctx$/i', '', str_replace(DIRECTORY_SEPARATOR, '/', $relative));
             $segments = array_values(array_filter(
@@ -85,7 +70,7 @@ final class ScrollDiscovery
         }
 
         try {
-            return $this->codec->decode($payload);
+            return $type->makeCodec()->decode($payload);
         } catch (Throwable $e) {
             throw new RuntimeException(sprintf(
                 'Failed to decode Scroll resource [%s]: %s',

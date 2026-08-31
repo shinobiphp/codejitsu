@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Codejitsu\Commands;
 
-use Codejitsu\Codecs\Neon;
 use Codejitsu\Console\Editor;
 use Codejitsu\Console\Questioner;
 use Codejitsu\Console\TerminalEditor;
@@ -12,6 +11,8 @@ use Codejitsu\Console\TerminalQuestioner;
 use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\ExecutionContext;
 use Codejitsu\Scrolls\ScrollCodex;
+use Codejitsu\Scrolls\TypeDefinition;
+use Codejitsu\Scrolls\TypeRegistry;
 use Codejitsu\SubstrateRegistry;
 use Codejitsu\Uri\Uri;
 use InvalidArgumentException;
@@ -33,7 +34,7 @@ final class Make
             );
         }
 
-        return self::create($uri, $arguments);
+        return self::create($uri, $arguments, $context->codex);
     }
 
     public static function interactive(
@@ -42,16 +43,17 @@ final class Make
         Editor $editor,
         SubstrateRegistry $registry,
     ): string {
-        $type = Types::normalize($questioner->select('Scroll type', array_map(
-            static fn (Types $type): string => $type->value,
-            Types::cases(),
-        )), null);
-
-        if (!$type instanceof Types) {
+        $types = $codex?->types() ?? TypeRegistry::builtins();
+        $selected = $questioner->select('Scroll type', array_map(
+            static fn (TypeDefinition $type): string => $type->name,
+            $types->all(),
+        ));
+        if (!$types->has($selected)) {
             throw new InvalidArgumentException('Invalid Scroll type selection.');
         }
+        $type = $types->get($selected);
 
-        $name = trim($questioner->ask(sprintf('%s name/identifier: ', $type->value)));
+        $name = trim($questioner->ask(sprintf('%s name/identifier: ', $type->name)));
         if ($name === '') {
             throw new InvalidArgumentException('Scroll name cannot be empty.');
         }
@@ -61,11 +63,11 @@ final class Make
 
         $payload = [
             'name' => $name,
-            'type' => $type->value,
+            'type' => $type->name,
             'version' => $version,
         ];
 
-        if ($type === Types::CAPABILITY) {
+        if ($type->name === Types::CAPABILITY->value) {
             $substrate = $questioner->select('Substrate', $registry->names());
             $payload['substrate'] = $substrate;
             if ($substrate === 'wasm') {
@@ -77,26 +79,27 @@ final class Make
             if ($description !== '') {
                 $payload['description'] = $description;
             }
-            $payload['content'] = $editor->edit(self::template($type->value));
+            $payload['content'] = $editor->edit(self::template($type->name));
         }
 
-        $uri = $type->scheme() . $name . '#' . $version;
+        $uri = $type->scheme . $name . '#' . $version;
         $path = self::path($type, $name);
         self::ensureDirectory(dirname($path));
         if (is_file($path)) {
             throw new RuntimeException(sprintf('Scroll [%s] already exists at [%s].', $uri, $path));
         }
 
-        self::write($path, $payload);
+        self::write($path, $payload, $type);
 
-        return sprintf("Created %s Scroll [%s].%s", $type->value, $uri, PHP_EOL);
+        return sprintf("Created %s Scroll [%s].%s", $type->name, $uri, PHP_EOL);
     }
 
-    private static function create(string $uri, array $arguments): string
+    private static function create(string $uri, array $arguments, ?ScrollCodex $codex): string
     {
         $parsed = Uri::make($uri, defaultVersion: '1.0.0');
-        $type = Types::normalize($parsed->type, null);
-        if (!$type instanceof Types) {
+        $types = $codex?->types() ?? TypeRegistry::builtins();
+        $type = $types->forScheme($parsed->type);
+        if (!$type instanceof TypeDefinition) {
             throw new InvalidArgumentException(sprintf('Unknown Scroll type [%s].', $parsed->type));
         }
 
@@ -117,7 +120,7 @@ final class Make
         $sourceEncoding = self::option($arguments, '--source-encoding=');
         $payload = [
             'name' => $name,
-            'type' => $type->value,
+            'type' => $type->name,
             'version' => $parsed->version ?? '1.0.0',
         ];
 
@@ -133,16 +136,16 @@ final class Make
             }
         }
 
-        self::write($path, $payload);
+        self::write($path, $payload, $type);
 
-        return sprintf("Created %s Scroll [%s].%s", $type->value, $uri, PHP_EOL);
+        return sprintf("Created %s Scroll [%s].%s", $type->name, $uri, PHP_EOL);
     }
 
-    private static function path(Types $type, string $name): string
+    private static function path(TypeDefinition $type, string $name): string
     {
         $root = defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd() . DIRECTORY_SEPARATOR;
-        $directory = rtrim($root, '/\\') . DIRECTORY_SEPARATOR . 'scrolls' . DIRECTORY_SEPARATOR . $type->plural();
-        $filename = str_replace(['/', '\\'], '_', $name) . '.' . $type->extension();
+        $directory = rtrim($root, '/\\') . DIRECTORY_SEPARATOR . 'scrolls' . DIRECTORY_SEPARATOR . $type->plural;
+        $filename = str_replace(['/', '\\'], '_', $name) . '.' . $type->extension;
 
         return $directory . DIRECTORY_SEPARATOR . $filename;
     }
@@ -154,20 +157,20 @@ final class Make
         }
     }
 
-    private static function write(string $path, array $payload): void
+    private static function write(string $path, array $payload, TypeDefinition $type): void
     {
-        if (file_put_contents($path, (new Neon())->encode($payload), LOCK_EX) === false) {
+        if (file_put_contents($path, $type->makeCodec()->encode($payload), LOCK_EX) === false) {
             throw new RuntimeException(sprintf('Unable to write Scroll [%s].', $path));
         }
     }
 
-    private static function nextVersion(?ScrollCodex $codex, Types $type, string $name): string
+    private static function nextVersion(?ScrollCodex $codex, TypeDefinition $type, string $name): string
     {
         if ($codex === null) {
             return '1.0.0';
         }
 
-        $entries = $codex->query(['type' => $type->value, 'name' => $name]);
+        $entries = $codex->query(['type' => $type->name, 'name' => $name]);
         if ($entries === []) {
             return '1.0.0';
         }

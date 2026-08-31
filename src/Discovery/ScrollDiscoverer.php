@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Codejitsu\Discovery;
 
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
+use Codejitsu\Scrolls\TypeDefinition;
+use Codejitsu\Scrolls\TypeRegistry;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -13,6 +15,7 @@ final class ScrollDiscoverer
     public function __construct(
         private readonly string $baseDir,
         private readonly ?string $extension = null,
+        private readonly ?TypeRegistry $types = null,
     ) {}
 
     /**
@@ -34,7 +37,7 @@ final class ScrollDiscoverer
 
         $discovered = [];
 
-        foreach (ScrollTypes::cases() as $type) {
+        foreach ($this->registry()->all() as $type) {
             $discovered = [
                 ...$discovered,
                 ...$this->discoverType($baseDir, $type),
@@ -45,21 +48,17 @@ final class ScrollDiscoverer
     }
 
     /** @return list<DiscoveredScroll> */
-    public function discoverType(string|ScrollTypes $type): array
+    public function discoverType(string|ScrollTypes|TypeDefinition $type): array
     {
-        $type = $type instanceof ScrollTypes
+        $type = $type instanceof TypeDefinition
             ? $type
-            : ScrollTypes::normalize($type, null);
-
-        if (!$type instanceof ScrollTypes) {
-            throw new InvalidArgumentException(sprintf('Unknown Scroll type [%s].', (string) $type));
-        }
+            : $this->registry()->get($type instanceof ScrollTypes ? $type->value : $type);
 
         return $this->discoverTypeFromDirectory(rtrim($this->baseDir, '/\\'), $type);
     }
 
     /** @return list<DiscoveredScroll> */
-    private function discoverTypeFromDirectory(string $baseDir, ScrollTypes $type): array
+    private function discoverTypeFromDirectory(string $baseDir, TypeDefinition $type): array
     {
         $directory = $this->getDirectory($baseDir, $type);
 
@@ -88,7 +87,7 @@ final class ScrollDiscoverer
 
             $result[] = new DiscoveredScroll(
                 name: strtolower($name),
-                type: $type,
+                type: ScrollTypes::tryFrom($type->name) ?? $type->name,
                 path: $path,
                 extension: $extension,
             );
@@ -97,19 +96,22 @@ final class ScrollDiscoverer
         return $result;
     }
 
-    private function getDirectory(string $baseDir, ScrollTypes $type): string
+    private function getDirectory(string $baseDir, TypeDefinition $type): string
     {
-        $plural = method_exists($type, 'plural') ? $type->plural() : $type->value;
-
-        return $baseDir . DIRECTORY_SEPARATOR . strtolower($plural);
+        return $baseDir . DIRECTORY_SEPARATOR . $type->plural;
     }
 
-    private function resolveExtension(ScrollTypes $type): string
+    private function resolveExtension(TypeDefinition $type): string
     {
         if ($this->extension !== null) {
             return ltrim($this->extension, '.');
         }
 
-        return $type->extension();
+        return $type->extension;
+    }
+
+    private function registry(): TypeRegistry
+    {
+        return $this->types ?? TypeRegistry::builtins();
     }
 }

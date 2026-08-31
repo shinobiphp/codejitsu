@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Codejitsu\Scrolls;
 
-use Codejitsu\Codecs\Neon;
 use Codejitsu\EnvelopeCodex;
 use Codejitsu\Contracts\Scrolls\Envelope as ScrollEnvelope;
 use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
@@ -72,7 +71,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         $source ??= $this->sources[array_key_last($this->sources)] ?? 'default';
         $this->registerSource($source);
 
-        foreach ((new ScrollDiscovery(new Neon()))->discover($root) as $scroll) {
+        foreach ((new ScrollDiscovery($this->types))->discover($root) as $scroll) {
             $this->registerScroll($scroll, $source);
         }
 
@@ -97,18 +96,10 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
     {
         $types = $criteria['type'] ?? null;
         $types = $types === null ? null : (array) $types;
-        $types = $types === null
-            ? null
-            : array_map(
-                static function (Types|string $type): Types {
-                    $normalized = $type instanceof Types ? $type : Types::normalize($type, null);
-                    if (!$normalized instanceof Types) {
-                        throw new InvalidArgumentException(sprintf('Unknown Scroll type [%s].', (string) $type));
-                    }
-                    return $normalized;
-                },
-                $types,
-            );
+        $types = $types === null ? null : array_map(
+            fn (Types|string $type): string => $this->typeDefinition($type)->name,
+            $types,
+        );
 
         $sources = $criteria['source'] ?? null;
         $sources = $sources === null ? array_reverse($this->sources) : (array) $sources;
@@ -145,7 +136,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
                 }
 
                 $scrollType = $this->scrollType($scroll);
-                if ($types !== null && !in_array($scrollType, $types, true)) {
+                if ($types !== null && !in_array($scrollType->name, $types, true)) {
                     continue;
                 }
 
@@ -184,7 +175,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
                 }
 
                 $entries[] = new IndexEntry(
-                    $scrollType->value,
+                    $scrollType->name,
                     $scroll->name,
                     $scroll->version,
                     $source,
@@ -192,7 +183,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
                     $metadata,
                     Uri::make(sprintf(
                         '%s%s@%s#%s',
-                        $scrollType->scheme(),
+                        $scrollType->scheme,
                         $scroll->name,
                         $source,
                         $scroll->version,
@@ -222,14 +213,11 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 
     public function ofType(Types|string $type): static
     {
-        $target = $type instanceof Types ? $type : Types::normalize($type, null);
-        if (!$target instanceof Types) {
-            throw new InvalidArgumentException(sprintf('Unknown Scroll type [%s].', (string) $type));
-        }
+        $target = $this->typeDefinition($type);
 
-        $result = new static();
+        $result = new static(types: $this->types);
         foreach ($this->all(true) as $scroll) {
-            if ($scroll instanceof ScrollContract && $this->scrollType($scroll) === $target) {
+            if ($scroll instanceof ScrollContract && $this->scrollType($scroll)->name === $target->name) {
                 $result->registerScroll($scroll);
             }
         }
@@ -284,8 +272,8 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         }
 
         $parsed = Uri::make($value);
-        $type = Types::normalize($parsed->type, null);
-        if (!$type instanceof Types) {
+        $type = $this->types->forScheme($parsed->type);
+        if (!$type instanceof TypeDefinition) {
             throw new InvalidArgumentException(sprintf('Unknown Scroll URI scheme [%s].', $parsed->type));
         }
 
@@ -299,7 +287,7 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
 
         foreach ($sources as $source) {
             foreach ($this->scrolls[$source] ?? [] as $scroll) {
-                if (!$scroll instanceof ScrollContract || $this->scrollType($scroll) !== $type) {
+                if (!$scroll instanceof ScrollContract || $this->scrollType($scroll)->name !== $type->name) {
                     continue;
                 }
 
@@ -369,21 +357,15 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
             throw new LogicException('ScrollCodex can only hydrate Scroll envelopes.');
         }
 
-        $scroll = $envelope->scrollType->make($envelope, $this->decodeEnvelope($envelope));
+        $typeName = $envelope->scrollType instanceof Types ? $envelope->scrollType->value : $envelope->scrollType;
+        $scroll = $this->types->get($typeName)->make($envelope, $this->decodeEnvelope($envelope));
         return $scroll->bind($this);
     }
 
-    protected function scrollType(ScrollContract $scroll): Types
+    protected function scrollType(ScrollContract $scroll): TypeDefinition
     {
         $type = $scroll->type;
-        if ($type instanceof Types) {
-            return $type;
-        }
-        $normalized = Types::normalize($type, null);
-        if (!$normalized instanceof Types) {
-            throw new InvalidArgumentException(sprintf('Invalid Scroll type [%s].', (string) $type));
-        }
-        return $normalized;
+        return $this->typeDefinition($type);
     }
 
     /** @return array<string> */
@@ -436,10 +418,19 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
     {
         return strtolower(sprintf(
             '%s:%s#%s',
-            $this->scrollType($scroll)->value,
+            $this->scrollType($scroll)->name,
             trim($scroll->name, '/'),
             $scroll->version,
         ));
+    }
+
+    private function typeDefinition(Types|string $type): TypeDefinition
+    {
+        $name = $type instanceof Types ? $type->value : strtolower(trim($type));
+        if (!$this->types->has($name)) {
+            throw new InvalidArgumentException(sprintf('Unknown Scroll type [%s].', $name));
+        }
+        return $this->types->get($name);
     }
 
     protected function validate(mixed $scroll): void

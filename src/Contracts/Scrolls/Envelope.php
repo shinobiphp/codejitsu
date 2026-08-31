@@ -13,7 +13,7 @@ interface Envelope extends BaseEnvelope
         get;
     }
 
-    public ScrollTypes $scrollType {
+    public ScrollTypes|string $scrollType {
         get;
     }
 }

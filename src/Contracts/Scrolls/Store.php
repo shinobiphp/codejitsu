@@ -10,12 +10,12 @@ interface Store
     /**
      * Check if an envelope exists in the store for the given scroll type and name.
      */
-    public function has(ScrollTypes $type, string $name): bool;
+    public function has(ScrollTypes|string $type, string $name): bool;
 
     /**
      * Retrieve an envelope from the store.
      */
-    public function get(ScrollTypes $type, string $name): ?Envelope;
+    public function get(ScrollTypes|string $type, string $name): ?Envelope;
 
     public function getDiscovered(
         \Codejitsu\Discovery\DiscoveredScroll $scroll,
@@ -25,5 +25,5 @@ interface Store
      *
      * @return array<string, Envelope>
      */
-    public function all(ScrollTypes $type): array;
+    public function all(ScrollTypes|string $type): array;
 }

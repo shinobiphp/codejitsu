@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Scrolls;
 
-use Codejitsu\Codecs\Neon;
 use Codejitsu\Scrolls\ScrollDiscovery;
+use Codejitsu\Scrolls\TypeRegistry;
 use Codejitsu\Scrolls\Types\Context;
 use FilesystemIterator;
 use PHPUnit\Framework\TestCase;
@@ -36,7 +36,7 @@ final class ContextSourceFixtureTest extends TestCase
         file_put_contents($root . '/architecture/codex.ctx', $markdown);
 
         try {
-            $scrolls = (new ScrollDiscovery(new Neon()))->discover($root);
+            $scrolls = (new ScrollDiscovery(TypeRegistry::builtins()))->discover($root);
             self::assertCount(1, $scrolls);
             self::assertInstanceOf(Context::class, $scrolls[0]);
             self::assertSame('architecture/codex', $scrolls[0]->name);

@@ -10,7 +10,7 @@ final readonly class DiscoveredScroll
 {
     public function __construct(
         public string $name,
-        public ScrollTypes $type,
+        public ScrollTypes|string $type,
         public string $path,
         public string $extension,
     ) {}
