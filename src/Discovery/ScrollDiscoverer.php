@@ -40,7 +40,7 @@ final class ScrollDiscoverer
         foreach ($this->registry()->all() as $type) {
             $discovered = [
                 ...$discovered,
-                ...$this->discoverType($baseDir, $type),
+                ...$this->discoverType($type),
             ];
         }
 

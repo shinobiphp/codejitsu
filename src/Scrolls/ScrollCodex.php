@@ -9,6 +9,8 @@ use Codejitsu\Contracts\Scrolls\Envelope as ScrollEnvelope;
 use Codejitsu\Contracts\Scrolls\Scroll as ScrollContract;
 use Codejitsu\Contracts\Scrolls\ScrollCodex as ScrollCodexContract;
 use Codejitsu\Contracts\Scrolls\Store as StoreContract;
+use Codejitsu\Contracts\Codec as CodecContract;
+use Codejitsu\Contracts\Envelope as EnvelopeContract;
 use Codejitsu\Enums\Codecs;
 use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\SubstrateRegistry;
@@ -193,7 +195,11 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         foreach ($discovered as $discoveredScroll) {
             $envelope = $store->getDiscovered($discoveredScroll);
             if ($envelope !== null) {
-                $this->loadEnvelope($envelope);
+                $scroll = $this->hydrateFromEnvelope($envelope);
+                if (!$scroll instanceof ScrollContract) {
+                    throw new LogicException('Discovered Scroll envelope did not hydrate to a Scroll.');
+                }
+                $this->registerScroll($scroll, $source);
             }
         }
 
@@ -338,6 +344,15 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         $typeName = $envelope->scrollType instanceof Types ? $envelope->scrollType->value : $envelope->scrollType;
         $scroll = $this->types->get($typeName)->make($envelope, $this->decodeEnvelope($envelope));
         return $scroll->bind($this);
+    }
+
+    protected function resolveCodec(EnvelopeContract $envelope): CodecContract
+    {
+        if ($envelope instanceof ScrollEnvelope) {
+            $typeName = $envelope->scrollType instanceof Types ? $envelope->scrollType->value : $envelope->scrollType;
+            return $this->types->get($typeName)->makeCodec();
+        }
+        return parent::resolveCodec($envelope);
     }
 
     protected function scrollType(ScrollContract $scroll): TypeDefinition
