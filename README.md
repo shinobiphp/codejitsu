@@ -13,6 +13,7 @@ Codejitsu models application capabilities, commands, schemas, configuration, and
 - **Graph** nodes and named edges preserve semantic relationships between resources.
 - **Capabilities** execute through explicit substrates and deny-by-default execution policy.
 - **Context Scrolls** keep architectural memory readable by humans and addressable by tools.
+- **Type registry** lets packages add Scroll types, extensions, URI schemes, codecs, and implementations without adding cases to a core enum.
 
 ## Requirements
 
@@ -67,6 +68,10 @@ The root `shinobiphp/codejitsu` package remains the installable aggregate while 
 The [`.context/`](.context/) directory is Codejitsu's durable architectural memory. Start with [the agent context protocol](.context/agent-context.ctx), then read [current state](.context/current-state.ctx) and the relevant architecture, concept, decision, and roadmap resources.
 
 Source and tests define implemented behavior. Context explains intent, terminology, constraints, and roadmap.
+
+At bootstrap, the project `.context/` directory is registered as source `context`. For example, `context://architecture/codex@context#1.0.0` resolves independently of the checkout's absolute path.
+
+Packages can register an immutable `TypeDefinition` with the Codex type registry. The existing `Enums\Scrolls\Types` API remains a compatibility facade for built-in types; new package types do not require a core enum case.
 
 ## Development
 

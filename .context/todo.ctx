@@ -2,7 +2,7 @@
 
 > Living implementation checklist. `.context/` records architectural intent; code and tests are authoritative for what is actually implemented.
 >
-> Updated: 2026-08-25
+> Updated: 2026-08-30
 
 ## Current Position
 
@@ -57,10 +57,10 @@ Remaining:
 `ScrollCodex` is the single discovery/index/resolution boundary.
 
 - [ ] Make complete Scroll discovery Codex-owned.
-- [ ] Discover every supported Scroll type from configured roots.
-- [ ] Register every discovery origin as a named source.
+- [x] Discover registered built-in and package-owned Scroll types from configured roots.
+- [x] Register project Scroll and Context discovery origins as named sources.
 - [ ] Introduce/finish lightweight `IndexEntry` metadata separate from hydrated Scroll instances.
-- [ ] Query by type, name, version, tags, attributes, source, and URI/path without hydration.
+- [x] Query by type, name, version, tags, attributes, source, exact/path-prefix, and references.
 - [ ] Preserve source provenance in indexed metadata.
 - [ ] Add persistent cache/index storage.
 - [ ] Validate cache freshness with a manifest/fingerprint.
@@ -115,12 +115,21 @@ cmd://hello
 
 `.context/` is intended to become a first-class Scroll source rather than a pile of Markdown agents have to rediscover manually.
 
-- [ ] Establish/finish `.ctx` discovery and indexing as a normal Codex source.
-- [ ] Support Markdown payloads inside Context Scrolls.
-- [ ] Make context queryable by logical URI, metadata, source, and relationship.
-- [ ] Preserve human-readable Markdown while making metadata machine-discoverable.
-- [ ] Avoid a destructive bulk conversion of existing `.ctx` context files; migrate deliberately.
-- [ ] Prove a consumer can request targeted context without loading the entire repository.
+- [x] Establish `.ctx` discovery and indexing as the named `context` Codex source.
+- [x] Support Markdown payloads inside Context Scrolls.
+- [x] Make context queryable by logical URI, metadata, source, and relationship target.
+- [x] Preserve human-readable Markdown while making metadata machine-discoverable.
+- [x] Convert durable project context to `.ctx` with Git history preserved.
+- [x] Prove a consumer can request targeted context by path prefix, tags, source, and reference.
+
+## 6a. Package-Owned Scroll Types
+
+- [x] Define immutable `TypeDefinition` metadata.
+- [x] Register and look up types by name, extension, and URI scheme.
+- [x] Reject name, extension, and scheme collisions.
+- [x] Register built-ins while preserving the enum compatibility facade.
+- [x] Support package-defined discovery, resolution, persistence, and `make:scroll` creation.
+- [ ] Start `packages/ui` on a new branch and register its initial types there.
 
 ## 7. CLI / Command Scrolls
 

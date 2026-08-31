@@ -4,6 +4,15 @@ This roadmap records direction, not promises. Items marked planned are not neces
 
 ## Now
 
+### Completed foundation
+
+- [x] Register `.context/` as the named `context` source.
+- [x] Convert durable project context to Markdown-readable `.ctx` Scrolls.
+- [x] Resolve and target Context Scrolls by logical URI, source, path, tags, and references.
+- [x] Introduce a collision-safe package-owned Scroll type registry.
+- [x] Preserve built-in enum and command-scheme compatibility during registry migration.
+- [x] Prove a package-defined type through discovery, resolution, persistence, and creation.
+
 ### 1. Codex-Owned Discovery and Cache
 
 Move complete Scroll discovery responsibility behind `ScrollCodex` and add persistent cache/indexing.
@@ -76,8 +85,8 @@ Strengthen the three initial resource types with richer validation, versioning, 
 
 ## Next
 
-- first-class `context` Scrolls backed by Markdown content
-- `.context/` discovery/indexing as a normal Codex source
+- begin `packages/ui` by registering UI-owned types through the type registry
+- define and validate the first World/Scene contracts in that package
 - first-class Application Scroll resource trees such as `app://archiq/...`
 - formal Scroll identity value object integration
 - stronger Envelope/Scroll serialization contract

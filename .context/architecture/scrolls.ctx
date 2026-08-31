@@ -6,6 +6,8 @@ A Scroll is a first-class, discoverable, addressable resource.
 
 Every Scroll has a type, name, version, tags, attributes/data, and optional Envelope/Codex binding. The base class supports hydration, serialization, references, and invocation when the specialized Scroll exposes executable behavior. fileciteturn102file0L2-L2
 
+Scroll types are described by immutable `TypeDefinition` values and owned by a `TypeRegistry`. A definition supplies the canonical name, plural directory, file extension, URI scheme, Scroll class, codec, and optional schema URI. Packages register their own definitions; core does not gain an enum case for every ecosystem resource. Built-ins still expose `Enums\Scrolls\Types` as a compatibility facade.
+
 The current identity key used by `ScrollCodex` is:
 
 ```text
@@ -66,3 +68,5 @@ The parent namespace is the owner of the raw child definitions; runtime child hy
 ## Polyglot Direction
 
 The resource model is intentionally format-neutral at the domain level. NEON is the current storage representation, but Scroll semantics should not depend on PHP-specific implementation details. Future runtimes may consume equivalent Scroll resources in other languages or execution substrates.
+
+The next UI package may register types such as World, Scene, or Edition, but their schemas are intentionally not fixed by core or by this completed infrastructure slice.

@@ -13,6 +13,7 @@
 - filter by type, tags, attributes, and source
 - invoke resolved Scrolls
 - bind Scrolls back to the Codex so references resolve through the same registry
+- own the injected Scroll type registry used by discovery, resolution, hydration, persistence, and creation
 
 The Codex should remain the single resolution boundary. Applications and Scrolls should not need to know whether a resource came from a filesystem, package, database, tenant store, or remote backend.
 
@@ -102,7 +103,9 @@ Future implementations may add full-text, structural, or semantic search over th
 
 ## Discovery
 
-`ScrollDiscovery` recursively scans a resource root and maps file extensions to `ScrollTypes`. It decodes the payload and creates the corresponding Scroll type.
+`ScrollDiscovery` recursively scans a resource root and maps file extensions through the Codex `TypeRegistry`. It decodes with the registered codec and creates the registered Scroll class. This permits package types without editing a core enum.
+
+Project bootstrap registers `scrolls/` as `default` and `.context/` as `context`. Missing roots are empty sources and never fall back to scanning the working directory.
 
 Discovery is intentionally separate from resolution, but discovery responsibility and its resulting index belong behind the Codex boundary. Each discovered resource must retain source provenance so the same logical resource can be resolved from a specific source or through a source cascade.
 

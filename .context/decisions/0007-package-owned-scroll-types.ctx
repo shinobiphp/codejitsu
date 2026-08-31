@@ -1,0 +1,22 @@
+# Decision 0007: Scroll Types Are Package-Owned
+
+Status: accepted  
+Date: 2026-08-30
+
+## Decision
+
+Semantic Scroll types belong to the package that defines their behavior. Packages register immutable `TypeDefinition` values with the application-composed `TypeRegistry`; they do not add cases to a core enum.
+
+A definition owns its canonical name, plural directory, extension, URI scheme, Scroll implementation class, codec, and optional schema URI. Registration order is stable. Duplicate names, extensions, or schemes fail immediately with a conflict naming both definitions.
+
+Core registers the current built-ins when constructing the default Codex. `Enums\Scrolls\Types` remains a temporary compatibility facade for existing callers and built-in envelope values. Registry definitions drive new discovery, resolution, persistence, hydration, and creation behavior.
+
+Package bootstrap is responsible for registering package definitions before its resources are loaded. Registries are injected through the Codex composition boundary; there is no mutable static global registry.
+
+## Consequences
+
+- Ecosystem packages can introduce resources without coupling releases to core enum changes.
+- Extension and URI collisions are deterministic startup errors rather than discovery-order bugs.
+- Built-in callers can migrate incrementally.
+- The future `packages/ui` package can register World, Scene, Edition, or other validated UI types without core changes.
+- This decision does not approve those UI schemas; they begin in the next package-specific slice.

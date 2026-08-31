@@ -1,6 +1,6 @@
 # Codejitsu — Current State
 
-Updated: 2026-08-23
+Updated: 2026-08-30
 
 ## RESUME PROMPT
 
@@ -8,21 +8,36 @@ Updated: 2026-08-23
 
 ## Status
 
-The Context Scroll / canonical resource graph slice is complete, merged into `main`, and locally verified.
+The Context Scroll source and package-owned Scroll type registry are implemented on the current development branch and ready to merge.
 
 Current verified baseline:
 
 ```text
-main
-31 tests
-94 assertions
+codex/context-scroll-source
+99 tests
+328 assertions
 0 failures
 0 errors
 0 deprecations
 0 risky tests
 ```
 
-The working tree was clean after restoring generated Composer artifacts. A fresh `composer install` followed by `composer test` reproduced the green suite.
+The last full `composer test` run was green. Final Composer validation and autoload verification are required before merge.
+
+## Implemented in the Current Slice
+
+- Root `README.md` is the public GitHub entrypoint; durable project context lives in Markdown-readable `.ctx` files.
+- Boot registers `scrolls/` as source `default` and `.context/` as source `context`; a missing directory is an empty source.
+- Context resources resolve with logical URIs such as `context://architecture/codex@context#1.0.0`.
+- Codex query supports exact path, path prefix, tags, source, attributes, and outgoing reference targets.
+- `TypeDefinition` and `TypeRegistry` provide normalized, collision-safe lookup by name, extension, and URI scheme.
+- Built-in Scroll types are registered at Codex composition while `Enums\Scrolls\Types` remains compatible.
+- Package-owned types work through recursive discovery, query/index entries, URI resolution, filesystem persistence, and `make:scroll`.
+- `cmd://` remains canonical while `command://` continues to resolve as a compatibility alias.
+
+## Next Slice
+
+Create `packages/ui` on a new branch. Its first responsibility is to register its own Scroll definitions through the completed registry. Do not add `world`, `scene`, or `edition` to the core enum. Validate their schemas in the UI-package slice rather than treating the current lander concepts as implemented contracts.
 
 ## What Is Locked In
 
