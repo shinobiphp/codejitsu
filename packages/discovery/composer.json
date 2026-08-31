@@ -1,8 +1,8 @@
 {
     "name": "codejitsu/discovery",
     "description": "Codejitsu resource discovery and source registration",
-    "version": "1.0.0",
     "type": "library",
+    "license": "proprietary",
     "require": {
         "php": ">=8.4",
         "codejitsu/core": "self.version",

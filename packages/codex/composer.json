@@ -1,8 +1,8 @@
 {
     "name": "codejitsu/codex",
     "description": "Codejitsu resource indexing, resolution, and graph navigation",
-    "version": "1.0.0",
     "type": "library",
+    "license": "proprietary",
     "require": {
         "php": ">=8.4",
         "codejitsu/core": "self.version",
@@ -11,7 +11,6 @@
     },
     "autoload": {
         "psr-4": {
-            "Codejitsu\\Codex\\": "../../src/Codex/",
             "Codejitsu\\": "../../src/"
         }
     }

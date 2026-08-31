@@ -1,8 +1,8 @@
 {
     "name": "codejitsu/config",
     "description": "Codejitsu configuration resources and stores",
-    "version": "1.0.0",
     "type": "library",
+    "license": "proprietary",
     "require": {
         "php": ">=8.4",
         "codejitsu/core": "self.version",

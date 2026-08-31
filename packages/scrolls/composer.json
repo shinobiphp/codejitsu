@@ -1,8 +1,8 @@
 {
     "name": "codejitsu/scrolls",
     "description": "Codejitsu Scroll resources, contracts, and serialization",
-    "version": "1.0.0",
     "type": "library",
+    "license": "proprietary",
     "require": {
         "php": ">=8.4",
         "codejitsu/core": "self.version",

@@ -1,7 +1,6 @@
 lib
 lib/
 lib/*
-composer.lock
 vendor/
 vendor/*
 .phpunit.cache/

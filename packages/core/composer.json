@@ -1,8 +1,8 @@
 {
     "name": "codejitsu/core",
     "description": "Codejitsu core runtime and foundational contracts",
-    "version": "1.0.0",
     "type": "library",
+    "license": "proprietary",
     "require": {
         "php": ">=8.4",
         "psr/container": "^2.0",
