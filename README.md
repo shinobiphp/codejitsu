@@ -77,9 +77,11 @@ Packages can register an immutable `TypeDefinition` with the Codex type registry
 
 ```bash
 composer validate --strict
-composer dump-autoload --strict-psr
+composer dump-autoload --optimize --strict-psr
 composer test
 ```
+
+Run the complete local release gate with `composer check`. Use `composer test:installation` to verify a disposable tracked checkout can install from the committed lockfile and boot the real CLI.
 
 See the [current roadmap](.context/roadmap/current.ctx) and [code standards](.context/code-standards.ctx) before architectural work.
 

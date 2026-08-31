@@ -31,7 +31,25 @@
     "config": {"bin-dir": "./bin/", "vendor-dir": "lib/"},
     "extra": {"branch-alias": {"dev-main": "1.0.x-dev"}},
     "scripts": {
-        "test": "phpunit --enforce-time-limit --default-time-limit=10",
-        "test:coverage": "phpunit --coverage-text --enforce-time-limit --default-time-limit=10"
+        "test": "phpunit --exclude-group installation --enforce-time-limit --default-time-limit=10",
+        "test:coverage": "phpunit --exclude-group installation --coverage-text --enforce-time-limit --default-time-limit=10",
+        "test:installation": "phpunit --group installation --enforce-time-limit --default-time-limit=60",
+        "check:php": "@php tools/check-php.php",
+        "check:manifests": [
+            "composer validate --strict",
+            "composer validate --strict packages/core/composer.json",
+            "composer validate --strict packages/discovery/composer.json",
+            "composer validate --strict packages/scrolls/composer.json",
+            "composer validate --strict packages/codex/composer.json",
+            "composer validate --strict packages/config/composer.json",
+            "composer validate --strict packages/schema/composer.json",
+            "composer validate --strict packages/console/composer.json"
+        ],
+        "check": [
+            "@check:manifests",
+            "composer dump-autoload --optimize --strict-psr",
+            "@check:php",
+            "@test"
+        ]
     }
 }
