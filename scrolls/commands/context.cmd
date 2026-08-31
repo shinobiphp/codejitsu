@@ -24,3 +24,6 @@ commands:
     resume:
         description: Render the current agent briefing.
         capability: capability://context-resume
+    tui:
+        description: Render the terminal Context browser.
+        capability: capability://context-tui

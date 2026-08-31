@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace Codejitsu\Commands;
 
 use Codejitsu\Context\ContextMemory;
+use Codejitsu\Context\ContextTui;
 use Codejitsu\ExecutionContext;
 use RuntimeException;
 
@@ -39,6 +40,11 @@ final class Contexts
     public static function resume(ExecutionContext $context): string
     {
         return self::memory($context)->resume();
+    }
+
+    public static function tui(ExecutionContext $context): string
+    {
+        return (new ContextTui(self::memory($context)))->render();
     }
 
     private static function memory(ExecutionContext $context): ContextMemory

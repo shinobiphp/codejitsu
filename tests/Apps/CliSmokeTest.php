@@ -22,6 +22,7 @@ final class CliSmokeTest extends TestCase
         yield 'context show' => [['context:show', 'current-state'], 0, 'Codejitsu'];
         yield 'context check' => [['context:check'], 0, 'Context memory is valid'];
         yield 'context resume' => [['context:resume'], 0, 'Current State'];
+        yield 'context tui' => [['context:tui'], 0, 'CODEJITSU CONTEXT'];
         yield 'invalid command' => [['does:not:exist'], 1, 'no commands defined'];
     }
 
