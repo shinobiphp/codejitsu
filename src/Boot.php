@@ -10,6 +10,7 @@ use Codejitsu\Apps\Web;
 use Codejitsu\Contracts\App;
 use Codejitsu\Enums\Environment;
 use Codejitsu\Kernel\Kernel;
+use Codejitsu\Packages\PackageBootstrap;
 use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\Substrate\Javascript;
 use Codejitsu\Substrate\Lua;
@@ -100,6 +101,7 @@ final class Boot
     private static function loadProjectScrolls(ScrollCodex $scrolls, string $root): void
     {
         $root = rtrim($root, '/\\');
+        (new PackageBootstrap())->boot($root, $scrolls);
         $scrolls->load($root . DIRECTORY_SEPARATOR . 'scrolls', 'default');
         $scrolls->registerSource('context');
         $scrolls->load($root . DIRECTORY_SEPARATOR . '.context', 'context');
