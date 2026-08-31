@@ -13,6 +13,7 @@ use Codejitsu\Scrolls\Types\Command as CommandScroll;
 use Codejitsu\Scrolls\Types\Config as ConfigScroll;
 use Codejitsu\Scrolls\Types\Context as ContextScroll;
 use Codejitsu\Scrolls\Types\Kata as KataScroll;
+use Codejitsu\Scrolls\Types\Package as PackageScroll;
 use Codejitsu\Scrolls\Types\Schema as SchemaScroll;
 use Codejitsu\Scrolls\Types\Skill as SkillScroll;
 use Codejitsu\Scrolls\TypeDefinition;
@@ -28,6 +29,7 @@ enum Types: string
     case CONFIG = 'config';
     case CONTEXT = 'context';
     case KATA = 'kata';
+    case PACKAGE = 'package';
     case SCHEMA = 'schema';
     case SKILL = 'skill';
 
@@ -77,6 +79,7 @@ enum Types: string
             'config' => array_merge(['class' => ConfigScroll::class, 'plural' => 'configs', 'long_name' => 'configuration', 'long_plural' => 'configurations', 'extension' => 'config', 'scheme' => 'config://'], $codecConfig),
             'context' => array_merge(['class' => ContextScroll::class, 'plural' => 'contexts', 'long_name' => 'context', 'long_plural' => 'contexts', 'extension' => 'ctx', 'scheme' => 'context://'], $codecConfig),
             'kata' => array_merge(['class' => KataScroll::class, 'plural' => 'katas', 'long_name' => 'kata', 'long_plural' => 'katas', 'extension' => 'kata', 'scheme' => 'kata://'], $codecConfig),
+            'package' => array_merge(['class' => PackageScroll::class, 'plural' => 'packages', 'long_name' => 'package', 'long_plural' => 'packages', 'extension' => 'package', 'scheme' => 'package://'], $codecConfig),
             'schema' => array_merge(['class' => SchemaScroll::class, 'plural' => 'schemas', 'long_name' => 'schema', 'long_plural' => 'schemas', 'extension' => 'schema', 'scheme' => 'schema://'], $codecConfig),
             'skill' => array_merge(['class' => SkillScroll::class, 'plural' => 'skills', 'long_name' => 'skill', 'long_plural' => 'skills', 'extension' => 'skill', 'scheme' => 'skill://'], $codecConfig),
         ];
@@ -91,6 +94,7 @@ enum Types: string
             self::CONFIG => ConfigScroll::class,
             self::CONTEXT => ContextScroll::class,
             self::KATA => KataScroll::class,
+            self::PACKAGE => PackageScroll::class,
             self::SCHEMA => SchemaScroll::class,
             self::SKILL => SkillScroll::class,
         };
@@ -121,6 +125,7 @@ enum Types: string
             self::CONFIG => 'configs',
             self::CONTEXT => 'contexts',
             self::KATA => 'katas',
+            self::PACKAGE => 'packages',
             self::SCHEMA => 'schemas',
             self::SKILL => 'skills',
         };
@@ -135,6 +140,7 @@ enum Types: string
             self::CONFIG => 'config',
             self::CONTEXT => 'ctx',
             self::KATA => 'kata',
+            self::PACKAGE => 'package',
             self::SCHEMA => 'schema',
             self::SKILL => 'skill',
         };

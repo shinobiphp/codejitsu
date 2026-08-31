@@ -15,7 +15,15 @@
         "symfony/filesystem": "^8.1",
         "vlucas/phpdotenv": "^5.6",
         "nette/neon": "^3.4",
-        "opis/json-schema": "^2.6"
+        "opis/json-schema": "^2.6",
+        "codejitsu/core": "dev-main@dev",
+        "codejitsu/discovery": "dev-main@dev",
+        "codejitsu/scrolls": "dev-main@dev",
+        "codejitsu/codex": "dev-main@dev",
+        "codejitsu/config": "dev-main@dev",
+        "codejitsu/schema": "dev-main@dev",
+        "codejitsu/console": "dev-main@dev",
+        "codejitsu/package": "dev-main@dev"
     },
     "require-dev": {
         "phpunit/phpunit": "^13.3"
@@ -29,6 +37,9 @@
     },
     "authors": [{"name": "Shinobi PHP", "email": "shinobiphp@gmail.com"}],
     "config": {"bin-dir": "./bin/", "vendor-dir": "lib/"},
+    "repositories": [
+        {"type": "path", "url": "packages/*", "options": {"symlink": true}}
+    ],
     "extra": {"branch-alias": {"dev-main": "1.0.x-dev"}},
     "scripts": {
         "test": "phpunit --exclude-group installation --enforce-time-limit --default-time-limit=10",
@@ -44,6 +55,7 @@
             "composer validate --strict packages/config/composer.json",
             "composer validate --strict packages/schema/composer.json",
             "composer validate --strict packages/console/composer.json"
+            ,"composer validate --strict packages/package/composer.json"
         ],
         "check": [
             "@check:manifests",

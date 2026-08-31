@@ -4,8 +4,240 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "de3c507e9f9b61aa5eef6a31b52b81b0",
+    "content-hash": "207e2b94fd059ba0795b187c5db18cad",
     "packages": [
+        {
+            "name": "codejitsu/codex",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/codex",
+                "reference": "78bdd6d081f166411b3186856e45d8014305e56a"
+            },
+            "require": {
+                "codejitsu/core": "self.version",
+                "codejitsu/discovery": "self.version",
+                "codejitsu/scrolls": "self.version",
+                "php": ">=8.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Codejitsu\\": "../../src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Codejitsu resource indexing, resolution, and graph navigation",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "codejitsu/config",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/config",
+                "reference": "3c0bd3f122f77fba64f976160bbc20cf79856f33"
+            },
+            "require": {
+                "codejitsu/core": "self.version",
+                "php": ">=8.4",
+                "symfony/config": "^8.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Codejitsu\\Config\\": "../../src/Config/",
+                    "Codejitsu\\Contracts\\Config\\": "../../src/Contracts/Config/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Codejitsu configuration resources and stores",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "codejitsu/console",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/console",
+                "reference": "b413f181eaace5e7c68099febdfa3df67f07c901"
+            },
+            "require": {
+                "codejitsu/codex": "self.version",
+                "codejitsu/core": "self.version",
+                "php": ">=8.4",
+                "symfony/console": "^8.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Codejitsu\\Apps\\": "../../src/Apps/",
+                    "Codejitsu\\IO\\": "../../src/IO/",
+                    "Codejitsu\\Commands\\": "../../src/Commands/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Codejitsu CLI application and input/output translation",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "codejitsu/core",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/core",
+                "reference": "c8b4524be60bf1171b96b8f4cdd07f00b029b40a"
+            },
+            "require": {
+                "php": ">=8.4",
+                "psr/container": "^2.0",
+                "psr/event-dispatcher": "^1.0",
+                "psr/log": "^3.0",
+                "psr/simple-cache": "^3.0"
+            },
+            "type": "library",
+            "license": [
+                "proprietary"
+            ],
+            "description": "Codejitsu core runtime and foundational contracts",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "codejitsu/discovery",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/discovery",
+                "reference": "7f630f063dfa6cb4dafb59a05321d4b627b49dea"
+            },
+            "require": {
+                "codejitsu/core": "self.version",
+                "php": ">=8.4",
+                "symfony/filesystem": "^8.1",
+                "symfony/finder": "^8.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Codejitsu\\Discovery\\": "../../src/Discovery/",
+                    "Codejitsu\\Contracts\\Discovery\\": "../../src/Contracts/Discovery/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Codejitsu resource discovery and source registration",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "codejitsu/package",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/package",
+                "reference": "ac3ae0513cd1d9da1328e83650ddd912797a798b"
+            },
+            "require": {
+                "codejitsu/codex": "self.version",
+                "codejitsu/core": "self.version",
+                "codejitsu/scrolls": "self.version",
+                "php": ">=8.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Codejitsu\\Packages\\": "../../src/Packages/",
+                    "Codejitsu\\Contracts\\Packages\\": "../../src/Contracts/Packages/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Codejitsu package manifests, compilation, and runtime registration",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "codejitsu/schema",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/schema",
+                "reference": "c6ef95775f6216ddbe1b724c7f74cadcc555fac5"
+            },
+            "require": {
+                "codejitsu/core": "self.version",
+                "opis/json-schema": "^2.6",
+                "php": ">=8.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Codejitsu\\Schema\\": "../../src/Schema/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Codejitsu schema resources and validation",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "codejitsu/scrolls",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/scrolls",
+                "reference": "211f9cbc636887dd705817520f1d5018de3bbf1c"
+            },
+            "require": {
+                "codejitsu/core": "self.version",
+                "nette/neon": "^3.4",
+                "php": ">=8.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Codejitsu\\Scrolls\\": "../../src/Scrolls/",
+                    "Codejitsu\\Contracts\\Scrolls\\": "../../src/Contracts/Scrolls/",
+                    "Codejitsu\\Attributes\\": "../../src/Attributes/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Codejitsu Scroll resources, contracts, and serialization",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
         {
             "name": "graham-campbell/result-type",
             "version": "v1.2.0",
@@ -3930,7 +4162,16 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "codejitsu/codex": 20,
+        "codejitsu/config": 20,
+        "codejitsu/console": 20,
+        "codejitsu/core": 20,
+        "codejitsu/discovery": 20,
+        "codejitsu/package": 20,
+        "codejitsu/schema": 20,
+        "codejitsu/scrolls": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
