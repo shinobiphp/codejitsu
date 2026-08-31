@@ -50,7 +50,7 @@ final class Boot
         $root = $rootDir ?? (defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd());
         $scrolls = $codex ?? new ScrollCodex();
         self::registerSubstrates($scrolls);
-        $scrolls->load($root . DIRECTORY_SEPARATOR . 'scrolls');
+        self::loadProjectScrolls($scrolls, $root);
 
         $kernel = Kernel::instance($name ?? 'cli', $scrolls);
         return new Cli($kernel);
@@ -64,10 +64,12 @@ final class Boot
         ?string $rootDir = null,
         ?Environment $environment = null,
     ): Swoole {
+        $root = $rootDir ?? (defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd());
         $scrolls = $codex ?? new ScrollCodex();
         self::registerSubstrates($scrolls);
+        self::loadProjectScrolls($scrolls, $root);
         $kernel = Kernel::instance($name ?? 'swoole', $scrolls);
-        $kernel->boot($rootDir, $environment);
+        $kernel->boot($root, $environment);
         return new Swoole($kernel, $host, $port);
     }
 
@@ -77,10 +79,12 @@ final class Boot
         ?string $rootDir = null,
         ?Environment $environment = null,
     ): Web {
+        $root = $rootDir ?? (defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd());
         $scrolls = $codex ?? new ScrollCodex();
         self::registerSubstrates($scrolls);
+        self::loadProjectScrolls($scrolls, $root);
         $kernel = Kernel::instance($name ?? 'web', $scrolls);
-        $kernel->boot($rootDir, $environment);
+        $kernel->boot($root, $environment);
         return new Web($kernel);
     }
 
@@ -91,6 +95,14 @@ final class Boot
         $registry->register('lua', new Lua());
         $registry->register('javascript', new Javascript());
         $registry->register('wasm', new Wasm());
+    }
+
+    private static function loadProjectScrolls(ScrollCodex $scrolls, string $root): void
+    {
+        $root = rtrim($root, '/\\');
+        $scrolls->load($root . DIRECTORY_SEPARATOR . 'scrolls', 'default');
+        $scrolls->registerSource('context');
+        $scrolls->load($root . DIRECTORY_SEPARATOR . '.context', 'context');
     }
 
     /** @return array{0: ?string, 1: ?Environment} */
