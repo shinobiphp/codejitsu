@@ -45,6 +45,18 @@ final class PackageManagerTest extends TestCase
         $this->expectExceptionMessage('package not found');
         $manager->info('vendor/missing', '/project');
     }
+
+    public function testSearchAndUninstallUseComposerBoundary(): void
+    {
+        $runner = new FakeProcessRunner(new ProcessResult(0, '[]', ''));
+        $manager = new PackageManager($runner, 'composer');
+        self::assertSame('[]', $manager->search('shinobi', '/project'));
+        self::assertSame(0, $manager->uninstall('vendor/pkg', '/project'));
+        self::assertSame([
+            ['composer', 'search', 'shinobi', '--format=json'],
+            ['composer', 'remove', 'vendor/pkg', '--no-interaction', '--no-progress'],
+        ], $runner->commands);
+    }
 }
 
 final class FakeProcessRunner implements ProcessRunner

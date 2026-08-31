@@ -12,6 +12,10 @@ commands:
         usage: 'pkg:info <package>'
         schema: schema://package
         capability: capability://pkg-info
+    search:
+        description: Search configured Composer repositories.
+        usage: 'pkg:search <query>'
+        capability: capability://pkg-search
     install:
         description: Install a Composer package.
         usage: 'pkg:install <package>'
@@ -22,7 +26,24 @@ commands:
         usage: 'pkg:remove <package>'
         schema: schema://package
         capability: capability://pkg-remove
+    uninstall:
+        description: Uninstall a Composer package.
+        usage: 'pkg:uninstall <package>'
+        schema: schema://package
+        capability: capability://pkg-uninstall
     update:
         description: Update a Composer package or the project.
         usage: 'pkg:update [package]'
         capability: capability://pkg-update
+    cache:
+        description: Manage the compiled package cache.
+        commands:
+            status:
+                description: Show package cache status.
+                capability: capability://pkg-cache-status
+            rebuild:
+                description: Rebuild the package cache.
+                capability: capability://pkg-cache-rebuild
+            clear:
+                description: Clear the package cache.
+                capability: capability://pkg-cache-clear

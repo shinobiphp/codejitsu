@@ -1,0 +1,3 @@
+name: pkg-uninstall
+type: capability
+target: Codejitsu\Commands\Packages::uninstall

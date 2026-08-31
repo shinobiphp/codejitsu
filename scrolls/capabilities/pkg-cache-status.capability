@@ -1,0 +1,3 @@
+name: pkg-cache-status
+type: capability
+target: Codejitsu\Commands\Packages::cacheStatus

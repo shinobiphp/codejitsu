@@ -48,6 +48,13 @@ final class PackageManager
         return $result['output'];
     }
 
+    public function search(string $query, string $root): string
+    {
+        $result = $this->composer(['search', $query, '--format=json'], $root);
+        if ($result['exit'] !== 0) throw new RuntimeException($result['output']);
+        return $result['output'];
+    }
+
     public function install(string $package, string $root): int
     {
         return $this->mutate('require', $package, $root);
@@ -56,6 +63,11 @@ final class PackageManager
     public function remove(string $package, string $root): int
     {
         return $this->mutate('remove', $package, $root);
+    }
+
+    public function uninstall(string $package, string $root): int
+    {
+        return $this->remove($package, $root);
     }
 
     public function update(?string $package, string $root): int

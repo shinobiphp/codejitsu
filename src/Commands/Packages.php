@@ -6,10 +6,20 @@ namespace Codejitsu\Commands;
 
 use Codejitsu\ExecutionContext;
 use Codejitsu\PackageManager;
+use Codejitsu\Composer\PackageInstaller;
+use Codejitsu\Packages\PackageBootstrap;
+use Codejitsu\Packages\PackageCache;
 use RuntimeException;
 
 final class Packages
 {
+    public static function search(ExecutionContext $context): string
+    {
+        $query = trim((string) ($context->arguments[0] ?? ''));
+        if ($query === '') throw new RuntimeException('A package search query is required.');
+        return (new PackageManager())->search($query, self::root());
+    }
+
     public static function list(ExecutionContext $context): string
     {
         $root = getcwd();
@@ -65,6 +75,28 @@ final class Packages
         return (new PackageManager())->remove($package, $root);
     }
 
+    public static function uninstall(ExecutionContext $context): int
+    {
+        return self::remove($context);
+    }
+
+    public static function cacheStatus(ExecutionContext $context): string
+    {
+        return json_encode((new PackageCache())->status(PackageBootstrap::cachePath(self::root())), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT) . "\n";
+    }
+
+    public static function cacheRebuild(ExecutionContext $context): string
+    {
+        $compiled = (new PackageInstaller())->rebuild(self::root());
+        return sprintf("Rebuilt package cache for %d package(s).\n", count($compiled['packages']));
+    }
+
+    public static function cacheClear(ExecutionContext $context): string
+    {
+        (new PackageCache())->clear(PackageBootstrap::cachePath(self::root()));
+        return "Package cache cleared.\n";
+    }
+
     public static function update(ExecutionContext $context): int
     {
         $package = $context->arguments[0] ?? null;
@@ -78,5 +110,10 @@ final class Packages
         }
 
         return (new PackageManager())->update($package, $root);
+    }
+
+    private static function root(): string
+    {
+        return getcwd() ?: throw new RuntimeException('Unable to determine the project root.');
     }
 }
