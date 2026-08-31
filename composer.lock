@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "207e2b94fd059ba0795b187c5db18cad",
+    "content-hash": "56db53d17a61e65493a634d8f215b4bc",
     "packages": [
         {
             "name": "codejitsu/codex",
@@ -30,6 +30,37 @@
                 "proprietary"
             ],
             "description": "Codejitsu resource indexing, resolution, and graph navigation",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "codejitsu/composer-plugin",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/composer-plugin",
+                "reference": "f7bf764091c2560eafc160014f3b00a12f02de8f"
+            },
+            "require": {
+                "codejitsu/package": "self.version",
+                "composer-plugin-api": "^2.6",
+                "php": ">=8.4"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Codejitsu\\Composer\\Plugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "Codejitsu\\Composer\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Keeps the Codejitsu package cache synchronized with Composer",
             "transport-options": {
                 "symlink": true,
                 "relative": true
@@ -4164,6 +4195,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "codejitsu/codex": 20,
+        "codejitsu/composer-plugin": 20,
         "codejitsu/config": 20,
         "codejitsu/console": 20,
         "codejitsu/core": 20,

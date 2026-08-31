@@ -24,6 +24,7 @@
         "codejitsu/schema": "dev-main@dev",
         "codejitsu/console": "dev-main@dev",
         "codejitsu/package": "dev-main@dev"
+        ,"codejitsu/composer-plugin": "dev-main@dev"
     },
     "require-dev": {
         "phpunit/phpunit": "^13.3"
@@ -36,7 +37,11 @@
         "psr-4": {"Codejitsu\\Tests\\": "tests/"}
     },
     "authors": [{"name": "Shinobi PHP", "email": "shinobiphp@gmail.com"}],
-    "config": {"bin-dir": "./bin/", "vendor-dir": "lib/"},
+    "config": {
+        "bin-dir": "./bin/",
+        "vendor-dir": "lib/",
+        "allow-plugins": {"codejitsu/composer-plugin": true}
+    },
     "repositories": [
         {"type": "path", "url": "packages/*", "options": {"symlink": true}}
     ],
@@ -56,6 +61,7 @@
             "composer validate --strict packages/schema/composer.json",
             "composer validate --strict packages/console/composer.json"
             ,"composer validate --strict packages/package/composer.json"
+            ,"composer validate --strict packages/composer-plugin/composer.json"
         ],
         "check": [
             "@check:manifests",
