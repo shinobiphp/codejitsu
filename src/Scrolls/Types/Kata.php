@@ -8,5 +8,5 @@ use Codejitsu\Scrolls\Scroll;
 
 class Kata extends Scroll
 {
-    public const TYPE = ScrollTypes::KATA;
+    public const ScrollTypes TYPE = ScrollTypes::KATA;
 }

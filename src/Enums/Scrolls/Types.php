@@ -15,6 +15,7 @@ use Codejitsu\Scrolls\Types\Context as ContextScroll;
 use Codejitsu\Scrolls\Types\Kata as KataScroll;
 use Codejitsu\Scrolls\Types\Schema as SchemaScroll;
 use Codejitsu\Scrolls\Types\Skill as SkillScroll;
+use Codejitsu\Scrolls\TypeDefinition;
 use Codejitsu\Traits\EnhancedEnum;
 
 enum Types: string
@@ -142,5 +143,17 @@ enum Types: string
     public function scheme(): string
     {
         return $this->value . '://';
+    }
+
+    public function definition(): TypeDefinition
+    {
+        return new TypeDefinition(
+            $this->value,
+            $this->plural(),
+            $this->extension(),
+            $this->scheme(),
+            $this->className(),
+            Codecs::NEON,
+        );
     }
 }

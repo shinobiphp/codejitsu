@@ -27,12 +27,19 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
     protected array $sources = [];
 
     private SubstrateRegistry $substrates;
+    private TypeRegistry $types;
 
-    public function __construct(array $itemsOrEnvelopes = [])
+    public function __construct(array $itemsOrEnvelopes = [], ?TypeRegistry $types = null)
     {
         parent::__construct(Codecs::NEON, $itemsOrEnvelopes);
         $this->substrates = new SubstrateRegistry();
+        $this->types = $types ?? TypeRegistry::builtins();
         $this->registerSource('default');
+    }
+
+    public function types(): TypeRegistry
+    {
+        return $this->types;
     }
 
     public function substrates(): SubstrateRegistry

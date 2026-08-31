@@ -8,5 +8,5 @@ use Codejitsu\Scrolls\Scroll;
 
 class App extends Scroll
 {
-    public const TYPE = ScrollTypes::APP;
+    public const ScrollTypes TYPE = ScrollTypes::APP;
 }

@@ -7,6 +7,7 @@ namespace Codejitsu\Scrolls;
 use Codejitsu\Contracts\Scrolls\TypeRegistry as TypeRegistryContract;
 use InvalidArgumentException;
 use OutOfBoundsException;
+use Codejitsu\Enums\Scrolls\Types;
 
 final class TypeRegistry implements TypeRegistryContract
 {
@@ -16,6 +17,15 @@ final class TypeRegistry implements TypeRegistryContract
     private array $extensions = [];
     /** @var array<string, string> */
     private array $schemes = [];
+
+    public static function builtins(): self
+    {
+        $registry = new self();
+        foreach (Types::cases() as $type) {
+            $registry->register($type->definition());
+        }
+        return $registry;
+    }
 
     public function register(TypeDefinition $definition): static
     {

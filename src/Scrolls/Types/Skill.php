@@ -8,5 +8,5 @@ use Codejitsu\Scrolls\Scroll;
 
 class Skill extends Scroll
 {
-    public const TYPE = ScrollTypes::SKILL;
+    public const ScrollTypes TYPE = ScrollTypes::SKILL;
 }
