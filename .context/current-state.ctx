@@ -144,7 +144,7 @@ The target model is:
 
 Markdown remains valuable as the human-readable content payload. Scroll metadata should make the content discoverable, filterable, versionable, source-aware, and relationship-aware.
 
-Do not prematurely require every existing `.md` file to be converted in one destructive migration. Establish the `.ctx` representation and conversion/discovery path first, then migrate useful context resources deliberately.
+Do not prematurely require every existing `.ctx` file to be converted in one destructive migration. Establish the `.ctx` representation and conversion/discovery path first, then migrate useful context resources deliberately.
 
 ## Vessel / Spark Architecture — LOCKED DIRECTION
 
@@ -399,7 +399,7 @@ Each step should be independently testable and should avoid pulling later-stage 
 ## Guardrails For The Next Session
 
 - Start from `main` and verify the tree/test baseline before changing anything.
-- Read this file, `.context/code-standards.md`, the canonical graph decision, and relevant existing source/tests before designing new contracts.
+- Read this file, `.context/code-standards.ctx`, the canonical graph decision, and relevant existing source/tests before designing new contracts.
 - Inspect the actual Neuron-AI dependency/API before deciding integration details.
 - Use existing discovery/source/Codex patterns instead of creating parallel infrastructure.
 - Write failing behavioral tests before implementation for new contracts.

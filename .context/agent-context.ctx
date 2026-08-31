@@ -6,13 +6,13 @@ This directory is Codejitsu's shared architectural memory. Any human or AI agent
 
 Before making a non-trivial architectural change:
 
-1. Read the repository `README.md`.
-2. Read `.context/agent-context.md`.
+1. Read the repository `README.ctx`.
+2. Read `.context/agent-context.ctx`.
 3. Read `.context/current-state.ctx`.
 4. Read the relevant documents under `architecture/` and `concepts/`.
 5. Read relevant decision records under `decisions/`.
 6. Read `roadmap/` when the change affects planned work.
-7. Read `ideas.md` when exploring alternatives or proposing new directions.
+7. Read `ideas.ctx` when exploring alternatives or proposing new directions.
 8. Inspect the current source/contracts before assuming the documentation is current.
 
 The repository's source code and tests define current behavior. Context documents explain intent, terminology, constraints, and rationale.
@@ -37,7 +37,7 @@ Do not update context merely because implementation details changed internally w
 
 ## Ideas
 
-`.context/ideas.md` is the deliberately non-committed-to-yet idea space.
+`.context/ideas.ctx` is the deliberately non-committed-to-yet idea space.
 
 Ideas are possibilities, not requirements, commitments, or current architecture. Agents may use them to explore options, but must not treat them as authorization to implement work.
 
@@ -53,7 +53,7 @@ architectural decision → decision record
 implementation → source/tests + updated context
 ```
 
-Do not turn `ideas.md` into a task backlog. Concrete work belongs in the project's issue/task system.
+Do not turn `ideas.ctx` into a task backlog. Concrete work belongs in the project's issue/task system.
 
 ## Decision Records
 
@@ -62,9 +62,9 @@ Create a new decision record when the project makes a meaningful architectural c
 Use sequential names:
 
 ```text
-0001-short-title.md
-0002-short-title.md
-0003-short-title.md
+0001-short-title.ctx
+0002-short-title.ctx
+0003-short-title.ctx
 ```
 
 A decision record should state:

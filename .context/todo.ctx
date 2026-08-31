@@ -6,9 +6,9 @@
 
 ## Current Position
 
-The Context Scroll / canonical resource graph slice is complete and merged into `main`. The repository now has the initial package workspace under `packages/` and the current architectural direction is recorded in `.context/architecture/`, `.context/decisions/`, `.context/current-state.ctx`, and `.context/roadmap/current.md`.
+The Context Scroll / canonical resource graph slice is complete and merged into `main`. The repository now has the initial package workspace under `packages/` and the current architectural direction is recorded in `.context/architecture/`, `.context/decisions/`, `.context/current-state.ctx`, and `.context/roadmap/current.ctx`.
 
-The old root `todo.md` was stale: several items described pre-graph architecture and conflicted with the current `ScrollCodex`/resource model. Those items are intentionally replaced by the checklist below rather than carried forward as zombie TODOs.
+The old root `todo.ctx` was stale: several items described pre-graph architecture and conflicted with the current `ScrollCodex`/resource model. Those items are intentionally replaced by the checklist below rather than carried forward as zombie TODOs.
 
 ## MVP Goal
 
@@ -119,7 +119,7 @@ cmd://hello
 - [ ] Support Markdown payloads inside Context Scrolls.
 - [ ] Make context queryable by logical URI, metadata, source, and relationship.
 - [ ] Preserve human-readable Markdown while making metadata machine-discoverable.
-- [ ] Avoid a destructive bulk conversion of existing `.md` context files; migrate deliberately.
+- [ ] Avoid a destructive bulk conversion of existing `.ctx` context files; migrate deliberately.
 - [ ] Prove a consumer can request targeted context without loading the entire repository.
 
 ## 7. CLI / Command Scrolls
@@ -178,7 +178,7 @@ These are not the old pre-graph TODOs; only pursue them where the current implem
 ## 10. Documentation / Context Integrity
 
 - [ ] Keep `.context/current-state.ctx` synchronized with the actual repository baseline.
-- [ ] Keep `.context/roadmap/current.md` synchronized with implemented vs planned work.
+- [ ] Keep `.context/roadmap/current.ctx` synchronized with implemented vs planned work.
 - [ ] Update architecture docs when package boundaries or resource contracts become locked.
 - [ ] Add an ADR documenting the MVP package workspace/monorepo boundary and why not every subsystem is extracted yet.
 - [ ] Update glossary only with terminology that has become a stable Codejitsu concept.

@@ -64,7 +64,7 @@ The root `shinobiphp/codejitsu` package remains the installable aggregate while 
 
 ## Project context
 
-The [`.context/`](.context/) directory is Codejitsu's durable architectural memory. Start with [the agent context protocol](.context/agent-context.md), then read [current state](.context/current-state.ctx) and the relevant architecture, concept, decision, and roadmap resources.
+The [`.context/`](.context/) directory is Codejitsu's durable architectural memory. Start with [the agent context protocol](.context/agent-context.ctx), then read [current state](.context/current-state.ctx) and the relevant architecture, concept, decision, and roadmap resources.
 
 Source and tests define implemented behavior. Context explains intent, terminology, constraints, and roadmap.
 
@@ -76,7 +76,7 @@ composer dump-autoload --strict-psr
 composer test
 ```
 
-See the [current roadmap](.context/roadmap/current.md) and [code standards](.context/code-standards.md) before architectural work.
+See the [current roadmap](.context/roadmap/current.ctx) and [code standards](.context/code-standards.ctx) before architectural work.
 
 ## License
 

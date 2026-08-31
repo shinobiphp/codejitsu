@@ -1,0 +1,18 @@
+# Architecture Context Index
+
+Read these in order when getting oriented:
+
+1. `../../README.ctx` — public project entrypoint, purpose, and development workflow
+2. `agent-context.ctx` — how to use and maintain the living context
+3. `architecture/overview.ctx` — system shape
+4. `architecture/scrolls.ctx` — Scroll model
+5. `architecture/codex.ctx` — discovery/index/resolution
+6. `architecture/runtime.ctx` — runtime and CLI
+7. `architecture/shinobi-and-archiq.ctx` — long-term destination
+8. `concepts/identity-and-uri.ctx` — identity/addressing
+9. `concepts/references-and-execution.ctx` — dependency/execution model
+10. `decisions/` — why important architectural choices were made
+11. `roadmap/current.ctx` — current priorities
+12. `glossary.ctx` — terminology
+
+Use source code and tests to verify current behavior after reading this context.
