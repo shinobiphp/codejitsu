@@ -1,0 +1,5 @@
+name: codejitsu/core
+version: 1.0.0
+description: 'Codejitsu core runtime and foundational contracts.'
+capabilities:
+  provides: [core-runtime]

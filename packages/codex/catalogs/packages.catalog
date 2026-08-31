@@ -1,0 +1,14 @@
+name: packages
+version: 1.0.0
+tags: [packages, public]
+entries:
+  - {identifier: package://codejitsu/core#1.0.0, kind: package, location: composer://codejitsu/core, version: 1.0.0, description: 'Core runtime and contracts'}
+  - {identifier: package://codejitsu/discovery#1.0.0, kind: package, location: composer://codejitsu/discovery, version: 1.0.0, description: 'Resource discovery'}
+  - {identifier: package://codejitsu/scrolls#1.0.0, kind: package, location: composer://codejitsu/scrolls, version: 1.0.0, description: 'Scroll resources'}
+  - {identifier: package://codejitsu/codex#1.0.0, kind: package, location: composer://codejitsu/codex, version: 1.0.0, description: 'Resource index and graph'}
+  - {identifier: package://codejitsu/config#1.0.0, kind: package, location: composer://codejitsu/config, version: 1.0.0, description: 'Configuration resources'}
+  - {identifier: package://codejitsu/schema#1.0.0, kind: package, location: composer://codejitsu/schema, version: 1.0.0, description: 'Schema validation'}
+  - {identifier: package://codejitsu/console#1.0.0, kind: package, location: composer://codejitsu/console, version: 1.0.0, description: 'Console runtime'}
+  - {identifier: package://codejitsu/package#1.0.0, kind: package, location: composer://codejitsu/package, version: 1.0.0, description: 'Package registry'}
+  - {identifier: package://codejitsu/composer-plugin#1.0.0, kind: package, location: composer://codejitsu/composer-plugin, version: 1.0.0, description: 'Composer lifecycle integration'}
+  - {identifier: package://codejitsu/context#1.0.0, kind: package, location: composer://codejitsu/context, version: 1.0.0, description: 'Deterministic project memory'}

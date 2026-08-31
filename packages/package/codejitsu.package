@@ -1,0 +1,6 @@
+name: codejitsu/package
+version: 1.0.0
+description: 'Package manifests, compilation, and runtime registration.'
+capabilities:
+  provides: [package-registry]
+  requires: [core-runtime, scroll-resources, resource-codex]

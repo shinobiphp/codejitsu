@@ -7,7 +7,7 @@
 
 Codejitsu ecosystem packages need a native, deterministic way to contribute Scroll types and resource sources. The package contract should itself be a Scroll rather than a PHP installer convention, and Composer should keep the compiled package state synchronized after dependency changes.
 
-This slice introduces a bootstrap `package` Scroll, a generic declarative installer, and a Composer plugin for packages whose Composer type is `codejitsu-pkg`. It completes the installation boundary required before `packages/ui` is created.
+This slice introduces a bootstrap `package` Scroll, a generic declarative installer, and a Composer plugin for packages that explicitly participate in the Codejitsu package registry. Normal Codejitsu packages use Composer type `codejitsu-pkg`; infrastructure that must retain another Composer type, such as `composer-plugin`, participates through the same explicit manifest metadata.
 
 ## Constraints
 
@@ -31,7 +31,7 @@ scheme: package://
 codec: neon
 ```
 
-A package of Composer type `codejitsu-pkg` declares its manifest location:
+A normal Codejitsu package uses type `codejitsu-pkg` and declares its manifest location:
 
 ```json
 {
@@ -86,11 +86,11 @@ Core provides `Scrolls\Types\Package`. It validates the declarative shape and ex
 
 ### Package Manifest Discovery
 
-The Composer-facing discovery layer inspects installed packages and selects only those with:
+The Composer-facing discovery layer inspects installed packages and selects packages with either the normal Codejitsu type or an explicit infrastructure manifest:
 
 ```text
-type = codejitsu-pkg
-extra.codejitsu.manifest = <relative path>
+type = codejitsu-pkg OR extra.codejitsu.manifest is declared
+extra.codejitsu.manifest = <relative path> for every participating package
 ```
 
 The root package may also use this shape during monorepo development. Discovery returns Composer package name, installed path, manifest path, and declared version. It never scans arbitrary directories looking for manifests.
@@ -162,14 +162,14 @@ The plugin must avoid recursive Composer execution. Existing `PackageManager` co
 
 The Scroll-driven CLI exposes `pkg:list`, `pkg:search`, `pkg:info`, `pkg:install`, `pkg:uninstall`, `pkg:update`, and `pkg:cache:{status,rebuild,clear}`. `pkg:uninstall` delegates to Composer removal; the existing `pkg:remove` name may remain as a compatibility alias.
 
-Version one searches the project's configured Composer repositories and filters results to Composer type `codejitsu-pkg`. This supports Packagist, private repositories, and path repositories without creating a proprietary marketplace. Repository access remains behind a Codejitsu contract so a Shinobi catalog can be added later. Installed package information combines Composer metadata, normalized Package Scroll data, and cache status; remote information never downloads or executes package code merely for inspection.
+Version one combines generic Catalog Scrolls with installed Composer metadata. Catalogs may be public, private, or project-local and package entries use `kind: package`; the same index can later describe Scrolls, Context resources, apps, licenses, and other resource kinds. Installed package information combines Composer metadata, normalized Package Scroll data, and cache status; catalog inspection never downloads or executes package code.
 
 ## Data Flow
 
 ```text
 composer install/update/remove
   -> Codejitsu Composer plugin
-  -> discover installed type=codejitsu-pkg packages
+  -> discover installed codejitsu-pkg and explicitly manifested infrastructure packages
   -> locate declared codejitsu.package files
   -> generic Package Scroll installer validates all declarations
   -> atomically compile vendor/codejitsu/packages.php
@@ -207,7 +207,7 @@ Executable lifecycle hooks, migrations, arbitrary file copying, environment chan
 Behavioral coverage will include:
 
 - Package Scroll validation and normalization;
-- discovery limited to `codejitsu-pkg` packages with explicit manifests;
+- discovery limited to `codejitsu-pkg` packages and infrastructure packages with explicit manifests;
 - deterministic compilation regardless of Composer enumeration order;
 - atomic cache replacement and preservation after a failed rebuild;
 - path traversal and symlink escape rejection;

@@ -1,8 +1,9 @@
 {
     "name": "codejitsu/console",
     "description": "Codejitsu CLI application and input/output translation",
-    "type": "library",
+    "type": "codejitsu-pkg",
     "license": "proprietary",
+    "extra": {"codejitsu": {"manifest": "codejitsu.package"}},
     "require": {
         "php": ">=8.4",
         "codejitsu/core": "self.version",

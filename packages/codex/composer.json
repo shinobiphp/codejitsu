@@ -1,8 +1,9 @@
 {
     "name": "codejitsu/codex",
     "description": "Codejitsu resource indexing, resolution, and graph navigation",
-    "type": "library",
+    "type": "codejitsu-pkg",
     "license": "proprietary",
+    "extra": {"codejitsu": {"manifest": "codejitsu.package"}},
     "require": {
         "php": ">=8.4",
         "codejitsu/core": "self.version",

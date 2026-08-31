@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Codejitsu;
 
+use Codejitsu\Catalog\CatalogIndex;
 use Codejitsu\Contracts\ProcessRunner as ProcessRunnerContract;
+use Codejitsu\Contracts\Packages\InstalledPackages;
+use Codejitsu\Packages\InstalledPackageDiscovery;
 use RuntimeException;
 
 final class PackageManager
@@ -12,27 +15,33 @@ final class PackageManager
     public function __construct(
         private readonly ProcessRunnerContract $runner = new ProcessRunner(),
         private readonly ?string $composerBinary = null,
+        private readonly InstalledPackages $packages = new InstalledPackageDiscovery(),
+        private readonly ?CatalogIndex $catalog = null,
     ) {}
 
     public function list(string $root): string
     {
-        $composer = $this->manifest($root);
         $packages = [];
-
-        foreach (['require', 'require-dev'] as $section) {
-            foreach (($composer[$section] ?? []) as $name => $constraint) {
-                $packages[$name] = $constraint;
+        foreach ($this->catalog?->all('package') ?? [] as $entry) {
+            if (preg_match('~^package://([^#]+)(?:#|$)~', (string) $entry['identifier'], $matches) !== 1) {
+                continue;
             }
+            $packages[$matches[1]] = [
+                'version' => (string) ($entry['version'] ?? 'unknown'),
+                'status' => 'available',
+            ];
         }
 
-        if ($packages === []) {
-            return "No Composer packages are required.\n";
+        foreach ($this->packages->all($root) as $package) {
+            $packages[$package->name] = ['version' => $package->version, 'status' => 'installed'];
         }
+
+        if ($packages === []) return "No Codejitsu packages are known.\n";
 
         ksort($packages);
         $output = '';
-        foreach ($packages as $name => $constraint) {
-            $output .= sprintf("%-40s %s\n", $name, $constraint);
+        foreach ($packages as $name => $package) {
+            $output .= sprintf("%-40s %-12s %s\n", $name, $package['version'], $package['status']);
         }
 
         return $output;

@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 final class PackagesTest extends TestCase
 {
-    public function testListsComposerRequirements(): void
+    public function testListIgnoresOrdinaryComposerRequirements(): void
     {
         $directory = sys_get_temp_dir() . '/codejitsu-package-test-' . bin2hex(random_bytes(6));
         mkdir($directory, 0777, true);
@@ -30,9 +30,7 @@ final class PackagesTest extends TestCase
             chdir($directory);
             $result = Packages::list(new ExecutionContext());
 
-            self::assertStringContainsString('vendor/alpha', $result);
-            self::assertStringContainsString('vendor/zeta', $result);
-            self::assertStringContainsString('>=8.4', $result);
+            self::assertSame("No Codejitsu packages are known.\n", $result);
         } finally {
             if ($workingDirectory !== false) {
                 chdir($workingDirectory);

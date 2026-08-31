@@ -1,0 +1,6 @@
+name: codejitsu/config
+version: 1.0.0
+description: 'Configuration resources and stores.'
+capabilities:
+  provides: [configuration]
+  requires: [core-runtime]

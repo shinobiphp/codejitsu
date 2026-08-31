@@ -4,7 +4,7 @@ description: Manage Composer packages used by Codejitsu.
 usage: 'pkg:<subcommand> [package]'
 commands:
     list:
-        description: List Composer requirements.
+        description: List available and installed Codejitsu packages.
         usage: 'pkg:list'
         capability: capability://pkg-list
     info:

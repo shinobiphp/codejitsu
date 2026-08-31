@@ -1,0 +1,6 @@
+name: codejitsu/composer-plugin
+version: 1.0.0
+description: 'Composer lifecycle integration for the Codejitsu package cache.'
+capabilities:
+  provides: [composer-package-lifecycle]
+  requires: [package-registry]

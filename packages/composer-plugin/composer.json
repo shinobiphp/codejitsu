@@ -9,5 +9,8 @@
         "codejitsu/package": "self.version"
     },
     "autoload": {"psr-4": {"Codejitsu\\Composer\\": "src/"}},
-    "extra": {"class": "Codejitsu\\Composer\\Plugin"}
+    "extra": {
+        "class": "Codejitsu\\Composer\\Plugin",
+        "codejitsu": {"manifest": "codejitsu.package"}
+    }
 }

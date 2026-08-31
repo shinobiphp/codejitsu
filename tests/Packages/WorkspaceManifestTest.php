@@ -36,6 +36,12 @@ final class WorkspaceManifestTest extends TestCase
         self::assertSame('codejitsu/' . $package, $manifest['name']);
         self::assertSame('proprietary', $manifest['license'] ?? null);
         self::assertArrayNotHasKey('version', $manifest);
+        self::assertSame($package === 'composer-plugin' ? 'composer-plugin' : 'codejitsu-pkg', $manifest['type'] ?? null);
+        self::assertSame('codejitsu.package', $manifest['extra']['codejitsu']['manifest'] ?? null);
+        self::assertFileExists($directory . '/codejitsu.package');
+
+        $packageScroll = (new \Codejitsu\Codecs\Neon())->decode((string) file_get_contents($directory . '/codejitsu.package'));
+        self::assertSame('codejitsu/' . $package, $packageScroll['name'] ?? null);
 
         foreach ($internalDependencies as $dependency) {
             self::assertArrayHasKey($dependency, $manifest['require'] ?? []);

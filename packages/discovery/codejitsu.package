@@ -1,0 +1,6 @@
+name: codejitsu/discovery
+version: 1.0.0
+description: 'Resource discovery and source registration.'
+capabilities:
+  provides: [resource-discovery]
+  requires: [core-runtime]

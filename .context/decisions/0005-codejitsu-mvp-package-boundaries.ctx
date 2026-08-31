@@ -14,6 +14,8 @@ The MVP keeps the package workspace in one repository using Composer path reposi
 
 Until physical source extraction is explicitly undertaken, the workspace manifests describe monorepo ownership and path-repository composition; they are not claimed to be independently publishable archives. The root aggregate is the supported distribution and commits `composer.lock` because it also ships a tested executable CLI.
 
+Every workspace package owns a `codejitsu.package` manifest. Normal workspace packages use Composer type `codejitsu-pkg`; packages constrained by Composer infrastructure retain the required type and opt into Codejitsu through `extra.codejitsu.manifest`. The Composer plugin is the initial exception because Composer requires type `composer-plugin`.
+
 Only boundaries already demonstrated by current source ownership are established. AI, database, cryptography, agent, Vessel, Spark, Sensei, and Shinobi runtime concerns are not forced into packages merely for symmetry.
 
 Package management is exposed through the existing Command Scroll mechanism. The initial `pkg:list`, `pkg:info`, `pkg:install`, `pkg:remove`, and `pkg:update` commands delegate PHP dependency operations to Composer rather than implementing a second dependency solver.

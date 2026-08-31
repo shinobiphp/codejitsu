@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/codex",
-                "reference": "78bdd6d081f166411b3186856e45d8014305e56a"
+                "reference": "043e76703a81a513563649d5c842e84c6bfc37c3"
             },
             "require": {
                 "codejitsu/core": "self.version",
@@ -20,7 +20,12 @@
                 "codejitsu/scrolls": "self.version",
                 "php": ">=8.4"
             },
-            "type": "library",
+            "type": "codejitsu-pkg",
+            "extra": {
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Codejitsu\\": "../../src/"
@@ -41,7 +46,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/composer-plugin",
-                "reference": "f7bf764091c2560eafc160014f3b00a12f02de8f"
+                "reference": "dcb76e7a7ca86724196ff4b0b87c765ace0e2863"
             },
             "require": {
                 "codejitsu/package": "self.version",
@@ -50,7 +55,10 @@
             },
             "type": "composer-plugin",
             "extra": {
-                "class": "Codejitsu\\Composer\\Plugin"
+                "class": "Codejitsu\\Composer\\Plugin",
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
             },
             "autoload": {
                 "psr-4": {
@@ -72,14 +80,19 @@
             "dist": {
                 "type": "path",
                 "url": "packages/config",
-                "reference": "3c0bd3f122f77fba64f976160bbc20cf79856f33"
+                "reference": "e1ddd0b3480b2ba9b213c3718eeb0d5cd9187c32"
             },
             "require": {
                 "codejitsu/core": "self.version",
                 "php": ">=8.4",
                 "symfony/config": "^8.1"
             },
-            "type": "library",
+            "type": "codejitsu-pkg",
+            "extra": {
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Codejitsu\\Config\\": "../../src/Config/",
@@ -101,7 +114,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/console",
-                "reference": "b413f181eaace5e7c68099febdfa3df67f07c901"
+                "reference": "b1d7410b802f3731a0c2bc8730beb0f3fa2658ab"
             },
             "require": {
                 "codejitsu/codex": "self.version",
@@ -109,7 +122,12 @@
                 "php": ">=8.4",
                 "symfony/console": "^8.1"
             },
-            "type": "library",
+            "type": "codejitsu-pkg",
+            "extra": {
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Codejitsu\\Apps\\": "../../src/Apps/",
@@ -132,7 +150,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/context",
-                "reference": "5eb3a475737a0a4e2fa945284689c64fe4e796d7"
+                "reference": "85e4151b35d2afa7f521f29279feae27d26302f2"
             },
             "require": {
                 "codejitsu/codex": "self.version",
@@ -141,7 +159,12 @@
                 "codejitsu/scrolls": "self.version",
                 "php": ">=8.4"
             },
-            "type": "library",
+            "type": "codejitsu-pkg",
+            "extra": {
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Codejitsu\\Context\\": "../../src/Context/"
@@ -162,7 +185,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/core",
-                "reference": "c8b4524be60bf1171b96b8f4cdd07f00b029b40a"
+                "reference": "c651724c2613fd9d3b90e39f7d105a2ca903fbf4"
             },
             "require": {
                 "php": ">=8.4",
@@ -171,7 +194,12 @@
                 "psr/log": "^3.0",
                 "psr/simple-cache": "^3.0"
             },
-            "type": "library",
+            "type": "codejitsu-pkg",
+            "extra": {
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
+            },
             "license": [
                 "proprietary"
             ],
@@ -187,7 +215,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/discovery",
-                "reference": "7f630f063dfa6cb4dafb59a05321d4b627b49dea"
+                "reference": "1c03a64b316bce96c5f3cbbc40ec3b66a8ba8cd3"
             },
             "require": {
                 "codejitsu/core": "self.version",
@@ -195,7 +223,12 @@
                 "symfony/filesystem": "^8.1",
                 "symfony/finder": "^8.1"
             },
-            "type": "library",
+            "type": "codejitsu-pkg",
+            "extra": {
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Codejitsu\\Discovery\\": "../../src/Discovery/",
@@ -217,7 +250,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/package",
-                "reference": "ac3ae0513cd1d9da1328e83650ddd912797a798b"
+                "reference": "97eeda939d731ac8da22b53900d6740965ecec57"
             },
             "require": {
                 "codejitsu/codex": "self.version",
@@ -225,7 +258,12 @@
                 "codejitsu/scrolls": "self.version",
                 "php": ">=8.4"
             },
-            "type": "library",
+            "type": "codejitsu-pkg",
+            "extra": {
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Codejitsu\\Packages\\": "../../src/Packages/",
@@ -247,14 +285,19 @@
             "dist": {
                 "type": "path",
                 "url": "packages/schema",
-                "reference": "c6ef95775f6216ddbe1b724c7f74cadcc555fac5"
+                "reference": "8bd581b65e8b491561cb948dd349a4edcd0dcabd"
             },
             "require": {
                 "codejitsu/core": "self.version",
                 "opis/json-schema": "^2.6",
                 "php": ">=8.4"
             },
-            "type": "library",
+            "type": "codejitsu-pkg",
+            "extra": {
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Codejitsu\\Schema\\": "../../src/Schema/"
@@ -275,14 +318,19 @@
             "dist": {
                 "type": "path",
                 "url": "packages/scrolls",
-                "reference": "211f9cbc636887dd705817520f1d5018de3bbf1c"
+                "reference": "83eca77d6d114a7806d76eeb78c542c01c2996fb"
             },
             "require": {
                 "codejitsu/core": "self.version",
                 "nette/neon": "^3.4",
                 "php": ">=8.4"
             },
-            "type": "library",
+            "type": "codejitsu-pkg",
+            "extra": {
+                "codejitsu": {
+                    "manifest": "codejitsu.package"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Codejitsu\\Scrolls\\": "../../src/Scrolls/",

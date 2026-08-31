@@ -4,14 +4,55 @@ declare(strict_types=1);
 
 namespace Codejitsu\Tests;
 
+use Codejitsu\Catalog\CatalogIndex;
 use Codejitsu\Contracts\ProcessRunner;
 use Codejitsu\PackageManager;
 use Codejitsu\ProcessResult;
+use Codejitsu\Contracts\Packages\InstalledPackages;
+use Codejitsu\Packages\InstalledPackage;
+use Codejitsu\Scrolls\ScrollCodex;
+use Codejitsu\Scrolls\TypeDefinition;
+use Codejitsu\Scrolls\TypeRegistry;
+use Codejitsu\Scrolls\Types\Catalog;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 final class PackageManagerTest extends TestCase
 {
+    public function testListShowsOnlyInstalledCodejitsuPackagesWithStatus(): void
+    {
+        $packages = new FakeInstalledPackages([
+            new InstalledPackage('codejitsu/context', '1.0.0', '/packages/context', '/packages/context/codejitsu.package'),
+            new InstalledPackage('shinobiphp/codejitsu-ui', '0.1.0', '/packages/ui', '/packages/ui/codejitsu.package'),
+        ]);
+        $manager = new PackageManager(packages: $packages);
+
+        self::assertSame(
+            "codejitsu/context                        1.0.0        installed\nshinobiphp/codejitsu-ui                  0.1.0        installed\n",
+            $manager->list('/project'),
+        );
+    }
+
+    public function testListCombinesCatalogPackagesWithInstalledStatus(): void
+    {
+        $types = TypeRegistry::builtins();
+        $types->register(new TypeDefinition('catalog', 'catalogs', 'catalog', 'catalog://', Catalog::class));
+        $codex = new ScrollCodex(types: $types);
+        $codex->registerScroll((new Catalog())->hydrate(['name' => 'packages', 'entries' => [
+            ['identifier' => 'package://vendor/available#1.0.0', 'kind' => 'package', 'version' => '^1.0'],
+            ['identifier' => 'package://vendor/installed#1.0.0', 'kind' => 'package', 'version' => '^1.0'],
+        ]]), 'test');
+        $installed = new FakeInstalledPackages([
+            new InstalledPackage('vendor/installed', '1.2.0', '/packages/installed', '/packages/installed/codejitsu.package'),
+        ]);
+        $manager = new PackageManager(packages: $installed, catalog: new CatalogIndex($codex));
+
+        self::assertSame(
+            "vendor/available                         ^1.0         available\nvendor/installed                         1.2.0        installed\n",
+            $manager->list('/project'),
+        );
+    }
+
     public function testInfoDelegatesToComposerAndReturnsStdout(): void
     {
         $runner = new FakeProcessRunner(new ProcessResult(0, '{"name":"vendor/pkg"}', ''));
@@ -57,6 +98,13 @@ final class PackageManagerTest extends TestCase
             ['composer', 'remove', 'vendor/pkg', '--no-interaction', '--no-progress'],
         ], $runner->commands);
     }
+}
+
+final readonly class FakeInstalledPackages implements InstalledPackages
+{
+    /** @param list<InstalledPackage> $packages */
+    public function __construct(private array $packages) {}
+    public function all(string $projectRoot): array { return $this->packages; }
 }
 
 final class FakeProcessRunner implements ProcessRunner

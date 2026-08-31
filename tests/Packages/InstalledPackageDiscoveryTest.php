@@ -36,13 +36,13 @@ final class InstalledPackageDiscoveryTest extends TestCase
     {
         $metadata = [
             'acme/zeta' => $this->record('zeta', 'codejitsu-pkg', '2.0.0', 'codejitsu.package'),
-            'acme/library' => $this->record('alpha', 'library', '1.0.0', 'codejitsu.package'),
+            'acme/plugin' => $this->record('alpha', 'composer-plugin', '1.0.0', 'codejitsu.package'),
             'acme/alpha' => $this->record('alpha', 'codejitsu-pkg', '1.0.0', 'codejitsu.package'),
         ];
 
         $packages = (new InstalledPackageDiscovery($metadata))->all($this->root);
 
-        self::assertSame(['acme/alpha', 'acme/zeta'], array_column($packages, 'name'));
+        self::assertSame(['acme/alpha', 'acme/plugin', 'acme/zeta'], array_column($packages, 'name'));
         self::assertSame('1.0.0', $packages[0]->version);
         self::assertSame(realpath($this->root . '/vendor/acme/alpha/codejitsu.package'), $packages[0]->manifest);
     }

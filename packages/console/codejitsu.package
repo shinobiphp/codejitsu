@@ -1,0 +1,6 @@
+name: codejitsu/console
+version: 1.0.0
+description: 'CLI application and input/output translation.'
+capabilities:
+  provides: [console-runtime]
+  requires: [core-runtime, resource-codex]

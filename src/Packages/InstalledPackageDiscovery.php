@@ -17,10 +17,10 @@ final class InstalledPackageDiscovery implements InstalledPackages
         $records = $this->metadata ?? $this->readInstalledMetadata($projectRoot);
         $packages = [];
         foreach ($records as $name => $record) {
-            if (($record['type'] ?? null) !== 'codejitsu-pkg') {
+            $manifest = $record['extra']['codejitsu']['manifest'] ?? null;
+            if (($record['type'] ?? null) !== 'codejitsu-pkg' && $manifest === null) {
                 continue;
             }
-            $manifest = $record['extra']['codejitsu']['manifest'] ?? null;
             if (!is_string($manifest) || !$this->relative($manifest)) {
                 throw new RuntimeException(sprintf(
                     'Package [%s] has invalid or missing [extra.codejitsu.manifest].',

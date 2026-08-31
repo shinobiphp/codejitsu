@@ -15,7 +15,7 @@ use RecursiveIteratorIterator;
 
 final class ContextSourceFixtureTest extends TestCase
 {
-    public function testDurableProjectContextUsesContextScrollFiles(): void
+    public function testDurableProjectContextUsesRegisteredScrollFiles(): void
     {
         $root = dirname(__DIR__, 2) . '/.context';
         $iterator = new RecursiveIteratorIterator(
@@ -24,7 +24,7 @@ final class ContextSourceFixtureTest extends TestCase
 
         foreach ($iterator as $file) {
             if ($file->isFile()) {
-                self::assertSame('ctx', $file->getExtension(), $file->getPathname());
+                self::assertContains($file->getExtension(), ['ctx', 'catalog'], $file->getPathname());
             }
         }
     }

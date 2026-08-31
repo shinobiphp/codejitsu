@@ -1,0 +1,6 @@
+name: codejitsu/scrolls
+version: 1.0.0
+description: 'Scroll resources, contracts, and serialization.'
+capabilities:
+  provides: [scroll-resources]
+  requires: [core-runtime]

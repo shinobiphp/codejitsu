@@ -1,0 +1,16 @@
+name: codejitsu/codex
+version: 1.0.0
+description: 'Resource indexing, resolution, and graph navigation.'
+capabilities:
+  provides: [resource-codex]
+  requires: [core-runtime, resource-discovery, scroll-resources]
+types:
+  catalog:
+    plural: catalogs
+    extension: catalog
+    scheme: catalog://
+    class: Codejitsu\Scrolls\Types\Catalog
+    codec: neon
+sources:
+  codejitsu-catalogs:
+    path: catalogs

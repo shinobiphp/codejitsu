@@ -1,0 +1,6 @@
+name: codejitsu/schema
+version: 1.0.0
+description: 'Schema resources and validation.'
+capabilities:
+  provides: [schema-validation]
+  requires: [core-runtime]

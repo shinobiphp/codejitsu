@@ -14,8 +14,8 @@ Current verified baseline:
 
 ```text
 codex/core-hardening
-118 default tests
-412 default assertions
+151 default tests
+548 default assertions
 1 clean-install test / 5 assertions
 0 failures
 0 errors
@@ -41,10 +41,13 @@ codex/core-hardening
 - PHP substrate execution uses a three-second default and deterministic explicit timeout tests.
 - Composer execution is behind an injectable process boundary.
 - The real CLI, PHP syntax, clean tracked-checkout installation, strict autoloading, and documentation links have automated coverage.
+- Every workspace package owns a validated Package Scroll; normal packages use `codejitsu-pkg`, while the Composer plugin participates through its required infrastructure type and explicit manifest.
+- Composer lifecycle rebuilds produce a deterministic registry containing all ten workspace packages.
+- `codejitsu/context` provides deterministic Context memory commands and a minimal terminal browser without an AI dependency.
 
 ## Next Slice
 
-Implement the approved Package Scroll installer and Composer plugin design. That slice adds declarative package manifests, cache lifecycle, and package commands. After it is merged, create `packages/ui` as the first production `codejitsu-pkg`; do not add `world`, `scene`, or `edition` to the core enum.
+Create `packages/ui` as the first product-facing `codejitsu-pkg`, or establish the provider-neutral AI contracts before its Neuron adapter. Do not add `world`, `scene`, `edition`, `vessel`, or `spark` to the core enum.
 
 ## What Is Locked In
 

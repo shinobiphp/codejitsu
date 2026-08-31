@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Codejitsu\Commands;
 
+use Codejitsu\Catalog\CatalogIndex;
 use Codejitsu\ExecutionContext;
 use Codejitsu\PackageManager;
 use Codejitsu\Composer\PackageInstaller;
@@ -27,7 +28,8 @@ final class Packages
             throw new RuntimeException('Unable to determine the project root.');
         }
 
-        return (new PackageManager())->list($root);
+        $catalog = $context->codex === null ? null : new CatalogIndex($context->codex);
+        return (new PackageManager(catalog: $catalog))->list($root);
     }
 
     public static function info(ExecutionContext $context): string

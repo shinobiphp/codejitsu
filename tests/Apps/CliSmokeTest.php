@@ -17,7 +17,8 @@ final class CliSmokeTest extends TestCase
         yield 'scroll namespace' => [['scrolls'], 0, 'scrolls:list'];
         yield 'scroll listing' => [['scrolls:list'], 0, 'cmd://'];
         yield 'command execution' => [['hello', 'ninja'], 0, 'Hello, ninja!'];
-        yield 'package listing' => [['pkg:list'], 0, 'symfony/console'];
+        yield 'package listing' => [['pkg:list'], 0, 'codejitsu/context'];
+        yield 'package cache rebuild' => [['pkg:cache:rebuild'], 0, 'Rebuilt package cache for 10 package(s).'];
         yield 'context listing' => [['context:list'], 0, 'current-state'];
         yield 'context show' => [['context:show', 'current-state'], 0, 'Codejitsu'];
         yield 'context check' => [['context:check'], 0, 'Context memory is valid'];

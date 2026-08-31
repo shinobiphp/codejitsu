@@ -1,0 +1,6 @@
+name: codejitsu/context
+version: 1.0.0
+description: 'Deterministic project memory and Context Scroll management.'
+capabilities:
+  provides: [context-memory, context-management]
+  requires: [core-runtime, scroll-resources, resource-codex, console-runtime]
