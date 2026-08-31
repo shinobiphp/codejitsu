@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 namespace Codejitsu;
 
+use Codejitsu\Contracts\ProcessRunner as ProcessRunnerContract;
 use RuntimeException;
 
 final class PackageManager
 {
+    public function __construct(
+        private readonly ProcessRunnerContract $runner = new ProcessRunner(),
+        private readonly ?string $composerBinary = null,
+    ) {}
+
     public function list(string $root): string
     {
         $composer = $this->manifest($root);
@@ -94,28 +100,12 @@ final class PackageManager
     /** @param list<string> $arguments @return array{exit:int,output:string} */
     private function composer(array $arguments, string $root): array
     {
-        $binary = getenv('COMPOSER_BINARY') ?: 'composer';
-        $pipes = [];
-        $process = proc_open(
-            array_merge([$binary], $arguments),
-            [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
-            $pipes,
-            $root,
-        );
-
-        if (!is_resource($process)) {
-            throw new RuntimeException('Unable to start Composer.');
-        }
-
-        $stdout = stream_get_contents($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        $exit = proc_close($process);
+        $binary = $this->composerBinary ?? (getenv('COMPOSER_BINARY') ?: 'composer');
+        $result = $this->runner->run(array_merge([$binary], $arguments), $root);
 
         return [
-            'exit' => $exit,
-            'output' => trim((string) $stdout . ((string) $stderr !== '' ? PHP_EOL . $stderr : '')),
+            'exit' => $result->exitCode,
+            'output' => $result->output(),
         ];
     }
 }

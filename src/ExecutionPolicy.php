@@ -7,7 +7,7 @@ namespace Codejitsu;
 final readonly class ExecutionPolicy
 {
     public function __construct(
-        public int $timeoutMilliseconds = 1000,
+        public int $timeoutMilliseconds = 3000,
         public int $memoryBytes = 67108864,
         public array $filesystemRoots = [],
         public array $environment = [],

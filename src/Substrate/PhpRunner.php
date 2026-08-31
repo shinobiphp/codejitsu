@@ -32,6 +32,7 @@ final class PhpRunner
             [$process, $pipes] = $this->open($runner, $payload, $script, $directory, $context->policy);
             $stdout = '';
             $stderr = '';
+            $observedExitCode = null;
             $deadline = microtime(true) + ($context->policy->timeoutMilliseconds / 1000);
 
             stream_set_blocking($pipes[1], false);
@@ -43,11 +44,18 @@ final class PhpRunner
                 $stderr .= stream_get_contents($pipes[2]) ?: '';
 
                 if (!$status['running']) {
+                    $observedExitCode = is_int($status['exitcode']) ? $status['exitcode'] : null;
                     break;
                 }
 
                 if (microtime(true) >= $deadline) {
                     proc_terminate($process, 9);
+                    foreach ($pipes as $pipe) {
+                        if (is_resource($pipe)) {
+                            fclose($pipe);
+                        }
+                    }
+                    proc_close($process);
                     throw new RuntimeException('PHP substrate execution exceeded its time limit.');
                 }
 
@@ -58,7 +66,10 @@ final class PhpRunner
             $stderr .= stream_get_contents($pipes[2]) ?: '';
             fclose($pipes[1]);
             fclose($pipes[2]);
-            $exitCode = proc_close($process);
+            $closedExitCode = proc_close($process);
+            $exitCode = $observedExitCode !== null && $observedExitCode >= 0
+                ? $observedExitCode
+                : $closedExitCode;
 
             if ($exitCode !== 0) {
                 throw new RuntimeException(sprintf(

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Codejitsu\Tests\Execution;
 
 use Codejitsu\ExecutionContext;
+use Codejitsu\ExecutionPolicy;
 use Codejitsu\Substrate\Php;
 use PHPUnit\Framework\TestCase;
 
@@ -38,5 +39,16 @@ final class PhpSubstrateTest extends TestCase
     public function testItDetectsPhpFromTheOpeningTag(): void
     {
         self::assertSame('php', Php::detect('<?php return true;'));
+    }
+
+    public function testItTerminatesSourceThatExceedsAnExplicitDeadline(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('exceeded its time limit');
+
+        (new Php())->execute(
+            '<?php while (true) {}',
+            new ExecutionContext(policy: new ExecutionPolicy(timeoutMilliseconds: 50)),
+        );
     }
 }
