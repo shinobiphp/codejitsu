@@ -1,0 +1,3 @@
+name: context-sync
+type: capability
+target: Codejitsu\Commands\Contexts::sync

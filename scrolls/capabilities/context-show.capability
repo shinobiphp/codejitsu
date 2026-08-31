@@ -1,0 +1,3 @@
+name: context-show
+type: capability
+target: Codejitsu\Commands\Contexts::show

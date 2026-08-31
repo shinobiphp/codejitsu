@@ -1,0 +1,3 @@
+name: context-search
+type: capability
+target: Codejitsu\Commands\Contexts::search
