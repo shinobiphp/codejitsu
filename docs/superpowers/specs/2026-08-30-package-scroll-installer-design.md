@@ -64,11 +64,17 @@ sources:
     path: scrolls
 ```
 
-Version one supports only:
+Version one supports:
 
-- package `name` and semantic `version`;
+- package `name`, semantic `version`, description, keywords, homepage, documentation URL, and tags;
 - `types`, keyed by canonical type name;
-- `sources`, keyed by source alias and containing a package-relative path.
+- `sources`, keyed by source alias and containing a package-relative path;
+- Codejitsu compatibility constraints;
+- capabilities provided and required;
+- semantic dependencies on other Codejitsu packages or capabilities;
+- optional configuration schema URIs.
+
+Composer remains authoritative for installable versions and PHP/Composer dependency resolution. Package Scroll dependencies express Codejitsu runtime semantics and do not override Composer's solver. Packages declare source directories rather than enumerating every bundled Scroll; the Codex discovers their contents normally.
 
 The generic installer derives the physical package root from Composer metadata. Absolute paths, parent traversal, symlink escapes, executable hooks, scripts, services, commands, migrations, and arbitrary configuration mutation are rejected or out of scope.
 
@@ -115,7 +121,7 @@ The file returns plain arrays only. It contains a format version, deterministic 
 
 Packages are ordered lexicographically by Composer package name. Declarations retain manifest order within each package. The installer writes a temporary sibling file and renames it into place. Failure leaves the previous valid cache untouched.
 
-The cache is generated state, never authoritative source, and may be removed safely. An empty installation produces a valid cache with no packages.
+The cache is generated state, never authoritative source, and may be removed safely. An empty installation produces a valid cache with no packages. If it is absent at boot, Codejitsu invokes the same compiler and writes atomically when possible; on a read-only installation it uses the compiled result in memory. A malformed existing cache fails closed. Composer lock/package metadata and Package Scroll contents form the cache fingerprint.
 
 ### Runtime Package Registry
 
@@ -152,6 +158,12 @@ The root aggregate requires the plugin so the package cache cannot silently beco
 
 The plugin must avoid recursive Composer execution. Existing `PackageManager` commands continue to invoke Composer normally; successful Composer lifecycle events refresh the package cache.
 
+### Package Commands and Search
+
+The Scroll-driven CLI exposes `pkg:list`, `pkg:search`, `pkg:info`, `pkg:install`, `pkg:uninstall`, `pkg:update`, and `pkg:cache:{status,rebuild,clear}`. `pkg:uninstall` delegates to Composer removal; the existing `pkg:remove` name may remain as a compatibility alias.
+
+Version one searches the project's configured Composer repositories and filters results to Composer type `codejitsu-pkg`. This supports Packagist, private repositories, and path repositories without creating a proprietary marketplace. Repository access remains behind a Codejitsu contract so a Shinobi catalog can be added later. Installed package information combines Composer metadata, normalized Package Scroll data, and cache status; remote information never downloads or executes package code merely for inspection.
+
 ## Data Flow
 
 ```text
@@ -164,7 +176,7 @@ composer install/update/remove
 
 application boot
   -> register built-in Scroll types
-  -> load compiled package cache
+  -> load compiled package cache, or compile it if absent
   -> register package-owned types
   -> register package-owned sources
   -> load project default/context sources
