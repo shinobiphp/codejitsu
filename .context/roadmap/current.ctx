@@ -12,6 +12,9 @@ This roadmap records direction, not promises. Items marked planned are not neces
 - [x] Introduce a collision-safe package-owned Scroll type registry.
 - [x] Preserve built-in enum and command-scheme compatibility during registry migration.
 - [x] Prove a package-defined type through discovery, resolution, persistence, and creation.
+- [x] Separate discovered metadata descriptors from hydrated Scroll instances.
+- [x] Prove metadata queries perform zero hydration and resolution memoizes one instance.
+- [x] Add strict workspace, syntax, CLI, audit, and clean-install release gates.
 
 ### 1. Codex-Owned Discovery and Cache
 
@@ -23,7 +26,7 @@ Requirements:
 - register every discovery origin as a named source
 - cache the resource index
 - validate cache freshness using a manifest/fingerprint
-- avoid hydration when metadata is enough
+- [x] avoid hydration when metadata is enough
 - explicitly clear/rebuild cache
 - expose cache operations as Command Scrolls
 
@@ -61,10 +64,10 @@ Make lightweight resource metadata a first-class Codex concern.
 
 Requirements:
 
-- `IndexEntry` representation separate from hydrated Scroll instances
-- query by type, name, version, tags, attributes, source, and URI/path
-- preserve source provenance
-- avoid hydrating resources merely to search metadata
+- [x] `IndexEntry` representation separate from hydrated Scroll instances
+- [x] query by type, name, version, tags, attributes, source, references, and URI/path
+- [x] preserve source provenance
+- [x] avoid hydrating resources merely to search metadata
 - leave room for full-text and semantic search later
 
 ### 4. Resource Graph and References
@@ -85,8 +88,10 @@ Strengthen the three initial resource types with richer validation, versioning, 
 
 ## Next
 
-- begin `packages/ui` by registering UI-owned types through the type registry
-- define and validate the first World/Scene contracts in that package
+- implement declarative Package Scrolls and the generic installer
+- implement the Composer plugin and package cache lifecycle
+- add `pkg:search`, `pkg:uninstall`, and package-cache commands
+- then begin `packages/ui` as the first production package consumer
 - first-class Application Scroll resource trees such as `app://archiq/...`
 - formal Scroll identity value object integration
 - stronger Envelope/Scroll serialization contract

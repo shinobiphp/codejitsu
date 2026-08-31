@@ -25,7 +25,7 @@ Boot
 
 A Scroll is a first-class resource. `Scroll` provides common identity, metadata, hydration, serialization, references, and invocation behavior. Specialized Scroll types provide type-specific behavior.
 
-`ScrollCodex` is the current in-process registry and resolution boundary. It indexes Scrolls by type/name/version and resolves typed URIs. Discovery is currently extension-driven and hydrates Scrolls from resource files. fileciteturn102file0L2-L2 fileciteturn103file0L2-L2 fileciteturn104file0L2-L2
+`ScrollCodex` is the in-process index and resolution boundary. Extension-driven discovery creates immutable metadata descriptors and lazy loaders. Queries inspect descriptors without constructing Scrolls; URI resolution hydrates only the selected resource and memoizes it.
 
 ## Resource Model
 
@@ -59,7 +59,7 @@ Hydration
 Execution or consumption
 ```
 
-Discovery should remain separate from hydration and execution. A resource should be identifiable and inspectable without executing it, and eventually help/metadata/index operations should avoid hydration whenever possible.
+Discovery is separate from hydration and execution. A resource is identifiable and inspectable without construction, and help/metadata/index operations avoid candidate hydration.
 
 ## Long-Term Runtime
 

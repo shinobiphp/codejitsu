@@ -1,0 +1,18 @@
+# Decision 0008: Scroll Indexing Is Separate from Hydration
+
+Status: accepted  
+Date: 2026-08-31
+
+## Decision
+
+Resource discovery produces immutable `DiscoveredResource` descriptors containing validated routing metadata, source-relative location, reference targets, and a lazy loader. `ScrollCodex` converts descriptors to `IndexEntry` values and stores index entries, loaders, and hydrated Scroll instances separately.
+
+Metadata queries operate only on index entries. URI or bare-name resolution selects an entry using the established source cascade, invokes its loader only when needed, binds the Scroll to the Codex, and memoizes it. Repeated resolution returns the same hydrated instance. Explicit object registration creates the equivalent index entry immediately.
+
+## Consequences
+
+- Query cost does not include constructing every candidate Scroll.
+- CLI help can hydrate only top-level Command Scrolls while inspecting stored child definitions.
+- Physical locators remain source-relative and do not enter logical URI identity.
+- Invalid routing metadata fails during discovery; behavior-specific hydration errors occur only when the resource is resolved.
+- A future persistent index/cache can serialize descriptor metadata without serializing runtime objects or closures.

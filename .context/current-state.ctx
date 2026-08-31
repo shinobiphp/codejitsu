@@ -1,6 +1,6 @@
 # Codejitsu — Current State
 
-Updated: 2026-08-30
+Updated: 2026-08-31
 
 ## RESUME PROMPT
 
@@ -8,23 +8,24 @@ Updated: 2026-08-30
 
 ## Status
 
-The Context Scroll source and package-owned Scroll type registry are implemented on the current development branch and ready to merge.
+The Codejitsu core-hardening slice is implemented on `codex/core-hardening` and awaiting final integration verification.
 
 Current verified baseline:
 
 ```text
-codex/context-scroll-source
-99 tests
-328 assertions
+codex/core-hardening
+118 default tests
+412 default assertions
+1 clean-install test / 5 assertions
 0 failures
 0 errors
 0 deprecations
 0 risky tests
 ```
 
-The last full `composer test` run was green. Final Composer validation and autoload verification are required before merge.
+`composer check`, `composer audit`, and `composer test:installation` are the verified release gates. The dependency audit currently reports no advisories.
 
-## Implemented in the Current Slice
+## Implemented Foundation
 
 - Root `README.md` is the public GitHub entrypoint; durable project context lives in Markdown-readable `.ctx` files.
 - Boot registers `scrolls/` as source `default` and `.context/` as source `context`; a missing directory is an empty source.
@@ -34,10 +35,16 @@ The last full `composer test` run was green. Final Composer validation and autol
 - Built-in Scroll types are registered at Codex composition while `Enums\Scrolls\Types` remains compatible.
 - Package-owned types work through recursive discovery, query/index entries, URI resolution, filesystem persistence, and `make:scroll`.
 - `cmd://` remains canonical while `command://` continues to resolve as a compatibility alias.
+- Composer workspace manifests validate strictly and the root lockfile is committed for reproducible CLI development and CI.
+- `ScrollDiscovery` produces immutable metadata descriptors; Codex queries perform zero Scroll hydration and resolution memoizes the selected Scroll.
+- Legacy directory/envelope discovery is covered through the same type registry, including package-defined types.
+- PHP substrate execution uses a three-second default and deterministic explicit timeout tests.
+- Composer execution is behind an injectable process boundary.
+- The real CLI, PHP syntax, clean tracked-checkout installation, strict autoloading, and documentation links have automated coverage.
 
 ## Next Slice
 
-Create `packages/ui` on a new branch. Its first responsibility is to register its own Scroll definitions through the completed registry. Do not add `world`, `scene`, or `edition` to the core enum. Validate their schemas in the UI-package slice rather than treating the current lander concepts as implemented contracts.
+Implement the approved Package Scroll installer and Composer plugin design. That slice adds declarative package manifests, cache lifecycle, and package commands. After it is merged, create `packages/ui` as the first production `codejitsu-pkg`; do not add `world`, `scene`, or `edition` to the core enum.
 
 ## What Is Locked In
 
