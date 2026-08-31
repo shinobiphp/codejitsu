@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Codejitsu\Configs;
+namespace Codejitsu\Config;
 
 use Codejitsu\Config\MutableConfig;
 use Codejitsu\Config\Stores\File as ConfigStore;

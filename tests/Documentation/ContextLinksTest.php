@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Documentation;
+namespace Codejitsu\Tests\Documentation;
 
 use FilesystemIterator;
 use PHPUnit\Framework\TestCase;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Uri;
+namespace Codejitsu\Tests\Uri;
 
 use Codejitsu\Uri\Uri;
 use PHPUnit\Framework\TestCase;

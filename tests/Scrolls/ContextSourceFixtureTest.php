@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Scrolls;
+namespace Codejitsu\Tests\Scrolls;
 
 use Codejitsu\Scrolls\ScrollDiscovery;
 use Codejitsu\Scrolls\TypeRegistry;

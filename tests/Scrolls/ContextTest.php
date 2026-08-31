@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Scrolls;
+namespace Codejitsu\Tests\Scrolls;
 
 use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\Scrolls\Types\Context;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Scrolls;
+namespace Codejitsu\Tests\Scrolls;
 
 use Codejitsu\Graph\Edge;
 use Codejitsu\Scrolls\Types\Context;

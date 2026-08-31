@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Scrolls;
+namespace Codejitsu\Tests\Scrolls;
 
 use Codejitsu\Boot;
 use Codejitsu\Kernel\Kernel;

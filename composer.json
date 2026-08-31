@@ -1,7 +1,6 @@
 {
     "name": "shinobiphp/codejitsu",
     "description": "Modern PHP 8.4+ framework/toolkit for composable, intent driven applications",
-    "version": "1.0.0",
     "type": "library",
     "require": {
         "php": ">=8.4",
