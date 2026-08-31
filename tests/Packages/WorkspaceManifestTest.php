@@ -21,6 +21,7 @@ final class WorkspaceManifestTest extends TestCase
         yield 'console' => ['console', ['codejitsu/core', 'codejitsu/codex']];
         yield 'package' => ['package', ['codejitsu/core', 'codejitsu/scrolls', 'codejitsu/codex']];
         yield 'composer-plugin' => ['composer-plugin', ['codejitsu/package']];
+        yield 'context' => ['context', ['codejitsu/core', 'codejitsu/scrolls', 'codejitsu/codex', 'codejitsu/console']];
     }
 
     /** @param array<string> $internalDependencies */

@@ -1,0 +1,14 @@
+{
+    "name": "codejitsu/context",
+    "description": "Deterministic project memory and Context Scroll management",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.4",
+        "codejitsu/core": "self.version",
+        "codejitsu/scrolls": "self.version",
+        "codejitsu/codex": "self.version",
+        "codejitsu/console": "self.version"
+    },
+    "autoload": {"psr-4": {"Codejitsu\\Context\\": "../../src/Context/"}}
+}

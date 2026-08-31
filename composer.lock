@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "56db53d17a61e65493a634d8f215b4bc",
+    "content-hash": "ff6a526f37c21a0dacfb6dd41cc18173",
     "packages": [
         {
             "name": "codejitsu/codex",
@@ -121,6 +121,36 @@
                 "proprietary"
             ],
             "description": "Codejitsu CLI application and input/output translation",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "codejitsu/context",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/context",
+                "reference": "5eb3a475737a0a4e2fa945284689c64fe4e796d7"
+            },
+            "require": {
+                "codejitsu/codex": "self.version",
+                "codejitsu/console": "self.version",
+                "codejitsu/core": "self.version",
+                "codejitsu/scrolls": "self.version",
+                "php": ">=8.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Codejitsu\\Context\\": "../../src/Context/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Deterministic project memory and Context Scroll management",
             "transport-options": {
                 "symlink": true,
                 "relative": true
@@ -4198,6 +4228,7 @@
         "codejitsu/composer-plugin": 20,
         "codejitsu/config": 20,
         "codejitsu/console": 20,
+        "codejitsu/context": 20,
         "codejitsu/core": 20,
         "codejitsu/discovery": 20,
         "codejitsu/package": 20,
