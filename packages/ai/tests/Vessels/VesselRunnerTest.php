@@ -1,0 +1,77 @@
+<?php
+declare(strict_types=1);
+namespace Codejitsu\Ai\Tests\Vessels;
+
+use Codejitsu\Ai\Definitions\DefinitionLoader;
+use Codejitsu\Ai\Prompt\PromptAssembler;
+use Codejitsu\Ai\Prompt\SkillRenderer;
+use Codejitsu\Ai\Runtime\AiRequest;
+use Codejitsu\Ai\Runtime\AiResponse;
+use Codejitsu\Ai\Runtime\AiRuntime;
+use Codejitsu\Ai\Runtime\RuntimeRegistry;
+use Codejitsu\Ai\Scrolls\Spark;
+use Codejitsu\Ai\Scrolls\Tool;
+use Codejitsu\Ai\Scrolls\Toolset;
+use Codejitsu\Ai\Scrolls\Vessel;
+use Codejitsu\Ai\Tools\ToolPolicy;
+use Codejitsu\Ai\Tools\DenyConsequentialTools;
+use Codejitsu\Ai\Vessels\VesselRunner;
+use Codejitsu\Scrolls\ScrollCodex;
+use Codejitsu\Scrolls\TypeDefinition;
+use Codejitsu\Scrolls\TypeRegistry;
+use Codejitsu\Scrolls\Types\Context;
+use Codejitsu\Scrolls\Types\Skill;
+use PHPUnit\Framework\TestCase;
+
+final class VesselRunnerTest extends TestCase
+{
+    public function testItResolvesAndRunsTheCompleteVesselPrompt(): void
+    {
+        [$runner, $runtime] = $this->runner();
+        $session = $runner->start('workbench', skills: ['skill://review'], skillInputs: ['review' => ['subject' => 'Codejitsu']]);
+        $response = $session->send('What changes?');
+
+        self::assertSame('done', $response->text);
+        self::assertStringContainsString('You are the architect.', $runtime->request->instructions);
+        self::assertStringContainsString('Review Codejitsu.', $runtime->request->instructions);
+        self::assertStringContainsString('Current architecture.', $runtime->request->instructions);
+        self::assertSame('vessel-model', $runtime->request->model);
+        self::assertInstanceOf(DenyConsequentialTools::class, $runtime->request->approval);
+        self::assertSame('architect', $session->metadata()['spark']);
+    }
+
+    public function testItRejectsAnIneligibleSparkOverride(): void
+    {
+        [$runner] = $this->runner();
+        $this->expectExceptionMessage('is not allowed by Vessel');
+        $runner->start('workbench', spark: 'spark://other');
+    }
+
+    private function runner(): array
+    {
+        $types = TypeRegistry::builtins();
+        foreach ([
+            ['spark', 'sparks', 'spark', 'spark://', Spark::class],
+            ['vessel', 'vessels', 'vessel', 'vessel://', Vessel::class],
+            ['tool', 'tools', 'tool', 'tool://', Tool::class],
+            ['toolset', 'toolsets', 'toolset', 'toolset://', Toolset::class],
+        ] as $type) $types->register(new TypeDefinition(...$type));
+        $codex = new ScrollCodex(types: $types);
+        $codex->registerScroll((new Spark())->hydrate(['name' => 'architect', 'version' => '1.0.0', 'instructions' => 'You are the architect.', 'allowedSkills' => ['skill://review'], 'contexts' => ['context://state']]));
+        $codex->registerScroll((new Spark())->hydrate(['name' => 'other', 'version' => '1.0.0', 'instructions' => 'Other.']));
+        $codex->registerScroll((new Vessel())->hydrate(['name' => 'workbench', 'version' => '1.0.0', 'runtime' => 'fake', 'spark' => 'spark://architect', 'model' => 'vessel-model']));
+        $codex->registerScroll((new Skill())->hydrate(['name' => 'review', 'version' => '1.0.0', 'prompt' => 'Review {{subject}}.', 'inputs' => ['subject' => ['type' => 'string', 'required' => true]]]));
+        $codex->registerScroll((new Context())->hydrate(['name' => 'state', 'version' => '1.0.0', 'content' => 'Current architecture.']));
+        $loader = new DefinitionLoader($codex);
+        $runtime = new RunnerRuntime();
+        $runtimes = new RuntimeRegistry();
+        $runtimes->register('fake', $runtime);
+        return [new VesselRunner($loader, new PromptAssembler(new SkillRenderer()), new ToolPolicy($loader), $runtimes, $codex), $runtime];
+    }
+}
+
+final class RunnerRuntime implements AiRuntime
+{
+    public AiRequest $request;
+    public function run(AiRequest $request): AiResponse { $this->request = $request; return new AiResponse('done'); }
+}
