@@ -602,7 +602,38 @@ git add packages/ai/src/Scaffolding packages/ai/src/Commands packages/ai/resourc
 git commit -m "feat(ai): add AI makers and resource commands"
 ```
 
-### Task 9: Add One-Shot Execution and Interactive Vessel TUI
+### Task 9: Add Provider Profiles and Catalog
+
+**Files:**
+- Modify: `packages/ai/codejitsu.package`
+- Create: `packages/ai/src/Scrolls/Provider.php`
+- Create: `packages/ai/src/Definitions/ProviderDefinition.php`
+- Modify: `packages/ai/src/Definitions/DefinitionLoader.php`
+- Modify: `packages/ai/src/Definitions/VesselDefinition.php`
+- Modify: `packages/ai/src/Vessels/VesselRunner.php`
+- Modify: `packages/ai/src/Neuron/ProviderFactory.php`
+- Create: `packages/ai/resources/catalogs/providers.catalog`
+- Create: `packages/ai/src/Commands/Providers.php`
+- Create: `packages/ai/resources/commands/provider.cmd`
+- Modify: `packages/ai/resources/commands/make.cmd`
+- Modify: `packages/ai/src/Scaffolding/AiScaffolder.php`
+- Modify: `packages/ai/src/Commands/MakeAi.php`
+- Test: `packages/ai/tests/Definitions/ProviderDefinitionTest.php`
+- Test: `packages/ai/tests/Commands/ProviderCommandsTest.php`
+
+**Interfaces:**
+- Produces: `provider://` Scrolls containing adapter, model, credential references, and non-secret options.
+- Produces: `make:provider`, `provider:list`, `provider:show`, and `provider:test`.
+- Changes: Vessel `provider` is a Provider Scroll reference; `ProviderFactory` receives `ProviderDefinition`.
+
+- [ ] Write failing tests for Provider validation, literal-secret rejection, Catalog discovery, makers, inspection, environment resolution, and Vessel resolution.
+- [ ] Run the focused tests and confirm failure because Provider support is absent.
+- [ ] Register the Provider type and bundled adapter Catalog; implement immutable definitions and typed loading.
+- [ ] Update Vessel resolution and OpenAI construction to use `env://` references without exposing resolved values.
+- [ ] Add maker and provider commands; `provider:test` validates configuration and credential availability without making a model request.
+- [ ] Run AI and root suites; commit as `feat(ai): add provider profiles`.
+
+### Task 10: Add One-Shot Execution and Interactive Vessel TUI
 
 **Files:**
 - Create: `packages/ai/src/Commands/Ai.php`
@@ -668,7 +699,7 @@ git add packages/ai/src/Commands packages/ai/src/Console packages/ai/resources p
 git commit -m "feat(ai): add vessel CLI and TUI"
 ```
 
-### Task 10: Document, Verify, and Prepare the Uninstalled Package
+### Task 11: Document, Verify, and Prepare the Uninstalled Package
 
 **Files:**
 - Modify: `packages/ai/README.md` (create if absent)

@@ -22,7 +22,7 @@ Consumers must not depend on Neuron classes.
 
 The first vertical slice provides:
 
-1. Package-owned `spark` and `vessel` Scroll types.
+1. Package-owned `spark`, `vessel`, and `provider` Scroll types.
 2. A concrete AI convention and schema for the existing `skill` Scroll type.
 3. A provider-neutral execution boundary with a Neuron AI adapter.
 4. Deterministic prompt assembly from Spark, Skills, Context Scrolls, and user
@@ -121,7 +121,7 @@ Optional fields:
 - `description`
 - `allowedSparks`: Sparks that may replace the default during a session;
   omitted means only the default is eligible
-- `provider`: provider name plus configuration references
+- `provider`: required Provider Scroll reference
 - `model`: execution-time override
 - `contexts`: additional ordered Context references
 - `capabilities`: allowlist constrained by the Spark
@@ -131,8 +131,20 @@ Optional fields:
 - `memory`: `session` for the first slice
 - `metadata`
 
-Credentials never appear in a Vessel Scroll. Provider configuration contains
-environment-variable names or configuration references only.
+Credentials never appear in a Vessel Scroll.
+
+### Provider
+
+A Provider Scroll is a named, non-secret runtime profile. Required fields are
+`name`, `adapter`, `model`, and `credentials`. Credential values are references
+such as `env://OPENAI_API_KEY`, never literal secrets. Optional `options` hold
+non-secret adapter settings. A project provider Catalog indexes available
+profiles, while the bundled provider Catalog describes adapters supported by
+the package. Vessels reference Provider Scrolls by URI.
+
+Provider Scrolls, Catalogs, caches, command output, and logs must never contain
+resolved credential values. A future secret-store adapter may resolve
+`secret://...` references without changing Provider or Vessel formats.
 
 ### Skill
 
@@ -206,7 +218,7 @@ value objects and interfaces:
 - `AiRequest` contains assembled instructions, conversation messages, selected
   model, capabilities, and non-secret runtime metadata.
 - `AiResponse` contains text plus optional usage and runtime metadata.
-- `SparkDefinition`, `VesselDefinition`, and `SkillDefinition` are validated,
+- `SparkDefinition`, `VesselDefinition`, `ProviderDefinition`, and `SkillDefinition` are validated,
   immutable projections of their Scrolls.
 - `PromptAssembler` deterministically composes the resolved definitions,
   Context content, Skill inputs, and user input.
@@ -237,6 +249,10 @@ Provider construction is isolated behind a provider factory. The first
 implementation only needs one configured provider path to prove the loop, while
 unsupported or incomplete configuration fails with a clear error. Tests use a
 fake `AiRuntime` and never call an external model.
+
+The factory receives a resolved Provider definition. The first slice resolves
+`env://` credential references only and supports the OpenAI adapter. Literal
+credentials and unknown reference schemes fail before provider construction.
 
 ## Context, Tools, and Capability Policy
 
@@ -278,6 +294,7 @@ agent definitions.
 - `make:skill <name>`
 - `make:tool <name>`
 - `make:toolset <name>`
+- `make:provider <name>`
 
 Each maker validates and normalizes the name, refuses overwrites, writes a
 minimal valid Scroll to its registered project directory, and reports the path
@@ -300,6 +317,9 @@ use the same maker services.
 - `tool:show <name-or-uri>`
 - `toolset:list`
 - `toolset:show <name-or-uri>`
+- `provider:list`
+- `provider:show <name-or-uri>`
+- `provider:test <name-or-uri>`
 - `ai:run <vessel> [prompt]`
 - `ai:tui`
 
