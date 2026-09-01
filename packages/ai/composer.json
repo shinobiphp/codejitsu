@@ -14,12 +14,12 @@
     },
     "autoload": {
         "psr-4": {
-            "CodejitsuAi\\": "src/"
+            "Codejitsu\\Ai\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "CodejitsuAi\\Tests\\": "tests/"
+            "Codejitsu\\Ai\\Tests\\": "tests/"
         }
     }
 }

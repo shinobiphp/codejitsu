@@ -44,6 +44,10 @@ composer test
 ./bin/codejitsu pkg:list
 ./bin/codejitsu pkg:search ui
 ./bin/codejitsu pkg:info shinobiphp/codejitsu
+./bin/codejitsu catalog:list
+./bin/codejitsu catalog:show packages
+./bin/codejitsu catalog:search astro package
+./bin/codejitsu catalog:edit
 ./bin/codejitsu context:tui
 ./bin/codejitsu make:context architecture/runtime
 ./bin/codejitsu make:catalog private
@@ -68,14 +72,18 @@ The repository currently develops these package boundaries together:
 | `codejitsu/package` | Package manifests, registry, installer, and cache |
 | `codejitsu/composer-plugin` | Composer lifecycle integration |
 | `codejitsu/context` | Deterministic project memory and terminal authoring |
+| `codejitsu/ai` | Cataloged, uninstalled AI/Vessel/Spark package scaffold |
+| `codejitsu/ui` | Cataloged, uninstalled Astro and narrative UI package scaffold |
 
 The root `shinobiphp/codejitsu` package remains the installable aggregate while these boundaries stabilize.
 
 Package catalogs may be bundled, project-local, or private. `pkg:list`, `pkg:search`, and `pkg:info` merge catalog entries with installed Composer metadata. `make:pkg` scaffolds and catalogs a package without adding it to the root requirements, so it remains visibly `available` until explicitly installed.
 
+Generic catalog commands inspect every resource kind. `catalog:edit` identifies catalogs by source, treats bundled or metadata-restricted catalogs as read-only, validates kind-specific entry schemas, and writes project catalogs atomically. `catalogs/sources.catalog` is the editable meta-catalog for configured catalog locations; remote fetching remains adapter work rather than implicit execution of catalog data.
+
 ## Runtime state
 
-Codejitsu stores disposable project runtime state below `var/`: compiled indexes in `var/cache`, temporary project files in `var/tmp`, and longer-lived task state in `var/work`. These directories are created lazily and their contents are not committed.
+Codejitsu stores disposable project runtime state below `var/`: compiled indexes in `var/cache`, temporary project files in `var/tmp`, and longer-lived task state in `var/work`. The package registry cache is bootstrap-safe JSON at `var/cache/codejitsu/packages.json`. These directories are created lazily and their contents are not committed.
 
 ## Project context
 

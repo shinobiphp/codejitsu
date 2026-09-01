@@ -1,0 +1,3 @@
+name: catalog-list
+type: capability
+target: Codejitsu\Commands\Catalogs::list

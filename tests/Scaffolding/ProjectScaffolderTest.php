@@ -34,6 +34,8 @@ final class ProjectScaffolderTest extends TestCase
         $composer = json_decode((string) file_get_contents($path . '/composer.json'), true, flags: JSON_THROW_ON_ERROR);
         self::assertSame('codejitsu-pkg', $composer['type']);
         self::assertSame('codejitsu.package', $composer['extra']['codejitsu']['manifest']);
+        self::assertSame('Codejitsu\\Ui\\', array_key_first($composer['autoload']['psr-4']));
+        self::assertSame('Codejitsu\\Ui\\Tests\\', array_key_first($composer['autoload-dev']['psr-4']));
         self::assertDirectoryExists($path . '/src');
         self::assertDirectoryExists($path . '/tests');
 
@@ -47,6 +49,14 @@ final class ProjectScaffolderTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
         (new ProjectScaffolder($this->root))->catalog('../private');
+    }
+
+    public function testNewCatalogIsRegisteredInSourcesMetaCatalog(): void
+    {
+        (new ProjectScaffolder($this->root))->catalog('private');
+        $sources = (new Neon())->decode((string) file_get_contents($this->root . '/catalogs/sources.catalog'));
+        self::assertSame('catalog', $sources['entries'][0]['kind']);
+        self::assertSame('project://catalogs/private.catalog', $sources['entries'][0]['location']);
     }
 
     private function remove(string $path): void

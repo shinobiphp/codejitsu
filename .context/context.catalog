@@ -1,6 +1,7 @@
 name: project-context
 version: 1.0.0
 tags: [context, project-memory]
+entrySchemas: {context: schema://catalog-entry/context}
 entries:
   - {identifier: context://current-state#1.0.0, kind: context, location: project://.context/current-state.ctx, description: 'Current verified project state'}
   - {identifier: context://roadmap/current#1.0.0, kind: context, location: project://.context/roadmap/current.ctx, description: 'Active roadmap'}

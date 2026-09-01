@@ -19,6 +19,9 @@ final class CliSmokeTest extends TestCase
         yield 'command execution' => [['context:list'], 0, 'current-state'];
         yield 'package listing' => [['pkg:list'], 0, 'codejitsu/context'];
         yield 'package cache rebuild' => [['pkg:cache:rebuild'], 0, 'Rebuilt package cache for 10 package(s).'];
+        yield 'catalog listing' => [['catalog:list'], 0, 'sources'];
+        yield 'catalog search' => [['catalog:search', 'astro', 'package'], 0, 'package://codejitsu/ui#0.1.0'];
+        yield 'catalog show' => [['catalog:show', 'packages'], 0, 'package://codejitsu/ai#0.1.0'];
         yield 'context listing' => [['context:list'], 0, 'current-state'];
         yield 'context show' => [['context:show', 'current-state'], 0, 'Codejitsu'];
         yield 'context check' => [['context:check'], 0, 'Context memory is valid'];

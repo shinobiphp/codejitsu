@@ -88,7 +88,7 @@ Strengthen the three initial resource types with richer validation, versioning, 
 
 ## Next
 
-- scaffold `packages/ui` or `packages/ai` with `make:pkg` so it is cataloged but remains uninstalled
+- choose `packages/ui` or `packages/ai` for the first implementation slice while both remain uninstalled
 - keep product-owned Scroll types in their packages rather than extending the core enum
 - first-class Application Scroll resource trees such as `app://archiq/...`
 - formal Scroll identity value object integration

@@ -1,0 +1,11 @@
+name: sources
+version: 1.0.0
+tags: [catalogs, sources, project]
+entrySchemas:
+  catalog: schema://catalog-entry/catalog
+entries:
+  - identifier: catalog://project/packages#1.0.0
+    kind: catalog
+    location: project://catalogs/packages.catalog
+    description: Project package catalog
+    metadata: {enabled: true, priority: 200, access: writable}

@@ -4,6 +4,7 @@ namespace Codejitsu\Catalog;
 
 use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\Scrolls\Types\Catalog;
+use RuntimeException;
 
 final readonly class CatalogIndex
 {
@@ -48,6 +49,52 @@ final readonly class CatalogIndex
                 ...($entry['tags'] ?? []),
             ], 'is_string')));
             return str_contains($haystack, $query);
+        });
+    }
+
+    /** @return list<array{name:string,uri:string,source:string,entries:int,access:string}> */
+    public function catalogs(): array
+    {
+        if (!$this->codex->types()->has('catalog')) return [];
+        $catalogs = [];
+        foreach ($this->codex->query(['type' => 'catalog']) as $entry) {
+            $catalog = $this->codex->resolve((string) $entry->uri);
+            if (!$catalog instanceof Catalog) continue;
+            $catalogs[] = [
+                'name' => $catalog->name,
+                'uri' => (string) $entry->uri,
+                'source' => $entry->source,
+                'entries' => count($catalog->entries()),
+                'access' => $catalog->access(),
+            ];
+        }
+        usort($catalogs, static fn (array $a, array $b): int => [$a['name'], $a['source']] <=> [$b['name'], $b['source']]);
+        return $catalogs;
+    }
+
+    public function catalog(string $identifier): Catalog
+    {
+        if (str_contains($identifier, '://')) {
+            $catalog = $this->codex->resolve($identifier);
+            if ($catalog instanceof Catalog) return $catalog;
+        } else {
+            $matches = $this->codex->query(['type' => 'catalog', 'name' => $identifier]);
+            if ($matches !== []) {
+                $catalog = $this->codex->resolve((string) $matches[0]->uri);
+                if ($catalog instanceof Catalog) return $catalog;
+            }
+        }
+        throw new RuntimeException(sprintf('Catalog [%s] was not found or is ambiguous.', $identifier));
+    }
+
+    /** @return array<string,array<string,mixed>> */
+    public function searchAll(string $query, ?string $kind = null): array
+    {
+        $query = strtolower(trim($query));
+        if ($query === '') return [];
+        return array_filter($this->all($kind), static function (array $entry) use ($query): bool {
+            $values = [$entry['identifier'] ?? '', $entry['description'] ?? '', $entry['location'] ?? '', ...($entry['tags'] ?? [])];
+            return str_contains(strtolower(implode(' ', array_map('strval', $values))), $query);
         });
     }
 

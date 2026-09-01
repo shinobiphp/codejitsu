@@ -173,6 +173,16 @@ Expose through Command Scrolls:
 
 Each command should use the existing Schema + Capability + Command Scroll execution path.
 
+### Catalog Management
+
+- [x] Inspect catalogs and entries with `catalog:list`, `catalog:show`, and `catalog:search`.
+- [x] Manage project catalogs interactively with effective read-only enforcement and atomic writes.
+- [x] Validate catalog entries through per-kind Schema Scroll mappings.
+- [x] Expose package install/update/uninstall through a catalog action-provider boundary.
+- [x] Represent configured project catalogs through an editable sources meta-catalog.
+- [ ] Add remote catalog source adapters, trust/signature policy, and cycle-safe refresh only when a concrete repository requires them.
+- [ ] Execute catalog-declared capability actions only after a catalog-action trust/allowlist policy is proven.
+
 ## 9. Contracts & Serialization
 
 These are not the old pre-graph TODOs; only pursue them where the current implementation or a concrete vertical slice requires them.

@@ -64,6 +64,8 @@
             ,"composer validate --strict packages/package/composer.json"
             ,"composer validate --strict packages/composer-plugin/composer.json"
             ,"composer validate --strict packages/context/composer.json"
+            ,"composer validate --strict packages/ai/composer.json"
+            ,"composer validate --strict packages/ui/composer.json"
         ],
         "check": [
             "@check:manifests",

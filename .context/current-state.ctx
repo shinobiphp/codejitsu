@@ -14,8 +14,8 @@ Current verified baseline:
 
 ```text
 main
-161 default tests
-580 default assertions
+176 default tests
+613 default assertions
 1 clean-install test / 5 assertions
 0 failures
 0 errors
@@ -28,7 +28,7 @@ main
 ## Implemented Foundation
 
 - Root `README.md` is the public GitHub entrypoint; durable project context lives in Markdown-readable `.ctx` files.
-- Boot registers `scrolls/` as source `default` and `.context/` as source `context`; a missing directory is an empty source.
+- Boot registers `scrolls/`, project `catalogs/`, and `.context/` as distinct sources; a missing directory is an empty source.
 - Context resources resolve with logical URIs such as `context://architecture/codex@context#1.0.0`.
 - Codex query supports exact path, path prefix, tags, source, attributes, and outgoing reference targets.
 - `TypeDefinition` and `TypeRegistry` provide normalized, collision-safe lookup by name, extension, and URI scheme.
@@ -49,10 +49,15 @@ main
 - `context:tui` selects existing project Context Scrolls for editing or creates new ones through `$EDITOR`, `$VISUAL`, or `nano`.
 - Codejitsu runtime state uses `var/cache`, `var/tmp`, and `var/work`; the compiled package registry lives under `var/cache/codejitsu`.
 - Shipped hello/demo commands have been removed; CLI verification exercises production commands.
+- `catalog:list`, `catalog:show`, `catalog:search`, and `catalog:edit` provide generic inspection and schema-aware project catalog management.
+- Catalog editing distinguishes duplicate names by source, enforces effective read-only access, validates before atomic writes, and exposes package actions through a provider boundary.
+- `catalogs/sources.catalog` catalogs project catalog sources; remote fetching and custom capability execution remain explicit follow-up adapter work.
+- The package cache is non-executable JSON at `var/cache/codejitsu/packages.json`.
+- `packages/ai` and `packages/ui` are valid, cataloged `codejitsu-pkg` scaffolds and remain uninstalled.
 
 ## Next Slice
 
-Choose `packages/ui` or `packages/ai`, scaffold it with `make:pkg`, and leave it uninstalled while its first package-owned contracts are designed. Do not add `world`, `scene`, `edition`, `vessel`, or `spark` to the core enum.
+Choose `packages/ui` or `packages/ai` for the first implementation slice while leaving both out of root Composer requirements. Do not add `world`, `scene`, `edition`, `vessel`, or `spark` to the core enum.
 
 ## What Is Locked In
 
@@ -413,14 +418,13 @@ Keep these as design goals, not excuses for premature abstraction:
 
 If AI is selected next, build the agentic development vertical slice through Sensei in this order unless repository evidence suggests a safer decomposition:
 
-1. **Catalog-only package scaffold** — create `packages/ai` without adding it to root Composer requirements.
-2. **Vessel contract** — define and test the minimal Codejitsu-owned harness boundary.
-3. **Neuron-AI adapter** — inspect and integrate the current Neuron-AI runtime behind the Vessel boundary.
-4. **Spark contract** — define and test the minimal agent boundary and execution/result model.
-5. **Context-aware Spark** — prove a Spark can receive targeted Context resources plus selected code/tests through its Vessel.
-6. **Sensei development Vessel/Spark** — create the first concrete developer-oriented pair and prove one useful task against Codejitsu itself.
-7. **Developer TUI expansion** — layer Vessel and Spark operations onto the existing Context terminal tooling.
-8. **Dogfood** — use Sensei against Codejitsu for inspect -> plan -> change -> test -> review loops, with explicit human approval for consequential mutations.
+1. **Vessel contract** — define and test the minimal Codejitsu-owned harness boundary inside the cataloged `packages/ai` scaffold.
+2. **Neuron-AI adapter** — inspect and integrate the current Neuron-AI runtime behind the Vessel boundary.
+3. **Spark contract** — define and test the minimal agent boundary and execution/result model.
+4. **Context-aware Spark** — prove a Spark can receive targeted Context resources plus selected code/tests through its Vessel.
+5. **Sensei development Vessel/Spark** — create the first concrete developer-oriented pair and prove one useful task against Codejitsu itself.
+6. **Developer TUI expansion** — layer Vessel and Spark operations onto the existing Context terminal tooling.
+7. **Dogfood** — use Sensei against Codejitsu for inspect -> plan -> change -> test -> review loops, with explicit human approval for consequential mutations.
 
 Each step should be independently testable and should avoid pulling later-stage concerns forward.
 

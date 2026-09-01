@@ -28,6 +28,6 @@ final class PackageBootstrap
 
     public static function cachePath(string $root): string
     {
-        return rtrim($root, '/\\') . '/var/cache/codejitsu/packages.php';
+        return rtrim($root, '/\\') . '/var/cache/codejitsu/packages.json';
     }
 }

@@ -1,0 +1,3 @@
+name: catalog-search
+type: capability
+target: Codejitsu\Commands\Catalogs::search

@@ -15,6 +15,7 @@ final readonly class ProjectScaffolder
         $path = $this->root() . '/catalogs/' . $name . '.catalog';
         if (is_file($path)) throw new RuntimeException(sprintf('Catalog [%s] already exists.', $name));
         $this->writeNeon($path, ['name' => $name, 'version' => '1.0.0', 'entries' => []]);
+        $this->addCatalogToSources($name);
         return $path;
     }
 
@@ -28,7 +29,7 @@ final readonly class ProjectScaffolder
         $path = $this->root() . '/packages/' . $shortName;
         if (file_exists($path)) throw new RuntimeException(sprintf('Package [%s] already exists.', $name));
         $description = trim($description) ?: sprintf('%s Codejitsu package', $name);
-        $namespace = implode('', array_map($this->studly(...), explode('/', $name))) . '\\';
+        $namespace = implode('\\', array_map($this->studly(...), explode('/', $name))) . '\\';
 
         $this->directory($path . '/src');
         $this->directory($path . '/tests');
@@ -72,6 +73,34 @@ final readonly class ProjectScaffolder
             'location' => 'composer://' . $name,
             'version' => '0.1.0',
             'description' => $description,
+        ];
+        $this->writeNeon($path, $data, overwrite: true);
+        $this->addCatalogToSources('packages');
+    }
+
+    private function addCatalogToSources(string $name): void
+    {
+        if ($name === 'sources') return;
+        $path = $this->root() . '/catalogs/sources.catalog';
+        $data = is_file($path)
+            ? $this->codec->decode((string) file_get_contents($path))
+            : [
+                'name' => 'sources',
+                'version' => '1.0.0',
+                'tags' => ['catalogs', 'sources', 'project'],
+                'entrySchemas' => ['catalog' => 'schema://catalog-entry/catalog'],
+                'entries' => [],
+            ];
+        $identifier = 'catalog://project/' . $name . '#1.0.0';
+        foreach ($data['entries'] ?? [] as $entry) {
+            if (($entry['identifier'] ?? null) === $identifier) return;
+        }
+        $data['entries'][] = [
+            'identifier' => $identifier,
+            'kind' => 'catalog',
+            'location' => 'project://catalogs/' . $name . '.catalog',
+            'description' => sprintf('Project Catalog [%s]', $name),
+            'metadata' => ['enabled' => true, 'priority' => 200, 'access' => 'writable'],
         ];
         $this->writeNeon($path, $data, overwrite: true);
     }

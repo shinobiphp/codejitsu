@@ -1,0 +1,11 @@
+name: catalog-entry/package
+type: schema
+definition:
+  type: object
+  required: [identifier, kind, location, version]
+  properties:
+    identifier: {type: string, pattern: '^package://.+'}
+    kind: {const: package}
+    location: {type: string, pattern: '^composer://.+'}
+    version: {type: string, minLength: 1}
+    description: {type: string}

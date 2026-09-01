@@ -1,0 +1,10 @@
+name: catalog-entry/context
+type: schema
+definition:
+  type: object
+  required: [identifier, kind, location]
+  properties:
+    identifier: {type: string, pattern: '^context://.+'}
+    kind: {const: context}
+    location: {type: string, pattern: '^[a-z][a-z0-9+.-]*://.+'}
+    description: {type: string}

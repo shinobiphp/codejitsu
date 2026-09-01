@@ -1,0 +1,3 @@
+name: catalog-edit
+type: capability
+target: Codejitsu\Commands\Catalogs::edit

@@ -35,6 +35,7 @@ final class CliTest extends TestCase
         self::assertStringContainsString('scrolls:list', $output);
         self::assertStringContainsString('Make', $output);
         self::assertStringContainsString('make:scroll', $output);
+        self::assertStringContainsString('catalog:list', $output);
     }
 
     public function testHelpFormsRenderUsage(): void

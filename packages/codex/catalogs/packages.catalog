@@ -1,6 +1,7 @@
 name: packages
 version: 1.0.0
 tags: [packages, public]
+entrySchemas: {package: schema://catalog-entry/package}
 entries:
   - {identifier: package://codejitsu/core#1.0.0, kind: package, location: composer://codejitsu/core, version: 1.0.0, description: 'Core runtime and contracts'}
   - {identifier: package://codejitsu/discovery#1.0.0, kind: package, location: composer://codejitsu/discovery, version: 1.0.0, description: 'Resource discovery'}

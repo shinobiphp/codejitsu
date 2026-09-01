@@ -114,7 +114,7 @@ Class existence is verified at runtime application, after Composer's autoloader 
 The installer atomically writes a PHP data file at:
 
 ```text
-vendor/codejitsu/packages.php
+var/cache/codejitsu/packages.json
 ```
 
 The file returns plain arrays only. It contains a format version, deterministic package order, package identity/version, Composer-provided install path, normalized type declarations, normalized sources, and a fingerprint derived from installed package metadata plus manifest contents.
@@ -172,7 +172,7 @@ composer install/update/remove
   -> discover installed codejitsu-pkg and explicitly manifested infrastructure packages
   -> locate declared codejitsu.package files
   -> generic Package Scroll installer validates all declarations
-  -> atomically compile vendor/codejitsu/packages.php
+  -> atomically compile var/cache/codejitsu/packages.json
 
 application boot
   -> register built-in Scroll types

@@ -1,0 +1,3 @@
+name: catalog-show
+type: capability
+target: Codejitsu\Commands\Catalogs::show
