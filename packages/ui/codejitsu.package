@@ -1,0 +1,1 @@
+{name: codejitsu/ui, version: '0.1.0', description: 'Astro integration for contextual, reactive, and innovative UI runtime', capabilities: {provides: [], requires: [core-runtime]}}

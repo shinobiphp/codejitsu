@@ -1,0 +1,25 @@
+{
+    "name": "codejitsu/ui",
+    "description": "Astro integration for contextual, reactive, and innovative UI runtime",
+    "type": "codejitsu-pkg",
+    "license": "proprietary",
+    "extra": {
+        "codejitsu": {
+            "manifest": "codejitsu.package"
+        }
+    },
+    "require": {
+        "php": ">=8.4",
+        "codejitsu/core": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "CodejitsuUi\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CodejitsuUi\\Tests\\": "tests/"
+        }
+    }
+}

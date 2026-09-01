@@ -1,0 +1,25 @@
+{
+    "name": "codejitsu/ai",
+    "description": "Harnesses, Agents, Tools, Skill Processing, Etc...",
+    "type": "codejitsu-pkg",
+    "license": "proprietary",
+    "extra": {
+        "codejitsu": {
+            "manifest": "codejitsu.package"
+        }
+    },
+    "require": {
+        "php": ">=8.4",
+        "codejitsu/core": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "CodejitsuAi\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CodejitsuAi\\Tests\\": "tests/"
+        }
+    }
+}
