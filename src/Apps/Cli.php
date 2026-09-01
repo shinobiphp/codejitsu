@@ -14,6 +14,7 @@ use Codejitsu\IO\Translators\Cli as CliTranslator;
 use Codejitsu\Kernel\Kernel;
 use Codejitsu\Pipeline\Pipeline;
 use Codejitsu\Scrolls\Types\Command;
+use Codejitsu\Console\CommandRegistry;
 use Closure;
 
 final class Cli implements App
@@ -79,6 +80,6 @@ final class Cli implements App
                 $commands[] = $command;
             }
         }
-        return $commands;
+        return (new CommandRegistry())->merge($commands);
     }
 }
