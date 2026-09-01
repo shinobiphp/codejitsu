@@ -53,6 +53,27 @@ final class PackageManagerTest extends TestCase
         );
     }
 
+    public function testCatalogSearchInfoAndInstallUsePackageEntries(): void
+    {
+        $types = TypeRegistry::builtins();
+        $types->register(new TypeDefinition('catalog', 'catalogs', 'catalog', 'catalog://', Catalog::class));
+        $codex = new ScrollCodex(types: $types);
+        $codex->registerScroll((new Catalog())->hydrate(['name' => 'packages', 'entries' => [[
+            'identifier' => 'package://codejitsu/ui#0.1.0',
+            'kind' => 'package',
+            'location' => 'composer://codejitsu/ui',
+            'version' => '0.1.0',
+            'description' => 'Astro UI integration',
+        ]]]), 'project');
+        $runner = new FakeProcessRunner(new ProcessResult(0, '', ''));
+        $manager = new PackageManager($runner, 'composer', new FakeInstalledPackages([]), new CatalogIndex($codex));
+
+        self::assertStringContainsString('codejitsu/ui', $manager->search('astro', '/project'));
+        self::assertStringContainsString('"status": "available"', $manager->info('codejitsu/ui', '/project'));
+        self::assertSame(0, $manager->install('codejitsu/ui', '/project'));
+        self::assertSame([['composer', 'require', 'codejitsu/ui', '--no-interaction', '--no-progress']], $runner->commands);
+    }
+
     public function testInfoDelegatesToComposerAndReturnsStdout(): void
     {
         $runner = new FakeProcessRunner(new ProcessResult(0, '{"name":"vendor/pkg"}', ''));

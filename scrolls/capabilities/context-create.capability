@@ -1,0 +1,3 @@
+name: context-create
+type: capability
+target: Codejitsu\Commands\Contexts::create

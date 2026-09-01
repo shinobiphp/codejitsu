@@ -30,4 +30,20 @@ final class CatalogRepositoryTest extends TestCase
         self::assertArrayHasKey('package://vendor/secret#1.0.0', $entries);
         self::assertCount(2, $entries);
     }
+
+    public function testFindsAndSearchesEntriesByKindAndPackageName(): void
+    {
+        $types = TypeRegistry::builtins();
+        $types->register(new TypeDefinition('catalog', 'catalogs', 'catalog', 'catalog://', Catalog::class));
+        $codex = new ScrollCodex(types: $types);
+        $codex->registerScroll((new Catalog())->hydrate(['name' => 'packages', 'entries' => [
+            ['identifier' => 'package://codejitsu/ui#0.1.0', 'kind' => 'package', 'location' => 'composer://codejitsu/ui', 'version' => '0.1.0', 'description' => 'Astro UI integration'],
+            ['identifier' => 'context://architecture/ui#1.0.0', 'kind' => 'context', 'location' => 'project://.context/ui.ctx'],
+        ]]), 'project');
+        $index = new CatalogIndex($codex);
+
+        self::assertSame('package://codejitsu/ui#0.1.0', $index->find('package', 'codejitsu/ui')['identifier']);
+        self::assertSame(['package://codejitsu/ui#0.1.0'], array_keys($index->search('package', 'astro')));
+        self::assertNull($index->find('package', 'missing/pkg'));
+    }
 }

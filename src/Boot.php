@@ -103,6 +103,7 @@ final class Boot
         $root = rtrim($root, '/\\');
         (new PackageBootstrap())->boot($root, $scrolls);
         $scrolls->load($root . DIRECTORY_SEPARATOR . 'scrolls', 'default');
+        $scrolls->load($root . DIRECTORY_SEPARATOR . 'catalogs', 'project-catalogs');
         $scrolls->registerSource('context');
         $scrolls->load($root . DIRECTORY_SEPARATOR . '.context', 'context');
     }

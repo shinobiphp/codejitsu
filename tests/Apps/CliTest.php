@@ -54,8 +54,8 @@ final class CliTest extends TestCase
         self::assertSame(0, $code);
         self::assertStringContainsString('Usage:', $output);
         self::assertStringContainsString('codejitsu scrolls:<subcommand> [arguments] [options]', $output);
-        self::assertStringContainsString('scrolls:hello', $output);
-        self::assertStringContainsString('Say hello through a nested Command Scroll.', $output);
+        self::assertStringContainsString('scrolls:list', $output);
+        self::assertStringContainsString('List registered Scroll resources.', $output);
     }
 
     public function testCommandHelpRendersTheResolvedNamespace(): void
@@ -68,20 +68,20 @@ final class CliTest extends TestCase
         self::assertStringContainsString('Execute a Scroll by URI.', $output);
     }
 
-    public function testCommandExecutionResolvesSchemaAndCapabilityReferences(): void
+    public function testCommandExecutionResolvesCapabilityReferences(): void
     {
-        [$code, $output] = $this->runCli(['codejitsu', 'hello', 'B']);
+        [$code, $output] = $this->runCli(['codejitsu', 'context:list']);
 
         self::assertSame(0, $code);
-        self::assertSame("Hello, B!\n", $output);
+        self::assertStringContainsString('current-state', $output);
     }
 
     public function testNamespacedCommandExecutionResolvesNestedReferences(): void
     {
-        [$code, $output] = $this->runCli(['codejitsu', 'scrolls:hello', 'B']);
+        [$code, $output] = $this->runCli(['codejitsu', 'scrolls:list']);
 
         self::assertSame(0, $code);
-        self::assertSame("Hello, B!\n", $output);
+        self::assertStringContainsString('cmd://scrolls', $output);
     }
 
     public function testCustomDriverCanReplaceConsoleImplementation(): void
@@ -90,8 +90,8 @@ final class CliTest extends TestCase
         $app = Boot::cli($this->kernelName, rootDir: dirname(__DIR__, 2));
         $app = $app->withDriver($driver);
 
-        self::assertSame(42, $app->run(['codejitsu', 'hello', 'B']));
-        self::assertSame(['codejitsu', 'hello', 'B'], $driver->argv);
+        self::assertSame(42, $app->run(['codejitsu', 'context:list']));
+        self::assertSame(['codejitsu', 'context:list'], $driver->argv);
         self::assertNotEmpty($driver->commands);
     }
 

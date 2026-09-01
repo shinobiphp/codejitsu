@@ -17,17 +17,17 @@ The current identity key used by `ScrollCodex` is:
 For example:
 
 ```text
-command:hello#1.0.0
-schema:hello#1.0.0
-capability:hello#1.0.0
+command:pkg#1.0.0
+catalog:packages#1.0.0
+capability:pkg-list#1.0.0
 ```
 
 URIs are the external addressing mechanism:
 
 ```text
-cmd://hello
-schema://hello
-capability://hello
+cmd://pkg
+catalog://packages
+capability://pkg-list
 config://shinobi
 ```
 
@@ -45,8 +45,8 @@ A Scroll may reference another Scroll by URI. The reference is resolved through 
 
 ```text
 Command
-  ├── schema://hello
-  └── capability://hello
+  ├── catalog://packages
+  └── capability://pkg-list
 ```
 
 This deliberately keeps references addressable rather than embedding arbitrary object graphs.

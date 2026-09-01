@@ -1,6 +1,0 @@
-name: hello
-type: schema
-definition:
-  type: array
-  items:
-    type: string

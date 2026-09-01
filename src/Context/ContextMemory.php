@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Codejitsu\Context;
 
+use Codejitsu\Console\Editor;
 use Codejitsu\Scrolls\IndexEntry;
 use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\Scrolls\Types\Context;
@@ -88,6 +89,49 @@ final class ContextMemory
             try { $sections[] = rtrim($this->show($name)); } catch (RuntimeException) {}
         }
         return implode("\n\n---\n\n", $sections) . "\n";
+    }
+
+    public function create(string $name, Editor $editor): string
+    {
+        $path = $this->path($name);
+        if (is_file($path)) throw new RuntimeException(sprintf('Context [%s] already exists.', $name));
+        $directory = dirname($path);
+        if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
+            throw new RuntimeException(sprintf('Unable to create Context directory [%s].', $directory));
+        }
+        $title = ucwords(str_replace(['-', '_', '/'], [' ', ' ', ' / '], $name));
+        $this->write($path, $editor->edit(sprintf("# %s\n\n", $title)));
+        return $path;
+    }
+
+    public function edit(string $name, Editor $editor): string
+    {
+        $path = $this->path($name);
+        if (!is_file($path)) throw new RuntimeException(sprintf('Context [%s] does not exist.', $name));
+        $this->write($path, $editor->edit((string) file_get_contents($path)));
+        return $path;
+    }
+
+    private function path(string $name): string
+    {
+        if (str_starts_with(trim($name), '/') || str_starts_with(trim($name), '\\')) {
+            throw new RuntimeException('Invalid Context name.');
+        }
+        $name = strtolower(trim($name, " /\t\n\r\0\x0B"));
+        if (preg_match('/^[a-z0-9][a-z0-9._-]*(?:\/[a-z0-9][a-z0-9._-]*)*$/', $name) !== 1
+            || in_array('.', explode('/', $name), true)
+            || in_array('..', explode('/', $name), true)) {
+            throw new RuntimeException('Invalid Context name.');
+        }
+        return rtrim($this->root, '/\\') . '/' . $name . '.ctx';
+    }
+
+    private function write(string $path, string $content): void
+    {
+        if (trim($content) === '') throw new RuntimeException('Context content cannot be empty.');
+        if (file_put_contents($path, rtrim($content, "\r\n") . "\n", LOCK_EX) === false) {
+            throw new RuntimeException(sprintf('Unable to write Context [%s].', $path));
+        }
     }
 
     /** @return list<string> */

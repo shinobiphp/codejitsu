@@ -8,12 +8,12 @@ commands:
         usage: 'pkg:list'
         capability: capability://pkg-list
     info:
-        description: Show Composer metadata for a package.
+        description: Show catalog and installation metadata for a Codejitsu package.
         usage: 'pkg:info <package>'
         schema: schema://package
         capability: capability://pkg-info
     search:
-        description: Search configured Composer repositories.
+        description: Search configured Codejitsu package catalogs.
         usage: 'pkg:search <query>'
         capability: capability://pkg-search
     install:

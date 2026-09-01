@@ -49,6 +49,13 @@ final class PackageManager
 
     public function info(string $package, string $root): string
     {
+        $entry = $this->catalog?->find('package', $package);
+        if ($entry !== null) {
+            $installed = $this->installed($root);
+            $entry['status'] = isset($installed[$package]) ? 'installed' : 'available';
+            if (isset($installed[$package])) $entry['installed_version'] = $installed[$package]->version;
+            return json_encode($entry, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT) . "\n";
+        }
         $result = $this->composer(['show', $package, '--format=json'], $root);
         if ($result['exit'] !== 0) {
             throw new RuntimeException($result['output']);
@@ -59,6 +66,23 @@ final class PackageManager
 
     public function search(string $query, string $root): string
     {
+        if ($this->catalog !== null) {
+            $entries = $this->catalog->search('package', $query);
+            if ($entries === []) return "No Codejitsu packages found.\n";
+            $installed = $this->installed($root);
+            $output = '';
+            foreach ($entries as $entry) {
+                $name = $this->packageName((string) $entry['identifier']);
+                if ($name === null) continue;
+                $output .= sprintf(
+                    "%-40s %-12s %s\n",
+                    $name,
+                    isset($installed[$name]) ? $installed[$name]->version : (string) ($entry['version'] ?? 'unknown'),
+                    isset($installed[$name]) ? 'installed' : 'available',
+                );
+            }
+            return $output !== '' ? $output : "No Codejitsu packages found.\n";
+        }
         $result = $this->composer(['search', $query, '--format=json'], $root);
         if ($result['exit'] !== 0) throw new RuntimeException($result['output']);
         return $result['output'];
@@ -66,6 +90,13 @@ final class PackageManager
 
     public function install(string $package, string $root): int
     {
+        $entry = $this->catalog?->find('package', $package);
+        if ($entry !== null && isset($entry['location'])) {
+            if (!str_starts_with((string) $entry['location'], 'composer://')) {
+                throw new RuntimeException(sprintf('Package [%s] does not have a Composer location.', $package));
+            }
+            $package = substr((string) $entry['location'], strlen('composer://'));
+        }
         return $this->mutate('require', $package, $root);
     }
 
@@ -116,6 +147,19 @@ final class PackageManager
         }
 
         return $result['exit'];
+    }
+
+    /** @return array<string,\Codejitsu\Packages\InstalledPackage> */
+    private function installed(string $root): array
+    {
+        $installed = [];
+        foreach ($this->packages->all($root) as $package) $installed[$package->name] = $package;
+        return $installed;
+    }
+
+    private function packageName(string $identifier): ?string
+    {
+        return preg_match('~^package://([^#]+)(?:#|$)~', $identifier, $matches) === 1 ? $matches[1] : null;
     }
 
     /** @param list<string> $arguments @return array{exit:int,output:string} */

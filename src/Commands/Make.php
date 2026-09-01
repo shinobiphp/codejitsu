@@ -13,6 +13,7 @@ use Codejitsu\ExecutionContext;
 use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\Scrolls\TypeDefinition;
 use Codejitsu\Scrolls\TypeRegistry;
+use Codejitsu\Scaffolding\ProjectScaffolder;
 use Codejitsu\SubstrateRegistry;
 use Codejitsu\Uri\Uri;
 use InvalidArgumentException;
@@ -20,6 +21,26 @@ use RuntimeException;
 
 final class Make
 {
+    public static function context(ExecutionContext $context): string
+    {
+        return Contexts::create($context);
+    }
+
+    public static function catalog(ExecutionContext $context): string
+    {
+        $name = self::requiredArgument($context, 0, 'A Catalog name is required.');
+        (new ProjectScaffolder(self::projectRoot()))->catalog($name);
+        return sprintf("Created Catalog Scroll [%s].\n", $name);
+    }
+
+    public static function package(ExecutionContext $context): string
+    {
+        $name = self::requiredArgument($context, 0, 'A package name is required.');
+        $description = trim((string) ($context->arguments[1] ?? ''));
+        (new ProjectScaffolder(self::projectRoot()))->package($name, $description);
+        return sprintf("Created uninstalled Codejitsu package [%s] and added it to the project catalog.\n", $name);
+    }
+
     public static function scroll(ExecutionContext $context): string
     {
         $arguments = is_array($context->arguments) ? array_values($context->arguments) : [$context->arguments];
@@ -220,5 +241,17 @@ final class Make
         }
 
         return null;
+    }
+
+    private static function requiredArgument(ExecutionContext $context, int $index, string $message): string
+    {
+        $value = trim((string) ($context->arguments[$index] ?? ''));
+        if ($value === '') throw new InvalidArgumentException($message);
+        return $value;
+    }
+
+    private static function projectRoot(): string
+    {
+        return getcwd() ?: throw new RuntimeException('Unable to determine the project root.');
     }
 }

@@ -77,9 +77,9 @@ Make references first-class enough that dependent resources can be inspected bef
 Examples:
 
 ```text
-cmd://hello
-  ├── schema://hello
-  └── capability://hello
+cmd://pkg
+  ├── catalog://packages
+  └── capability://pkg-list
 ```
 
 ### 5. Schema/Config/Capability Depth
@@ -88,10 +88,8 @@ Strengthen the three initial resource types with richer validation, versioning, 
 
 ## Next
 
-- implement declarative Package Scrolls and the generic installer
-- implement the Composer plugin and package cache lifecycle
-- add `pkg:search`, `pkg:uninstall`, and package-cache commands
-- then begin `packages/ui` as the first production package consumer
+- scaffold `packages/ui` or `packages/ai` with `make:pkg` so it is cataloged but remains uninstalled
+- keep product-owned Scroll types in their packages rather than extending the core enum
 - first-class Application Scroll resource trees such as `app://archiq/...`
 - formal Scroll identity value object integration
 - stronger Envelope/Scroll serialization contract

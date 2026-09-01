@@ -25,5 +25,13 @@ commands:
         description: Render the current agent briefing.
         capability: capability://context-resume
     tui:
-        description: Render the terminal Context browser.
+        description: 'Select, create, and edit project Context Scrolls.'
         capability: capability://context-tui
+    create:
+        description: Create and edit a new project Context Scroll.
+        usage: 'context:create <name>'
+        capability: capability://context-create
+    edit:
+        description: Edit an existing project Context Scroll.
+        usage: 'context:edit <name>'
+        capability: capability://context-edit

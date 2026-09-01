@@ -10,6 +10,14 @@ use PHPUnit\Framework\TestCase;
 
 final class PackageCacheTest extends TestCase
 {
+    public function testBootstrapStoresCompiledCacheUnderProjectVarDirectory(): void
+    {
+        self::assertSame(
+            '/project/var/cache/codejitsu/packages.php',
+            \Codejitsu\Packages\PackageBootstrap::cachePath('/project'),
+        );
+    }
+
     public function testWritesReadsReportsAndClearsCache(): void
     {
         $root = sys_get_temp_dir() . '/codejitsu-cache-' . bin2hex(random_bytes(5));

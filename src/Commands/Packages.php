@@ -18,7 +18,7 @@ final class Packages
     {
         $query = trim((string) ($context->arguments[0] ?? ''));
         if ($query === '') throw new RuntimeException('A package search query is required.');
-        return (new PackageManager())->search($query, self::root());
+        return self::manager($context)->search($query, self::root());
     }
 
     public static function list(ExecutionContext $context): string
@@ -28,8 +28,7 @@ final class Packages
             throw new RuntimeException('Unable to determine the project root.');
         }
 
-        $catalog = $context->codex === null ? null : new CatalogIndex($context->codex);
-        return (new PackageManager(catalog: $catalog))->list($root);
+        return self::manager($context)->list($root);
     }
 
     public static function info(ExecutionContext $context): string
@@ -44,7 +43,7 @@ final class Packages
             throw new RuntimeException('Unable to determine the project root.');
         }
 
-        return (new PackageManager())->info($package, $root);
+        return self::manager($context)->info($package, $root);
     }
 
     public static function install(ExecutionContext $context): int
@@ -59,7 +58,7 @@ final class Packages
             throw new RuntimeException('Unable to determine the project root.');
         }
 
-        return (new PackageManager())->install($package, $root);
+        return self::manager($context)->install($package, $root);
     }
 
     public static function remove(ExecutionContext $context): int
@@ -117,5 +116,11 @@ final class Packages
     private static function root(): string
     {
         return getcwd() ?: throw new RuntimeException('Unable to determine the project root.');
+    }
+
+    private static function manager(ExecutionContext $context): PackageManager
+    {
+        $catalog = $context->codex === null ? null : new CatalogIndex($context->codex);
+        return new PackageManager(catalog: $catalog);
     }
 }

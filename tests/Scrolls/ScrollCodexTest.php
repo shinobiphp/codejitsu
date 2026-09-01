@@ -36,7 +36,7 @@ NEON);
         file_put_contents($root . '/capabilities/hello.capability', <<<'NEON'
 name: hello
 type: capability
-target: Codejitsu\Commands\Hello::run
+target: Codejitsu\Tests\Scrolls\ScrollCodexTest::hello
 NEON);
 
         try {
@@ -71,7 +71,7 @@ NEON);
         file_put_contents($root . '/capabilities/hello.capability', <<<'NEON'
 name: hello
 type: capability
-target: Codejitsu\Commands\Hello::run
+target: Codejitsu\Tests\Scrolls\ScrollCodexTest::hello
 NEON);
 
         try {
@@ -89,5 +89,10 @@ NEON);
             @rmdir($root . '/capabilities');
             @rmdir($root);
         }
+    }
+
+    public static function hello(\Codejitsu\ExecutionContext $context): string
+    {
+        return sprintf("Hello, %s!%s", (string) ($context->arguments[0] ?? 'shinobi'), PHP_EOL);
     }
 }

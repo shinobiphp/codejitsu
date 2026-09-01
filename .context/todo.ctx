@@ -106,9 +106,9 @@ config://app@global.tenant
 Example:
 
 ```text
-cmd://hello
-  ├── schema://hello
-  └── capability://hello
+cmd://pkg
+  ├── catalog://packages
+  └── capability://pkg-list
 ```
 
 ## 6. Context Scrolls
@@ -156,8 +156,8 @@ argv
 
 Add a minimal package-management abstraction as composition over Composer, not as a replacement dependency solver.
 
-- [ ] Create the package-management boundary only after the core package workspace is stable.
-- [ ] Define minimal package metadata/manifest contracts.
+- [x] Create the package-management boundary only after the core package workspace is stable.
+- [x] Define minimal package metadata/manifest contracts.
 - [x] Implement current Composer requirement listing and package information.
 - [x] Implement install/remove/update through an injectable Composer process boundary.
 - [ ] Produce structured, traceable results and propagate failures cleanly.

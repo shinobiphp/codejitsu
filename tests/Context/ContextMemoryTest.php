@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Codejitsu\Tests\Context;
 
+use Codejitsu\Console\Editor;
 use Codejitsu\Context\ContextMemory;
 use Codejitsu\Scrolls\ScrollCodex;
 use PHPUnit\Framework\TestCase;
@@ -58,5 +59,46 @@ final class ContextMemoryTest extends TestCase
     {
         file_put_contents($this->root . '/.context/todo.ctx', "[missing](missing.ctx)\n");
         self::assertStringContainsString('missing.ctx', implode("\n", $this->memory->check()));
+    }
+
+    public function testCreatesAndEditsProjectContextThroughEditor(): void
+    {
+        $created = $this->memory->create('architecture/runtime', new MemoryEditor("# Runtime\n\nCreated.\n"));
+        self::assertSame($this->root . '/.context/architecture/runtime.ctx', $created);
+        self::assertStringContainsString('Created.', (string) file_get_contents($created));
+
+        $editor = new MemoryEditor("# Runtime\n\nUpdated.\n");
+        self::assertSame($created, $this->memory->edit('architecture/runtime', $editor));
+        self::assertStringContainsString('Created.', $editor->initial);
+        self::assertStringContainsString('Updated.', (string) file_get_contents($created));
+        unlink($created);
+        rmdir(dirname($created));
+    }
+
+    public function testCreateRejectsTraversalAndDuplicates(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->memory->create('../outside', new MemoryEditor('invalid'));
+    }
+
+    public function testCreateRejectsAbsoluteLogicalNames(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        try {
+            $this->memory->create('/outside', new MemoryEditor('invalid'));
+        } finally {
+            @unlink($this->root . '/.context/outside.ctx');
+        }
+    }
+}
+
+final class MemoryEditor implements Editor
+{
+    public string $initial = '';
+    public function __construct(private readonly string $result) {}
+    public function edit(string $initial = ''): string
+    {
+        $this->initial = $initial;
+        return $this->result;
     }
 }

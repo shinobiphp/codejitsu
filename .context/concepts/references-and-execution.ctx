@@ -42,9 +42,9 @@ Namespace commands add another layer:
 
 ```text
 cmd://scrolls
-  ├── scrolls:hello
-  ├── scrolls:cache
-  └── scrolls:cache:rebuild
+  ├── scrolls:list
+  ├── scroll:verify
+  └── scroll:run
 ```
 
 The parent stores child definitions as data. Child hydration is deferred until execution.

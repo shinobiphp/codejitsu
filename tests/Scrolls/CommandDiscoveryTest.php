@@ -22,7 +22,7 @@ name: hello
 description: Say hello.
 usage: 'hello [name]'
 type: command
-target: Codejitsu\Commands\Hello::run
+target: strlen
 NEON);
 
             $codex = new ScrollCodex();

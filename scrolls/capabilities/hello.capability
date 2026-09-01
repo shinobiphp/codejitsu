@@ -1,3 +1,0 @@
-name: hello
-type: capability
-target: Codejitsu\Commands\Hello::run

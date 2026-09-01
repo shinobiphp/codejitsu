@@ -94,6 +94,19 @@ final class MakeTest extends TestCase
         Make::scroll(new ExecutionContext(['capability://foo/bar']));
     }
 
+    public function testPurposeSpecificMakersCreateCatalogedButUninstalledPackage(): void
+    {
+        self::assertStringContainsString('Created Catalog Scroll [private]', Make::catalog(new ExecutionContext(['private'])));
+        self::assertStringContainsString(
+            'Created uninstalled Codejitsu package [codejitsu/ui]',
+            Make::package(new ExecutionContext(['codejitsu/ui', 'Astro UI integration'])),
+        );
+
+        self::assertFileExists($this->directory . '/catalogs/private.catalog');
+        self::assertFileExists($this->directory . '/packages/ui/codejitsu.package');
+        self::assertFileDoesNotExist($this->directory . '/composer.lock');
+    }
+
     private function remove(string $path): void
     {
         if (!is_dir($path)) {

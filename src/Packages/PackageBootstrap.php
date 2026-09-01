@@ -28,8 +28,6 @@ final class PackageBootstrap
 
     public static function cachePath(string $root): string
     {
-        $manifest = json_decode((string) @file_get_contents(rtrim($root, '/\\') . '/composer.json'), true);
-        $vendor = is_array($manifest) ? ($manifest['config']['vendor-dir'] ?? 'vendor') : 'vendor';
-        return rtrim($root, '/\\') . '/' . trim((string) $vendor, '/\\') . '/codejitsu/packages.php';
+        return rtrim($root, '/\\') . '/var/cache/codejitsu/packages.php';
     }
 }

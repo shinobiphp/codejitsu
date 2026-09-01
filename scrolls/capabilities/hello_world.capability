@@ -1,8 +1,0 @@
-name: hello/world
-type: capability
-version: 1.0.0
-substrate: php
-source: """
-    <?php
-    return "Hello " . ($context->arguments[0] ?? "shinobi");
-"""

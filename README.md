@@ -42,7 +42,12 @@ composer test
 ./bin/codejitsu scrolls
 ./bin/codejitsu make
 ./bin/codejitsu pkg:list
+./bin/codejitsu pkg:search ui
 ./bin/codejitsu pkg:info shinobiphp/codejitsu
+./bin/codejitsu context:tui
+./bin/codejitsu make:context architecture/runtime
+./bin/codejitsu make:catalog private
+./bin/codejitsu make:pkg codejitsu/ui 'Astro UI integration'
 ```
 
 Commands are themselves Scrolls. Their schemas, capabilities, and help metadata travel through the same Codex path as other resources.
@@ -60,8 +65,17 @@ The repository currently develops these package boundaries together:
 | `codejitsu/config` | Configuration resources |
 | `codejitsu/schema` | Schema validation |
 | `codejitsu/console` | Console integration |
+| `codejitsu/package` | Package manifests, registry, installer, and cache |
+| `codejitsu/composer-plugin` | Composer lifecycle integration |
+| `codejitsu/context` | Deterministic project memory and terminal authoring |
 
 The root `shinobiphp/codejitsu` package remains the installable aggregate while these boundaries stabilize.
+
+Package catalogs may be bundled, project-local, or private. `pkg:list`, `pkg:search`, and `pkg:info` merge catalog entries with installed Composer metadata. `make:pkg` scaffolds and catalogs a package without adding it to the root requirements, so it remains visibly `available` until explicitly installed.
+
+## Runtime state
+
+Codejitsu stores disposable project runtime state below `var/`: compiled indexes in `var/cache`, temporary project files in `var/tmp`, and longer-lived task state in `var/work`. These directories are created lazily and their contents are not committed.
 
 ## Project context
 
@@ -82,6 +96,8 @@ composer test
 ```
 
 Run the complete local release gate with `composer check`. Use `composer test:installation` to verify a disposable tracked checkout can install from the committed lockfile and boot the real CLI.
+
+`tools/check-php.php` intentionally remains standalone pre-bootstrap tooling so syntax errors can be reported even when Codejitsu itself cannot load.
 
 See the [current roadmap](.context/roadmap/current.ctx) and [code standards](.context/code-standards.ctx) before architectural work.
 

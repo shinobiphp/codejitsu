@@ -4,6 +4,8 @@ namespace Codejitsu\Commands;
 
 use Codejitsu\Context\ContextMemory;
 use Codejitsu\Context\ContextTui;
+use Codejitsu\Console\TerminalEditor;
+use Codejitsu\Console\TerminalQuestioner;
 use Codejitsu\ExecutionContext;
 use RuntimeException;
 
@@ -44,7 +46,21 @@ final class Contexts
 
     public static function tui(ExecutionContext $context): string
     {
-        return (new ContextTui(self::memory($context)))->render();
+        return (new ContextTui(self::memory($context)))->run(new TerminalQuestioner(), new TerminalEditor());
+    }
+
+    public static function create(ExecutionContext $context): string
+    {
+        $name = self::argument($context, 0, 'A Context name is required.');
+        self::memory($context)->create($name, new TerminalEditor());
+        return sprintf("Created Context Scroll [%s].\n", $name);
+    }
+
+    public static function edit(ExecutionContext $context): string
+    {
+        $name = self::argument($context, 0, 'A Context name is required.');
+        self::memory($context)->edit($name, new TerminalEditor());
+        return sprintf("Updated Context Scroll [%s].\n", $name);
     }
 
     private static function memory(ExecutionContext $context): ContextMemory
