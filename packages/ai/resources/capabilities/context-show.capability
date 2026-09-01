@@ -1,0 +1,3 @@
+name: ai-context-show
+type: capability
+target: Codejitsu\Ai\Tools\Context\ContextCapabilities::show

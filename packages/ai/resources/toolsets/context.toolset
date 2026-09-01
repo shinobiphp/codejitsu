@@ -1,0 +1,3 @@
+name: context
+tools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]
+guidelines: 'Read existing Context before updating it. Update only when durable project memory materially changed.'

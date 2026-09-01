@@ -51,6 +51,18 @@ final class ToolRegistryTest extends TestCase
         $registry->execute($tool, ['value' => 'two'], $approval);
     }
 
+    public function testInternalPolicyMetadataIsInjectedAfterSchemaValidation(): void
+    {
+        $codex = new ScrollCodex();
+        $codex->registerScroll((new Capability())->hydrate([
+            'name' => 'write', 'version' => '1.0.0',
+            'target' => fn ($context): array => $context->arguments['_codejitsu'],
+        ]));
+        $registry = new ToolRegistry($codex, executionMetadata: ['allowedContexts' => ['context://state']]);
+        $result = $registry->execute($this->tool(), ['value' => 'hello'], new AllowNamedTools(['write']));
+        self::assertSame(['allowedContexts' => ['context://state']], $result->value);
+    }
+
     private function registry(callable $target): ToolRegistry
     {
         $codex = new ScrollCodex();

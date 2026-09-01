@@ -15,7 +15,11 @@ final class ToolRegistry
 {
     private array $runs = [];
 
-    public function __construct(private readonly ScrollCodex $codex, private readonly JsonSchema $validator = new JsonSchema()) {}
+    public function __construct(
+        private readonly ScrollCodex $codex,
+        private readonly JsonSchema $validator = new JsonSchema(),
+        private readonly array $executionMetadata = [],
+    ) {}
 
     public function execute(ToolDefinition $tool, array $arguments, ToolApproval $approval): ToolResult
     {
@@ -27,6 +31,7 @@ final class ToolRegistry
         $capability = $this->codex->resolve($tool->capability);
         if (!$capability instanceof Capability) throw new DefinitionException(sprintf('Tool [%s] Capability [%s] was not found.', $tool->name, $tool->capability));
         $this->runs[$tool->name] = $runs + 1;
-        return new ToolResult($capability->execute(new ExecutionContext($arguments, $this->codex)));
+        $payload = $this->executionMetadata === [] ? $arguments : $arguments + ['_codejitsu' => $this->executionMetadata];
+        return new ToolResult($capability->execute(new ExecutionContext($payload, $this->codex)));
     }
 }

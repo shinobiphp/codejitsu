@@ -1,0 +1,3 @@
+name: ai-context-search
+type: capability
+target: Codejitsu\Ai\Tools\Context\ContextCapabilities::search
