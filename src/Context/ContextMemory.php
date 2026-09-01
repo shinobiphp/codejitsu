@@ -24,10 +24,22 @@ final class ContextMemory
 
     public function show(string $identifier): string
     {
+        $entry = null;
         if (!str_contains($identifier, '://')) {
             $matches = $this->codex->query(['type' => 'context', 'name' => $identifier]);
             if (count($matches) !== 1) throw new RuntimeException(sprintf('Context [%s] was not found or is ambiguous.', $identifier));
+            $entry = $matches[0];
             $identifier = (string) $matches[0]->uri;
+        } else {
+            $matches = $this->codex->query(['type' => 'context', 'uri' => $identifier]);
+            $entry = count($matches) === 1 ? $matches[0] : null;
+        }
+        if ($entry !== null && $entry->source === 'context' && is_string($entry->locator)) {
+            $path = realpath(rtrim($this->root, '/\\') . DIRECTORY_SEPARATOR . $entry->locator);
+            $root = realpath($this->root);
+            if ($path !== false && $root !== false && str_starts_with($path, rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)) {
+                return (string) file_get_contents($path);
+            }
         }
         $context = $this->codex->resolve($identifier);
         if (!$context instanceof Context) throw new RuntimeException(sprintf('[%s] is not a Context Scroll.', $identifier));
@@ -80,6 +92,50 @@ final class ContextMemory
             if ($count === 1 && $next !== $source) { file_put_contents($path, $next); $updated++; }
         }
         return $updated;
+    }
+
+    public function updateSection(string $identifier, string $section, string $content): void
+    {
+        if (preg_match('/^[a-z0-9_-]+$/', $section) !== 1) throw new RuntimeException('Invalid managed section name.');
+        if (trim($content) === '') throw new RuntimeException('Context content cannot be empty.');
+        if (str_contains($identifier, '..') || str_contains($identifier, '\\')) throw new RuntimeException('Invalid Context identifier.');
+
+        $criteria = str_contains($identifier, '://') ? ['type' => 'context', 'uri' => $identifier] : ['type' => 'context', 'name' => $identifier];
+        $matches = $this->codex->query($criteria);
+        if (count($matches) !== 1) throw new RuntimeException(sprintf('Context [%s] was not found or is ambiguous.', $identifier));
+        $entry = $matches[0];
+        if ($entry->source !== 'context' || !is_string($entry->locator) || str_starts_with($entry->locator, '/')) {
+            throw new RuntimeException(sprintf('Context [%s] is not writable project memory.', $identifier));
+        }
+        $root = realpath($this->root);
+        $path = realpath(rtrim($this->root, '/\\') . DIRECTORY_SEPARATOR . $entry->locator);
+        if ($root === false || $path === false || !str_starts_with($path, rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)) {
+            throw new RuntimeException('Context locator is outside the project memory root.');
+        }
+
+        $lockPath = $path . '.lock';
+        $lock = fopen($lockPath, 'c');
+        if ($lock === false || !flock($lock, LOCK_EX)) throw new RuntimeException('Unable to lock Context memory.');
+        $temporary = null;
+        try {
+            $source = (string) file_get_contents($path);
+            $start = '<!-- codejitsu:managed ' . $section . ':start -->';
+            $end = '<!-- codejitsu:managed ' . $section . ':end -->';
+            $pattern = '/' . preg_quote($start, '/') . '.*?' . preg_quote($end, '/') . '/s';
+            $replacement = $start . "\n" . rtrim($content) . "\n" . $end;
+            $next = preg_replace($pattern, $replacement, $source, 2, $count);
+            if ($count !== 1 || !is_string($next)) throw new RuntimeException(sprintf('Context [%s] must contain exactly one managed section [%s].', $identifier, $section));
+            $temporary = tempnam(dirname($path), '.context-');
+            if ($temporary === false || file_put_contents($temporary, $next, LOCK_EX) === false || !rename($temporary, $path)) {
+                throw new RuntimeException('Unable to atomically update Context memory.');
+            }
+            $temporary = null;
+        } finally {
+            if (is_string($temporary) && is_file($temporary)) @unlink($temporary);
+            flock($lock, LOCK_UN);
+            fclose($lock);
+            @unlink($lockPath);
+        }
     }
 
     public function resume(): string
