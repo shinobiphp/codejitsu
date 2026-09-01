@@ -32,6 +32,7 @@ final readonly class VesselRunner
         ?ToolApproval $approval = null,
     ): VesselSession {
         $vesselDefinition = $this->loader->vessel($vessel);
+        $providerDefinition = $this->loader->provider($vesselDefinition->provider);
         $sparkReference = $spark ?? $vesselDefinition->spark;
         if (!in_array($sparkReference, $vesselDefinition->allowedSparks, true)) {
             throw new DefinitionException(sprintf('Spark [%s] is not allowed by Vessel [%s].', $sparkReference, $vesselDefinition->name));
@@ -61,10 +62,10 @@ final readonly class VesselRunner
         return new VesselSession(
             $this->runtimes->get($vesselDefinition->runtime),
             $instructions,
-            $vesselDefinition->model ?? $sparkDefinition->model,
+            $vesselDefinition->model ?? $sparkDefinition->model ?? $providerDefinition->model,
             $resolvedTools,
             $vesselDefinition->limits,
-            ['vessel' => $vesselDefinition->name, 'spark' => $sparkDefinition->name, 'provider' => $vesselDefinition->provider],
+            ['vessel' => $vesselDefinition->name, 'spark' => $sparkDefinition->name, 'provider' => $providerDefinition],
             $approval ?? new DenyConsequentialTools(),
         );
     }

@@ -17,6 +17,12 @@ types:
     scheme: vessel://
     class: Codejitsu\Ai\Scrolls\Vessel
     codec: neon
+  provider:
+    plural: providers
+    extension: provider
+    scheme: provider://
+    class: Codejitsu\Ai\Scrolls\Provider
+    codec: neon
   tool:
     plural: tools
     extension: tool

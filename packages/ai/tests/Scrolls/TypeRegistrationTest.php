@@ -8,6 +8,7 @@ use Codejitsu\Ai\Scrolls\Spark;
 use Codejitsu\Ai\Scrolls\Tool;
 use Codejitsu\Ai\Scrolls\Toolset;
 use Codejitsu\Ai\Scrolls\Vessel;
+use Codejitsu\Ai\Scrolls\Provider;
 use Codejitsu\Packages\InstalledPackage;
 use Codejitsu\Packages\PackageCompiler;
 use PHPUnit\Framework\TestCase;
@@ -27,5 +28,7 @@ final class TypeRegistrationTest extends TestCase
         self::assertSame(Vessel::class, $types['vessel']['class']);
         self::assertSame(Tool::class, $types['tool']['class']);
         self::assertSame(Toolset::class, $types['toolset']['class']);
+        self::assertSame(Provider::class, $types['provider']['class']);
+        self::assertFileExists($root . '/resources/catalogs/providers.catalog');
     }
 }

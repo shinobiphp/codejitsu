@@ -13,6 +13,7 @@ use Codejitsu\Ai\Scrolls\Spark;
 use Codejitsu\Ai\Scrolls\Tool;
 use Codejitsu\Ai\Scrolls\Toolset;
 use Codejitsu\Ai\Scrolls\Vessel;
+use Codejitsu\Ai\Scrolls\Provider;
 use Codejitsu\Ai\Tools\ToolPolicy;
 use Codejitsu\Ai\Tools\DenyConsequentialTools;
 use Codejitsu\Ai\Vessels\VesselRunner;
@@ -36,6 +37,7 @@ final class VesselRunnerTest extends TestCase
         self::assertStringContainsString('Review Codejitsu.', $runtime->request->instructions);
         self::assertStringContainsString('Current architecture.', $runtime->request->instructions);
         self::assertSame('vessel-model', $runtime->request->model);
+        self::assertSame('openai', $runtime->request->metadata['provider']->adapter);
         self::assertInstanceOf(DenyConsequentialTools::class, $runtime->request->approval);
         self::assertSame('architect', $session->metadata()['spark']);
     }
@@ -55,11 +57,13 @@ final class VesselRunnerTest extends TestCase
             ['vessel', 'vessels', 'vessel', 'vessel://', Vessel::class],
             ['tool', 'tools', 'tool', 'tool://', Tool::class],
             ['toolset', 'toolsets', 'toolset', 'toolset://', Toolset::class],
+            ['provider', 'providers', 'provider', 'provider://', Provider::class],
         ] as $type) $types->register(new TypeDefinition(...$type));
         $codex = new ScrollCodex(types: $types);
         $codex->registerScroll((new Spark())->hydrate(['name' => 'architect', 'version' => '1.0.0', 'instructions' => 'You are the architect.', 'allowedSkills' => ['skill://review'], 'contexts' => ['context://state']]));
         $codex->registerScroll((new Spark())->hydrate(['name' => 'other', 'version' => '1.0.0', 'instructions' => 'Other.']));
-        $codex->registerScroll((new Vessel())->hydrate(['name' => 'workbench', 'version' => '1.0.0', 'runtime' => 'fake', 'spark' => 'spark://architect', 'model' => 'vessel-model']));
+        $codex->registerScroll((new Provider())->hydrate(['name'=>'openai/default','version'=>'1.0.0','adapter'=>'openai','model'=>'provider-model','credentials'=>['apiKey'=>'env://OPENAI_API_KEY']]));
+        $codex->registerScroll((new Vessel())->hydrate(['name' => 'workbench', 'version' => '1.0.0', 'runtime' => 'fake', 'spark' => 'spark://architect', 'provider'=>'provider://openai/default', 'model' => 'vessel-model']));
         $codex->registerScroll((new Skill())->hydrate(['name' => 'review', 'version' => '1.0.0', 'prompt' => 'Review {{subject}}.', 'inputs' => ['subject' => ['type' => 'string', 'required' => true]]]));
         $codex->registerScroll((new Context())->hydrate(['name' => 'state', 'version' => '1.0.0', 'content' => 'Current architecture.']));
         $loader = new DefinitionLoader($codex);

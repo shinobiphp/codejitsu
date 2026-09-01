@@ -1,0 +1,6 @@
+name: ai-providers
+version: 1.0.0
+access: read-only
+tags: [ai, providers]
+entries:
+  - {identifier: provider-adapter://openai, kind: provider_adapter, location: package://codejitsu/ai, description: 'OpenAI adapter; Provider profiles reference an API key with env://VARIABLE.'}

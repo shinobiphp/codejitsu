@@ -6,6 +6,7 @@ namespace Codejitsu\Ai\Tests\Definitions;
 
 use Codejitsu\Ai\Definitions\DefinitionLoader;
 use Codejitsu\Ai\Definitions\SparkDefinition;
+use Codejitsu\Ai\Definitions\ProviderDefinition;
 use Codejitsu\Ai\Definitions\ToolDefinition;
 use Codejitsu\Ai\Definitions\ToolsetDefinition;
 use Codejitsu\Ai\Definitions\VesselDefinition;
@@ -45,13 +46,29 @@ final class DefinitionLoaderTest extends TestCase
             'name' => 'workbench',
             'runtime' => 'neuron',
             'spark' => 'spark://architect',
-            'provider' => ['name' => 'openai', 'keyEnv' => 'OPENAI_API_KEY'],
+            'provider' => 'provider://openai/default',
         ]);
 
         self::assertSame(['skill://review'], $spark->allowedSkills);
         self::assertSame(['tool://context.show'], $spark->allowedTools);
         self::assertSame(['spark://architect'], $vessel->allowedSparks);
-        self::assertSame('openai', $vessel->provider['name']);
+        self::assertSame('provider://openai/default', $vessel->provider);
+    }
+
+    public function testProviderDefinitionsAcceptReferencesAndRejectLiteralSecrets(): void
+    {
+        $provider = ProviderDefinition::fromArray([
+            'name' => 'openai/default', 'adapter' => 'openai', 'model' => 'gpt-5',
+            'credentials' => ['apiKey' => 'env://OPENAI_API_KEY'],
+        ]);
+        self::assertSame('env://OPENAI_API_KEY', $provider->credentials['apiKey']);
+
+        $this->expectException(DefinitionException::class);
+        $this->expectExceptionMessage('credential reference');
+        ProviderDefinition::fromArray([
+            'name' => 'unsafe', 'adapter' => 'openai', 'model' => 'gpt-5',
+            'credentials' => ['apiKey' => 'sk-literal'],
+        ]);
     }
 
     #[DataProvider('invalidTools')]

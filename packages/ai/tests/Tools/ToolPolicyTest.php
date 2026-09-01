@@ -28,7 +28,7 @@ final class ToolPolicyTest extends TestCase
             'capabilities' => ['capability://show', 'capability://write'],
         ]);
         $vessel = VesselDefinition::fromArray([
-            'name' => 'safe', 'runtime' => 'fake', 'spark' => 'spark://agent',
+            'name' => 'safe', 'runtime' => 'fake', 'spark' => 'spark://agent', 'provider' => 'provider://test',
             'tools' => ['tool://show'], 'toolsets' => ['toolset://context'],
             'capabilities' => ['capability://show'],
         ]);

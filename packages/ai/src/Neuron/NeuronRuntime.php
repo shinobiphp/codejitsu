@@ -17,7 +17,7 @@ final readonly class NeuronRuntime implements AiRuntime
 
     public function __construct(private ToolRegistry $tools, ?\Closure $providers = null)
     {
-        $this->providers = $providers ?? static fn (array $configuration, ?string $model) => (new ProviderFactory())->make($configuration, $model);
+        $this->providers = $providers ?? static fn ($configuration, ?string $model) => (new ProviderFactory())->make($configuration, $model);
     }
 
     public function run(AiRequest $request): AiResponse

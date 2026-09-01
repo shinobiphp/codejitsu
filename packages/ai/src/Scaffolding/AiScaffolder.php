@@ -14,9 +14,9 @@ final readonly class AiScaffolder
     {
         return $this->write('spark', $name, ['instructions' => $this->required($instructions, 'Spark instructions')]);
     }
-    public function vessel(string $name, string $runtime, string $spark): string
+    public function vessel(string $name, string $runtime, string $spark, string $provider): string
     {
-        return $this->write('vessel', $name, ['runtime' => $this->required($runtime, 'Vessel runtime'), 'spark' => $this->required($spark, 'Vessel Spark')]);
+        return $this->write('vessel', $name, ['runtime' => $this->required($runtime, 'Vessel runtime'), 'spark' => $this->required($spark, 'Vessel Spark'), 'provider'=>$this->required($provider, 'Vessel Provider')]);
     }
     public function skill(string $name, string $prompt, array $inputs = []): string
     {
@@ -33,6 +33,10 @@ final readonly class AiScaffolder
         $data = ['tools' => array_values($tools)];
         if (is_string($guidelines) && trim($guidelines) !== '') $data['guidelines'] = trim($guidelines);
         return $this->write('toolset', $name, $data);
+    }
+    public function provider(string $name, string $adapter, string $model, string $apiKeyReference): string
+    {
+        return $this->write('provider', $name, ['adapter'=>$this->required($adapter, 'Provider adapter'), 'model'=>$this->required($model, 'Provider model'), 'credentials'=>['apiKey'=>$this->required($apiKeyReference, 'Provider API key reference')]]);
     }
 
     private function write(string $typeName, string $name, array $attributes): string

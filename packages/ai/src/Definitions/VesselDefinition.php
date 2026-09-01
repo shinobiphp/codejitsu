@@ -12,7 +12,7 @@ final readonly class VesselDefinition
         public string $spark,
         public array $allowedSparks,
         public ?string $description,
-        public array $provider,
+        public string $provider,
         public ?string $model,
         public array $contexts,
         public array $capabilities,
@@ -30,8 +30,8 @@ final readonly class VesselDefinition
         $spark = DefinitionData::string($data, 'spark', $owner, true);
         $allowed = DefinitionData::strings($data, 'allowedSparks', $owner);
         $allowed = DefinitionData::allowed([$spark], $allowed, 'Spark', $owner);
-        $provider = $data['provider'] ?? [];
-        if (!is_array($provider)) throw new \Codejitsu\Ai\Exceptions\DefinitionException($owner . ' provider must be a map.');
+        $provider = DefinitionData::string($data, 'provider', $owner, true);
+        if (!str_starts_with($provider, 'provider://')) throw new \Codejitsu\Ai\Exceptions\DefinitionException($owner . ' provider must be a provider:// reference.');
         $memory = DefinitionData::string($data, 'memory', $owner) ?? 'session';
         if ($memory !== 'session') throw new \Codejitsu\Ai\Exceptions\DefinitionException($owner . ' memory must be [session].');
         return new self(

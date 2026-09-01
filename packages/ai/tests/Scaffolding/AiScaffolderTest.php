@@ -7,6 +7,7 @@ use Codejitsu\Ai\Scrolls\Spark;
 use Codejitsu\Ai\Scrolls\Tool;
 use Codejitsu\Ai\Scrolls\Toolset;
 use Codejitsu\Ai\Scrolls\Vessel;
+use Codejitsu\Ai\Scrolls\Provider;
 use Codejitsu\Scrolls\TypeDefinition;
 use Codejitsu\Scrolls\TypeRegistry;
 use PHPUnit\Framework\TestCase;
@@ -25,6 +26,7 @@ final class AiScaffolderTest extends TestCase
         foreach ([
             ['spark', 'sparks', 'spark', 'spark://', Spark::class], ['vessel', 'vessels', 'vessel', 'vessel://', Vessel::class],
             ['tool', 'tools', 'tool', 'tool://', Tool::class], ['toolset', 'toolsets', 'toolset', 'toolset://', Toolset::class],
+            ['provider', 'providers', 'provider', 'provider://', Provider::class],
         ] as $type) $types->register(new TypeDefinition(...$type));
         $this->scaffolder = new AiScaffolder($this->root, $types);
     }
@@ -34,10 +36,11 @@ final class AiScaffolderTest extends TestCase
     public function testItCreatesMinimalValidResourcesAtRegisteredPaths(): void
     {
         self::assertSame($this->root . '/scrolls/sparks/architect.spark', $this->scaffolder->spark('architect', 'Review architecture.'));
-        self::assertSame($this->root . '/scrolls/vessels/workbench.vessel', $this->scaffolder->vessel('workbench', 'neuron', 'spark://architect'));
+        self::assertSame($this->root . '/scrolls/vessels/workbench.vessel', $this->scaffolder->vessel('workbench', 'neuron', 'spark://architect', 'provider://openai'));
         self::assertSame($this->root . '/scrolls/skills/review.skill', $this->scaffolder->skill('review', 'Review {{subject}}.', ['subject' => ['type' => 'string', 'required' => true]]));
         self::assertSame($this->root . '/scrolls/tools/search.tool', $this->scaffolder->tool('search', 'Search context.', 'capability://search', ['type' => 'object']));
         self::assertSame($this->root . '/scrolls/toolsets/context.toolset', $this->scaffolder->toolset('context', ['tool://search'], 'Search first.'));
+        self::assertSame($this->root . '/scrolls/providers/openai.provider', $this->scaffolder->provider('openai', 'openai', 'gpt-5', 'env://OPENAI_API_KEY'));
         self::assertStringContainsString('instructions: Review architecture.', file_get_contents($this->root . '/scrolls/sparks/architect.spark'));
         self::assertFileDoesNotExist($this->root . '/composer.lock');
     }
