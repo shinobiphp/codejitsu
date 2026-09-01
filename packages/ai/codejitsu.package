@@ -1,1 +1,34 @@
-{name: codejitsu/ai, version: '0.1.0', description: 'Harnesses, Agents, Tools, Skill Processing, Etc...', capabilities: {provides: [], requires: [core-runtime]}}
+name: codejitsu/ai
+version: 0.1.0
+description: 'Provider-neutral AI agents, harnesses, skills, and tools.'
+capabilities:
+  provides: [ai-runtime, spark-agents, ai-tools]
+  requires: [core-runtime, scroll-resources, resource-codex, schema-validation, console-runtime, context-memory]
+types:
+  spark:
+    plural: sparks
+    extension: spark
+    scheme: spark://
+    class: Codejitsu\Ai\Scrolls\Spark
+    codec: neon
+  vessel:
+    plural: vessels
+    extension: vessel
+    scheme: vessel://
+    class: Codejitsu\Ai\Scrolls\Vessel
+    codec: neon
+  tool:
+    plural: tools
+    extension: tool
+    scheme: tool://
+    class: Codejitsu\Ai\Scrolls\Tool
+    codec: neon
+  toolset:
+    plural: toolsets
+    extension: toolset
+    scheme: toolset://
+    class: Codejitsu\Ai\Scrolls\Toolset
+    codec: neon
+sources:
+  codejitsu-ai:
+    path: resources

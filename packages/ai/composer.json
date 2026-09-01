@@ -3,6 +3,8 @@
     "description": "Harnesses, Agents, Tools, Skill Processing, Etc...",
     "type": "codejitsu-pkg",
     "license": "proprietary",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "extra": {
         "codejitsu": {
             "manifest": "codejitsu.package"
@@ -10,7 +12,17 @@
     },
     "require": {
         "php": ">=8.4",
-        "codejitsu/core": "self.version"
+        "codejitsu/core": "self.version",
+        "codejitsu/scrolls": "self.version",
+        "codejitsu/codex": "self.version",
+        "codejitsu/schema": "self.version",
+        "codejitsu/console": "self.version",
+        "codejitsu/context": "self.version",
+        "neuron-core/neuron-ai": "^3.16"
+    },
+    "require-dev": {
+        "codejitsu/package": "self.version",
+        "phpunit/phpunit": "^13.3"
     },
     "autoload": {
         "psr-4": {
@@ -21,5 +33,20 @@
         "psr-4": {
             "Codejitsu\\Ai\\Tests\\": "tests/"
         }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../*",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "config": {
+        "vendor-dir": "../../lib/ai"
+    },
+    "scripts": {
+        "test": "phpunit"
     }
 }
