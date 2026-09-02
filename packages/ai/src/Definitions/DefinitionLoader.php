@@ -10,6 +10,7 @@ use Codejitsu\Ai\Scrolls\Tool;
 use Codejitsu\Ai\Scrolls\Toolset;
 use Codejitsu\Ai\Scrolls\Vessel;
 use Codejitsu\Ai\Scrolls\Provider;
+use Codejitsu\Ai\Scrolls\Model;
 use Codejitsu\Scrolls\Scroll;
 use Codejitsu\Scrolls\ScrollCodex;
 use Codejitsu\Scrolls\Types\Skill;
@@ -21,6 +22,7 @@ final readonly class DefinitionLoader
     public function spark(string $reference): SparkDefinition { return SparkDefinition::fromArray($this->data($reference, 'spark', Spark::class)); }
     public function vessel(string $reference): VesselDefinition { return VesselDefinition::fromArray($this->data($reference, 'vessel', Vessel::class)); }
     public function provider(string $reference): ProviderDefinition { return ProviderDefinition::fromArray($this->data($reference, 'provider', Provider::class)); }
+    public function model(string $reference): ModelDefinition { return ModelDefinition::fromArray($this->data($reference,'model',Model::class)); }
     public function skill(string $reference): SkillDefinition { return SkillDefinition::fromArray($this->data($reference, 'skill', Skill::class)); }
     public function tool(string $reference): ToolDefinition { return ToolDefinition::fromArray($this->data($reference, 'tool', Tool::class)); }
     public function toolset(string $reference): ToolsetDefinition { return ToolsetDefinition::fromArray($this->data($reference, 'toolset', Toolset::class)); }

@@ -8,3 +8,7 @@ vendor/*
 packages/*/composer.lock
 bin/php-parse
 bin/phpunit
+/var/models/
+/var/tmp/codejitsu-ai/
+*.gguf
+*.safetensors

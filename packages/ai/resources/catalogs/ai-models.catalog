@@ -1,0 +1,6 @@
+name: ai-models
+version: 1.0.0
+access: read-only
+tags: [ai, models]
+entries:
+  - {identifier: model://codejitsu/local#1.0.0, kind: model, location: model://codejitsu/local, version: 1.0.0, description: 'Balanced local Codejitsu coding model.', tags: [code, tools, abliterated, ollama, cpu]}

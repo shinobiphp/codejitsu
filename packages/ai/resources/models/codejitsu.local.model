@@ -1,0 +1,11 @@
+name: codejitsu/local
+type: model
+version: 1.0.0
+runtime: ollama
+destination: codejitsu:latest
+base: hf.co/bartowski/Qwen2.5-Coder-7B-Instruct-abliterated-GGUF:Q5_K_M
+size: 5.44GB
+capabilities: [chat, code, tools]
+modelfile: modelfiles/codejitsu/Modelfile
+storage: var/models
+tags: [code, tools, abliterated, ollama, cpu]

@@ -23,6 +23,12 @@ types:
     scheme: provider://
     class: Codejitsu\Ai\Scrolls\Provider
     codec: neon
+  model:
+    plural: models
+    extension: model
+    scheme: model://
+    class: Codejitsu\Ai\Scrolls\Model
+    codec: neon
   tool:
     plural: tools
     extension: tool
