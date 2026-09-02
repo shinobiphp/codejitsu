@@ -23,6 +23,7 @@ final class PackageCompilerTest extends TestCase
             self::assertSame($first, $second);
             self::assertSame('acme/ui', $first['packages'][0]['name']);
             self::assertSame($root, $first['packages'][0]['root']);
+            self::assertSame([], $first['packages'][0]['setup']);
             self::assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $first['fingerprint']);
         } finally {
             $this->remove($root);

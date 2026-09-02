@@ -44,6 +44,11 @@ final class Package extends Scroll
         foreach (($data['types'] ?? []) as $type => $definition) {
             $this->validateType((string) $type, $definition);
         }
+        foreach(($data['setup']??[]) as $name=>$definition){
+            if(preg_match('/^[a-z][a-z0-9_-]*$/',(string)$name)!==1||!is_array($definition))throw new InvalidArgumentException(sprintf('Invalid package field [setup.%s].',$name));
+            $target=$definition['target']??null;if(!is_string($target)||preg_match('/^(?:[A-Za-z_][A-Za-z0-9_]*\\\\)*[A-Za-z_][A-Za-z0-9_]*$/',$target)!==1)throw new InvalidArgumentException(sprintf('Invalid package field [setup.%s.target].',$name));
+            foreach(['optional','interactive'] as $flag)if(isset($definition[$flag])&&!is_bool($definition[$flag]))throw new InvalidArgumentException(sprintf('Invalid package field [setup.%s.%s].',$name,$flag));
+        }
         foreach (($data['sources'] ?? []) as $alias => $source) {
             $path = is_array($source) ? ($source['path'] ?? null) : null;
             if (preg_match('/^[a-z][a-z0-9_-]*$/', (string) $alias) !== 1
@@ -71,6 +76,7 @@ final class Package extends Scroll
     {
         return $this->attributes['sources'] ?? [];
     }
+    public function setupDeclarations():array{return $this->attributes['setup']??[];}
 
     private function validateType(string $type, mixed $definition): void
     {

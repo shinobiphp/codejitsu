@@ -34,6 +34,7 @@ final class PackageTest extends TestCase
                 ],
             ],
             'sources' => ['ui' => ['path' => 'scrolls']],
+            'setup' => ['model' => ['target' => 'Acme\\ModelSetup', 'optional' => true, 'interactive' => true]],
         ]);
 
         self::assertSame('shinobiphp/codejitsu-ui', $package->name);
@@ -45,6 +46,7 @@ final class PackageTest extends TestCase
             'codec' => 'neon',
         ]], $package->typeDeclarations());
         self::assertSame(['ui' => ['path' => 'scrolls']], $package->sourceDeclarations());
+        self::assertSame('Acme\\ModelSetup',$package->setupDeclarations()['model']['target']);
         self::assertSame(['astro', 'ui'], $package->toArray()['keywords']);
     }
 
@@ -56,6 +58,7 @@ final class PackageTest extends TestCase
         yield 'codec' => [['name' => 'vendor/pkg', 'types' => ['world' => ['plural' => 'worlds', 'extension' => 'world', 'scheme' => 'world://', 'class' => 'Vendor\\World', 'codec' => 'yaml']]], 'types.world.codec'];
         yield 'source traversal' => [['name' => 'vendor/pkg', 'sources' => ['ui' => ['path' => '../scrolls']]], 'sources.ui.path'];
         yield 'configuration uri' => [['name' => 'vendor/pkg', 'configuration' => ['not-a-uri']], 'configuration.0'];
+        yield 'setup target' => [['name'=>'vendor/pkg','setup'=>['model'=>['target'=>'not a class']]],'setup.model.target'];
     }
 
     #[DataProvider('invalidManifests')]

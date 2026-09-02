@@ -8,6 +8,7 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
+use Codejitsu\Packages\PackageSetupCoordinator;
 
 final class Plugin implements PluginInterface, EventSubscriberInterface
 {
@@ -22,6 +23,9 @@ final class Plugin implements PluginInterface, EventSubscriberInterface
 
     public function rebuild(Event $event): void
     {
-        (new PackageInstaller())->rebuild(dirname($event->getComposer()->getConfig()->get('vendor-dir')));
+        $root=dirname($event->getComposer()->getConfig()->get('vendor-dir'));
+        $compiled=(new PackageInstaller())->rebuild($root);
+        $io=$event->getIO();
+        (new PackageSetupCoordinator())->run($root,$compiled,new ComposerSetupIO($io),$io->isInteractive(),[]);
     }
 }

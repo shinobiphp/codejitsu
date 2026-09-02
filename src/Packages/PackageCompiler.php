@@ -39,6 +39,7 @@ final class PackageCompiler
                 'manifest' => $item->manifest,
                 'types' => $data['types'] ?? [],
                 'sources' => $data['sources'] ?? [],
+                'setup' => $data['setup'] ?? [],
                 'metadata' => array_diff_key($data, array_flip(['type', 'types', 'sources'])),
             ];
         }

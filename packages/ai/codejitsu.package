@@ -1,6 +1,8 @@
 name: codejitsu/ai
 version: 0.1.0
 description: 'Provider-neutral AI agents, harnesses, skills, and tools.'
+setup:
+  model: {target: Codejitsu\Ai\Models\ModelPackageSetup, optional: true, interactive: true}
 capabilities:
   provides: [ai-runtime, spark-agents, ai-tools]
   requires: [core-runtime, scroll-resources, resource-codex, schema-validation, console-runtime, context-memory]
