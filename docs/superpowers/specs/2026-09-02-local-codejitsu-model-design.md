@@ -30,11 +30,14 @@ Default parameters are `num_ctx 8192`, `temperature 0.2`, and `top_p 0.9`.
 
 ## Package Resources
 
-`packages/ai/resources/models/codejitsu/Modelfile` owns the portable model definition. A small model manifest records its name, base reference, description, and Modelfile path without storing weights.
+The AI package owns a `model` Scroll type. `packages/ai/resources/models/codejitsu.local.model` records the destination name, runtime, base reference, known download size, capabilities, storage path, and portable Modelfile path without storing weights. `packages/ai/resources/modelfiles/codejitsu/Modelfile` contains the tracked model definition.
+
+A bundled generic Catalog named `ai-models` indexes entries with `kind: model`. The initial `model://codejitsu/local#1.0.0` entry points to the bundled Model Scroll and advertises code, tools, abliterated, Ollama, and CPU tags. Project and private Catalogs may add or override model recipes through normal Catalog precedence, enabling future local, Runpod, licensed, and marketplace models without changing Sparks.
 
 The AI package adds a `model` command namespace:
 
 - `model:list` delegates to `ollama list`;
+- `model:search <query>` searches generic Catalog entries with `kind: model` and annotates local installation status;
 - `model:show <name>` delegates to `ollama show`;
 - `model:build [manifest] [--name=...] [--base=...]` renders a temporary Modelfile with the selected base and invokes `ollama create`;
 - `model:ensure [manifest]` returns immediately when the model exists and otherwise opens the setup wizard;
@@ -57,7 +60,7 @@ Package setup is a generic lifecycle boundary: the Composer plugin coordinates r
 
 The model manifest and Modelfile are discovered as package resources. The Build Command resolves the selected manifest, substitutes only the validated `FROM` value, creates `codejitsu:latest`, and then runs smoke tests. Model weights remain in Ollama's managed store and never enter Git or Codejitsu caches.
 
-The repository `.gitignore` excludes model weight formats including `*.gguf` and `*.safetensors` plus package/project model staging directories. Versioned Modelfiles and small model manifests remain tracked.
+Downloaded or imported source weights live under `var/models`. Rendered Modelfiles and incomplete downloads live under `var/tmp/codejitsu-ai`. The repository `.gitignore` excludes both locations and model weight formats including `*.gguf` and `*.safetensors`. Versioned Modelfiles and small model/catalog Scrolls remain tracked.
 
 The future Ollama Provider adapter will call Ollama's OpenAI-compatible API. That adapter is a separate follow-up because model lifecycle and inference transport are independent boundaries.
 
