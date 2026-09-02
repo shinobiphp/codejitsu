@@ -1,0 +1,14 @@
+name: cognition
+type: vessel
+version: 1.0.0
+description: 'Analysis and specification-oriented Neuron harness.'
+spark: spark://scribe
+runtime: neuron
+provider: provider://ollama/local
+model: 'codejitsu:latest'
+allowedSparks: [spark://engineer, spark://scribe, spark://product-designer, spark://marketer, spark://seo, spark://security]
+contexts: [context://contexts/architecture, context://contexts/operations]
+tools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]
+capabilities: [capability://ai-context-list, capability://ai-context-search, capability://ai-context-show, capability://ai-context-update-section]
+toolsets: [toolset://context]
+memory: session

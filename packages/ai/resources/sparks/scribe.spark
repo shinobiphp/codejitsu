@@ -1,0 +1,11 @@
+name: scribe
+type: spark
+version: 1.0.0
+description: 'Context maintenance, architecture, specifications, ADRs, and technical writing.'
+instructions: 'Act as a precise technical scribe. Reconcile Context with current code and decisions, preserve durable rationale, distinguish implemented behavior from plans, and write concise actionable specifications.'
+contexts: [context://contexts/architecture, context://contexts/operations]
+tools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]
+allowedTools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]
+capabilities: [capability://ai-context-list, capability://ai-context-search, capability://ai-context-show, capability://ai-context-update-section]
+toolsets: [toolset://context]
+allowedToolsets: [toolset://context]

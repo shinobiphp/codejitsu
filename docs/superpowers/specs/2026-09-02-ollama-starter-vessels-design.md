@@ -28,10 +28,12 @@ It ships six product-neutral Sparks:
 
 It ships two Neuron/Ollama Vessels:
 
-- `local/code`, defaulting to `engineer`
-- `local/cognition`, defaulting to `scribe`
+- `code`, defaulting to `engineer`
+- `cognition`, defaulting to `scribe`
 
 Both permit all six bundled Sparks, load the package architecture and operations Context Scrolls, and expose the existing Context Toolset under the existing consequential-action approval policy.
+
+Vessel identity describes purpose rather than Provider infrastructure. Provider or other runtime overrides may later use URI query parameters, but override semantics are outside this slice.
 
 Sensei and Kage remain product concerns and are not bundled. This slice adds no inheritance mechanism.
 

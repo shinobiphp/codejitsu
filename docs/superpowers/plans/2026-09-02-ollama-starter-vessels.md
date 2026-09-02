@@ -43,13 +43,14 @@
 **Files:**
 - Create: `packages/ai/resources/providers/ollama-local.provider`
 - Create: `packages/ai/resources/sparks/*.spark`
-- Create: `packages/ai/resources/vessels/local-*.vessel`
+- Create: `packages/ai/resources/vessels/code.vessel`
+- Create: `packages/ai/resources/vessels/cognition.vessel`
 - Modify: `packages/ai/tests/Definitions/DefinitionLoaderTest.php`
 - Modify: `packages/ai/tests/Vessels/VesselRunnerTest.php`
 
 **Interfaces:**
 - Consumes: existing package type registry, Context Scrolls, and `toolset://context`
-- Produces: `provider://ollama/local`, six starter Sparks, and two local Vessels
+- Produces: `provider://ollama/local`, six starter Sparks, `vessel://code`, and `vessel://cognition`
 
 - [ ] Write failing discovery/resolution tests for every resource and both complete Vessel graphs.
 - [ ] Run focused tests and confirm resources are absent.

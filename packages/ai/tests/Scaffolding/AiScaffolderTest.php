@@ -55,6 +55,14 @@ final class AiScaffolderTest extends TestCase
         $this->scaffolder->spark('same', 'y');
     }
 
+    public function testItPreservesNestedResourceNamesAsDirectories(): void
+    {
+        self::assertSame(
+            $this->root.'/scrolls/vessels/local/code.vessel',
+            $this->scaffolder->vessel('local/code','neuron','spark://engineer','provider://ollama/local'),
+        );
+    }
+
     private function remove(string $path): void
     {
         if (!is_dir($path)) return;

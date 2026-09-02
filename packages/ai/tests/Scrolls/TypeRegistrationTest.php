@@ -35,5 +35,11 @@ final class TypeRegistrationTest extends TestCase
         self::assertFileExists($root . '/resources/catalogs/providers.catalog');
         $catalog=(new Neon())->decode((string)file_get_contents($root.'/resources/catalogs/ai-models.catalog'));
         self::assertSame('model://codejitsu/local#1.0.0',$catalog['entries'][0]['identifier']);
+        self::assertFileExists($root.'/resources/providers/ollama/local.provider');
+        foreach (['engineer','scribe','product-designer','marketer','seo','security'] as $spark) {
+            self::assertFileExists($root.'/resources/sparks/'.$spark.'.spark');
+        }
+        self::assertFileExists($root.'/resources/vessels/code.vessel');
+        self::assertFileExists($root.'/resources/vessels/cognition.vessel');
     }
 }

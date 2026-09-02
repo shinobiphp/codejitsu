@@ -14,6 +14,7 @@ use Codejitsu\Ai\Scrolls\Tool;
 use Codejitsu\Ai\Scrolls\Toolset;
 use Codejitsu\Ai\Scrolls\Vessel;
 use Codejitsu\Ai\Scrolls\Provider;
+use Codejitsu\Ai\Scrolls\Model;
 use Codejitsu\Ai\Tools\ToolPolicy;
 use Codejitsu\Ai\Tools\DenyConsequentialTools;
 use Codejitsu\Ai\Vessels\VesselRunner;
@@ -49,6 +50,43 @@ final class VesselRunnerTest extends TestCase
         [$runner] = $this->runner();
         $this->expectExceptionMessage('is not allowed by Vessel');
         $runner->start('workbench', spark: 'spark://other');
+    }
+
+    public function testBundledLocalVesselsResolveTheirCompleteResourceGraph(): void
+    {
+        $types=TypeRegistry::builtins();
+        foreach ([
+            ['spark','sparks','spark','spark://',Spark::class],
+            ['vessel','vessels','vessel','vessel://',Vessel::class],
+            ['provider','providers','provider','provider://',Provider::class],
+            ['model','models','model','model://',Model::class],
+            ['tool','tools','tool','tool://',Tool::class],
+            ['toolset','toolsets','toolset','toolset://',Toolset::class],
+        ] as $type) $types->register(new TypeDefinition(...$type));
+        $codex=(new ScrollCodex(types:$types))->load(dirname(__DIR__,2).'/resources','codejitsu-ai');
+        $runtime=new RunnerRuntime();
+        $runtimes=new RuntimeRegistry();
+        $runtimes->register('neuron',$runtime);
+        $runner=new VesselRunner(
+            new DefinitionLoader($codex),
+            new PromptAssembler(new SkillRenderer()),
+            new ToolPolicy(new DefinitionLoader($codex)),
+            $runtimes,
+            $codex,
+        );
+
+        foreach ([
+            'code'=>['engineer','codejitsu:latest'],
+            'cognition'=>['scribe','codejitsu:latest'],
+        ] as $vessel=>[$spark,$model]) {
+            $session=$runner->start($vessel);
+            $session->send('Inspect the project.');
+            self::assertSame($spark,$runtime->request->metadata['spark']);
+            self::assertSame('ollama',$runtime->request->metadata['provider']->adapter);
+            self::assertSame($model,$runtime->request->model);
+            self::assertNotEmpty($runtime->request->tools);
+            self::assertStringContainsString('Codejitsu AI — Architecture',$runtime->request->instructions);
+        }
     }
 
     private function runner(): array

@@ -1,0 +1,9 @@
+name: ollama/local
+type: provider
+version: 1.0.0
+description: 'Local Codejitsu model served by Ollama through Neuron AI.'
+adapter: ollama
+model: 'codejitsu:latest'
+options:
+  url: 'http://127.0.0.1:11434/api'
+  parameters: {temperature: 0.2}

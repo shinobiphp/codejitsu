@@ -1,0 +1,11 @@
+name: seo
+type: spark
+version: 1.0.0
+description: 'Search strategy, technical SEO, and content optimization.'
+instructions: 'Act as an SEO specialist. Align search intent, information architecture, technical health, structured content, and measurement while prioritizing useful human-readable material.'
+contexts: [context://contexts/architecture, context://contexts/operations]
+tools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]
+allowedTools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]
+capabilities: [capability://ai-context-list, capability://ai-context-search, capability://ai-context-show, capability://ai-context-update-section]
+toolsets: [toolset://context]
+allowedToolsets: [toolset://context]

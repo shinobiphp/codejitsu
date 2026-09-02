@@ -45,8 +45,9 @@ final readonly class AiScaffolder
         if (preg_match('/^[a-z0-9][a-z0-9._-]*(?:\/[a-z0-9][a-z0-9._-]*)*$/', $name) !== 1 || str_contains($name, '..')) throw new RuntimeException('Invalid AI Scroll name.');
         $type = $this->types->get($typeName);
         $directory = rtrim($this->root, '/\\') . '/scrolls/' . $type->plural;
+        $path = $directory . '/' . $name . '.' . $type->extension;
+        $directory = dirname($path);
         if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) throw new RuntimeException('Unable to create Scroll directory.');
-        $path = $directory . '/' . str_replace('/', '_', $name) . '.' . $type->extension;
         if (is_file($path)) throw new RuntimeException(sprintf('Scroll [%s://%s] already exists.', $typeName, $name));
         $content = (new Neon())->encode(['name' => $name, 'type' => $typeName, 'version' => '1.0.0', ...$attributes]);
         $temporary = tempnam($directory, '.scroll-');
