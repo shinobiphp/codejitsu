@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ff6a526f37c21a0dacfb6dd41cc18173",
+    "content-hash": "dbe33120e9040ef572559aa1e1bd5d42",
     "packages": [
         {
             "name": "codejitsu/codex",
@@ -4270,7 +4270,7 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": {
         "codejitsu/codex": 20,
         "codejitsu/composer-plugin": 20,
@@ -4283,7 +4283,7 @@
         "codejitsu/schema": 20,
         "codejitsu/scrolls": 20
     },
-    "prefer-stable": false,
+    "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.4"

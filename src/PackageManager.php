@@ -143,7 +143,7 @@ final class PackageManager
     {
         $result = $this->composer([$operation, $package, '--no-interaction', '--no-progress'], $root);
         if ($result['output'] !== '') {
-            echo $result['output'];
+            echo $result['output'] . "\n";
         }
 
         return $result['exit'];
