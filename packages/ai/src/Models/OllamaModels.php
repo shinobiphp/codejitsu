@@ -15,5 +15,6 @@ final readonly class OllamaModels
         $temporary=tempnam($directory,'Modelfile-');if($temporary===false)throw new RuntimeException('Unable to create temporary Modelfile.');
         try{if(file_put_contents($temporary,$this->renderer->render((string)file_get_contents($source),$base??$model->base),LOCK_EX)===false)throw new RuntimeException('Unable to render temporary Modelfile.');return $this->process->run(['ollama','create',$this->name($name??$model->destination),'-f',$temporary],$this->projectRoot);}finally{if(is_file($temporary))unlink($temporary);}
     }
+    public function smoke(string $name):ProcessResult{return $this->process->run(['ollama','run',$this->name($name),'Reply with exactly CODEJITSU_OK.'],$this->projectRoot);}
     private function name(string $name):string{if(preg_match('/^[a-z0-9][a-z0-9._\/-]*(?::[a-z0-9][a-z0-9._-]*)?$/',$name)!==1)throw new RuntimeException('Invalid Ollama model name.');return $name;}
 }

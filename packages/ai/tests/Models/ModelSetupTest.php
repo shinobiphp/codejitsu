@@ -1,0 +1,15 @@
+<?php declare(strict_types=1); namespace Codejitsu\Ai\Tests\Models;
+use Codejitsu\Ai\Definitions\ModelDefinition; use Codejitsu\Ai\Models\ModelSetup; use Codejitsu\Ai\Models\OllamaModels; use Codejitsu\Ai\Console\ModelSetupIO; use Codejitsu\Contracts\ProcessRunner; use Codejitsu\ProcessResult; use PHPUnit\Framework\TestCase;
+final class ModelSetupTest extends TestCase
+{
+    private string $root;
+    protected function setUp():void{$this->root=sys_get_temp_dir().'/codejitsu-setup-'.bin2hex(random_bytes(4));mkdir($this->root.'/resources/modelfiles/codejitsu',0755,true);file_put_contents($this->root.'/resources/modelfiles/codejitsu/Modelfile',"FROM original:model\nSYSTEM test\n");}
+    protected function tearDown():void{$this->remove($this->root);}
+    public function testExistingModelIsANoop():void{$r=new SetupRunner([new ProcessResult(0,'','')]);$io=new ScriptedSetupIO([]);self::assertSame(0,(new ModelSetup(new OllamaModels($r,$this->root,$this->root)))->ensure($this->model(),$io));self::assertCount(1,$r->commands);}
+    public function testRecommendedChoiceBuildsAndSmokeTestsAfterConfirmation():void{$r=new SetupRunner([new ProcessResult(1,'',''),new ProcessResult(0,'built',''),new ProcessResult(0,'CODEJITSU_OK','')]);$io=new ScriptedSetupIO(['Download recommended model','yes']);self::assertSame(0,(new ModelSetup(new OllamaModels($r,$this->root,$this->root)))->ensure($this->model(),$io));self::assertSame('create',$r->commands[1][1]);self::assertSame('run',$r->commands[2][1]);}
+    public function testSkipDoesNotBuild():void{$r=new SetupRunner([new ProcessResult(1,'','')]);$io=new ScriptedSetupIO(['Skip for now']);self::assertSame(0,(new ModelSetup(new OllamaModels($r,$this->root,$this->root)))->ensure($this->model(),$io));self::assertCount(1,$r->commands);}
+    private function model():ModelDefinition{return ModelDefinition::fromArray(['name'=>'codejitsu/local','runtime'=>'ollama','destination'=>'codejitsu:latest','base'=>'remote:model','size'=>'5GB','capabilities'=>['tools'],'modelfile'=>'modelfiles/codejitsu/Modelfile','storage'=>'var/models']);}
+    private function remove(string $p):void{if(!is_dir($p))return;foreach(scandir($p)?:[] as $e)if(!in_array($e,['.','..'],true)){$c=$p.'/'.$e;is_dir($c)?$this->remove($c):unlink($c);}rmdir($p);}
+}
+final class SetupRunner implements ProcessRunner { public array $commands=[];public function __construct(private array $results){}public function run(array $command,string $cwd):ProcessResult{$this->commands[]=$command;return array_shift($this->results)??new ProcessResult(0,'','');} }
+final class ScriptedSetupIO implements ModelSetupIO { public array $output=[];public function __construct(private array $answers){}public function select(string $q,array $c):string{return (string)array_shift($this->answers);}public function ask(string $q,string $default=''):string{return (string)(array_shift($this->answers)??$default);}public function confirm(string $q):bool{return array_shift($this->answers)==='yes';}public function write(string $m):void{$this->output[]=$m;} }
