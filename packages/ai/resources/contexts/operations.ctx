@@ -8,7 +8,7 @@ Run a Vessel once with `ai:run <vessel> <prompt>`. Use `--spark=<name>`, `--prov
 
 ## Starter Providers and Vessels
 
-`provider://groq/free` is the fast hosted development default and reads its key from `env://GROQ_API_KEY`. Copy `.env.example` to `.env`, set the key, and validate it with `provider:test groq/free`. The project boot process loads `.env` without replacing values already supplied by the process environment.
+`provider://groq/free` is the fast hosted development default and reads its key from `env://GROQ_API_KEY`. Copy `.env.example` to `.env`, set the key, and validate it with `provider:test groq/free`. The profile uses low reasoning effort and an 8,192-token completion budget so substantial structured outputs do not exhaust the default Groq reasoning budget. The project boot process loads `.env` without replacing values already supplied by the process environment.
 
 `provider://ollama/local` uses `codejitsu:latest` for offline inference and permits longer CPU-bound requests. Validate it with `provider:test ollama/local` after Ollama and the model are available.
 

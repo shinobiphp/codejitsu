@@ -37,6 +37,9 @@ final class TypeRegistrationTest extends TestCase
         self::assertSame('model://codejitsu/local#1.0.0',$catalog['entries'][0]['identifier']);
         self::assertFileExists($root.'/resources/providers/ollama/local.provider');
         self::assertFileExists($root.'/resources/providers/groq/free.provider');
+        $groq = (new Neon())->decode((string) file_get_contents($root . '/resources/providers/groq/free.provider'));
+        self::assertSame('low', $groq['options']['parameters']['reasoning_effort']);
+        self::assertSame(8192, $groq['options']['parameters']['max_completion_tokens']);
         foreach (['engineer','scribe','product-designer','marketer','seo','security'] as $spark) {
             self::assertFileExists($root.'/resources/sparks/'.$spark.'.spark');
         }
