@@ -17,6 +17,6 @@ Neuron AI is the first runtime adapter. Runtime and provider selection remain sw
 
 ## Execution boundary
 
-Command Scroll handlers that need arguments, the Codex, or other request state must be exposed through a Capability Scroll. Capabilities receive an `ExecutionContext`; raw command `target` callables receive only positional CLI arguments. Package command namespaces may extend core namespaces when their child names do not collide.
+Command Scroll handlers that need arguments, the Codex, or other request state must be exposed through a Capability Scroll. Capabilities receive an `ExecutionContext`; raw command `target` callables receive only positional CLI arguments. Package command namespaces may extend core namespaces when their child names do not collide. The registry alphabetizes namespaces and children for deterministic human-facing discovery; Command Scrolls in the Codex remain the authoritative command catalog.
 
 Consequential Tools require explicit approval. Context mutation is limited to named managed sections of explicitly resolved Context Scrolls.

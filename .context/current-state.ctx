@@ -14,8 +14,8 @@ Current verified baseline:
 
 ```text
 main
-186 default tests
-638 default assertions
+187 default tests
+641 default assertions
 1 clean-install test / 5 assertions
 0 failures
 0 errors
@@ -56,6 +56,7 @@ main
 - `packages/ai` is installed in the root development aggregate and provides provider-neutral Context/Skill/Spark/Vessel/Tool contracts, Neuron/OpenAI adapters, non-secret Provider profiles, scoped Context tools, one-shot execution, and a conversational TUI.
 - The AI package owns Model Scroll recipes, a generic model Catalog, a balanced local Codejitsu Modelfile, safe Ollama lifecycle commands, and optional interactive package setup; model weights remain outside Git.
 - AI command handlers are wired through Capability Scrolls so every command receives `ExecutionContext`; package-local Context Scrolls give Sparks targeted architecture and operations memory.
+- Command Scrolls indexed by the Codex are the authoritative command catalog; the registry renders namespaces and child commands alphabetically.
 - `packages/ui` remains a valid, cataloged, uninstalled scaffold.
 
 ## Next Slice

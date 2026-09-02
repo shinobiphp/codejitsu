@@ -22,6 +22,13 @@ final class CommandRegistry
             }
             $existing->hydrate([...$existing->toArray(),'commands'=>$children]);
         }
+        foreach($merged as $command){
+            if(!$command->isNamespace())continue;
+            $children=$command->commands();
+            uksort($children,'strnatcasecmp');
+            $command->hydrate([...$command->toArray(),'commands'=>$children]);
+        }
+        uksort($merged,'strnatcasecmp');
         return array_values($merged);
     }
 }

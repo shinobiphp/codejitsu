@@ -37,4 +37,23 @@ final class CommandRegistryTest extends TestCase
         self::assertSame(['context'],array_keys($core->commands()));
         self::assertSame(['spark'],array_keys($ai->commands()));
     }
+
+    public function testItSortsNamespacesAndChildrenAlphabetically(): void
+    {
+        $make=(new Command())->hydrate(['name'=>'make','commands'=>[
+            'vessel'=>['target'=>'Ai::vessel'],
+            'context'=>['target'=>'Core::context'],
+            'spark'=>['target'=>'Ai::spark'],
+        ]]);
+        $ai=(new Command())->hydrate(['name'=>'ai','commands'=>[
+            'tui'=>['target'=>'Ai::tui'],
+            'run'=>['target'=>'Ai::run'],
+        ]]);
+
+        $commands=(new CommandRegistry())->merge([$make,$ai]);
+
+        self::assertSame(['ai','make'],array_map(static fn(Command $command): string=>$command->name,$commands));
+        self::assertSame(['run','tui'],array_keys($commands[0]->commands()));
+        self::assertSame(['context','spark','vessel'],array_keys($commands[1]->commands()));
+    }
 }
