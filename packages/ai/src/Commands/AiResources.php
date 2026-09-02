@@ -39,7 +39,7 @@ final class AiResources
     {
         $rows = self::codex($c)->query(['type'=>$type]);
         usort($rows, fn ($a,$b) => $a->name <=> $b->name);
-        return $rows === [] ? sprintf("No %s Scrolls found.\n", ucfirst($type)) : implode("\n", array_map(fn ($e) => sprintf('%s\t%s', $e->name, $e->uri), $rows)) . "\n";
+        return $rows === [] ? sprintf("No %s Scrolls found.\n", ucfirst($type)) : implode("\n", array_map(fn ($e) => sprintf("%s\t%s", $e->name, $e->uri), $rows)) . "\n";
     }
     private static function show(ExecutionContext $c, string $type): string
     {
