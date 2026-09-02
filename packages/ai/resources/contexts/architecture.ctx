@@ -15,6 +15,8 @@
 
 Neuron AI is the first runtime adapter. Runtime and provider selection remain swappable behind package contracts.
 
+Vessel Spark access uses an ordered `sparkPolicy`. Rules have `effect: allow|deny` and either `match: '*'` or an exact Spark name/URI; the last matching rule wins and unmatched Sparks are denied. If both `sparkPolicy` and legacy `allowedSparks` are omitted, the Vessel permits every registered Spark. The two fields cannot be combined, and the configured default Spark must remain permitted.
+
 ## Execution boundary
 
 Command Scroll handlers that need arguments, the Codex, or other request state must be exposed through a Capability Scroll. Capabilities receive an `ExecutionContext`; raw command `target` callables receive only positional CLI arguments. Package command namespaces may extend core namespaces when their child names do not collide. The registry alphabetizes namespaces and children for deterministic human-facing discovery; Command Scrolls in the Codex remain the authoritative command catalog.

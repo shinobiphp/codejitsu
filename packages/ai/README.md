@@ -19,7 +19,13 @@ AI commands bind their PHP handlers through Capability Scrolls so arguments and 
 
 Neuron AI is the first runtime adapter. The package includes `provider://groq/free` for fast hosted development with `GROQ_API_KEY` and `provider://ollama/local` for offline inference. The Groq profile uses low reasoning effort and an 8,192-token completion budget for substantial structured responses. Copy `.env.example` to `.env`, set the Groq key, then run `provider:test groq/free`. Public definitions remain provider-neutral. MCP belongs in a future integration package.
 
-The bundled `code` Vessel defaults to the `engineer` Spark; `cognition` defaults to `scribe`. Both allow the bundled `product-designer`, `marketer`, `seo`, and `security` Sparks as well. Hosted Providers receive the selected Context Scrolls and prompt; use Ollama when that material must remain local.
+The bundled `code` Vessel defaults to the `engineer` Spark; `cognition` defaults to `scribe`. A Vessel with neither `sparkPolicy` nor the legacy `allowedSparks` field permits every registered Spark. Explicit `sparkPolicy` rules are evaluated in order, the last matching rule wins, and an unmatched Spark is denied. Use `match: '*'` for all Sparks or an exact name/URI for one Spark. A Vessel may define `sparkPolicy` or `allowedSparks`, but not both, and its default Spark must be permitted. Hosted Providers receive the selected Context Scrolls and prompt; use Ollama when that material must remain local.
+
+```neon
+sparkPolicy:
+  - {effect: allow, match: '*'}
+  - {effect: deny, match: spark://product-designer}
+```
 
 The bundled `product-strategy` Skill generates a prioritized JSON portfolio for Codejitsu, Buildshido, Shinobi, Satori, Kensho, Archiq, Kuzuryu, Ryujin, Daimyo, Sensei, and Shogun. It is permitted by the scribe, product-designer, and marketer Sparks:
 

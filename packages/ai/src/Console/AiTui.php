@@ -21,7 +21,8 @@ final readonly class AiTui
         $loader = new DefinitionLoader($this->codex);
         $vessel = $io->select('Vessel', $vessels);
         $definition = $loader->vessel($vessel);
-        $sparks = array_map($this->shortName(...), $definition->allowedSparks);
+        $sparks = array_values(array_filter($this->names('spark'), $definition->allowsSpark(...)));
+        if ($sparks === []) { $io->write("Selected Vessel permits no registered Sparks.\n"); return 1; }
         $spark = $io->select('Spark', array_values(array_unique($sparks)));
         $provider = $io->select('Provider', $this->names('provider'));
         $sparkDefinition = $loader->spark($spark);

@@ -56,16 +56,19 @@ final class AiTuiTest extends TestCase
         self::assertStringContainsString('spark=product-designer', implode('', $io->output));
         self::assertStringContainsString('provider=ollama/local', implode('', $io->output));
         self::assertStringContainsString('skills=product-strategy', implode('', $io->output));
+        self::assertContains('security', $io->choices[1]);
     }
 }
 
 final class TuiIO implements ConversationIO
 {
     public array $output = [];
+    public array $choices = [];
     public function __construct(private array $selections, private array $answers) {}
     public function ask(string $prompt): string { return (string) array_shift($this->answers); }
     public function select(string $prompt, array $choices): string
     {
+        $this->choices[] = $choices;
         $answer = (string) array_shift($this->selections);
         TestCase::assertContains($answer, $choices);
         return $answer;

@@ -51,8 +51,46 @@ final class DefinitionLoaderTest extends TestCase
 
         self::assertSame(['skill://review'], $spark->allowedSkills);
         self::assertSame(['tool://context.show'], $spark->allowedTools);
-        self::assertSame(['spark://architect'], $vessel->allowedSparks);
+        self::assertSame([], $vessel->allowedSparks);
+        self::assertSame([['effect' => 'allow', 'match' => '*']], $vessel->sparkPolicy);
+        self::assertTrue($vessel->allowsSpark('spark://anything'));
         self::assertSame('provider://openai/default', $vessel->provider);
+    }
+
+    public function testVesselSparkPolicyUsesTheLastMatchingRule(): void
+    {
+        $allowScribe = VesselDefinition::fromArray([
+            'name' => 'scribe-only', 'runtime' => 'neuron', 'spark' => 'spark://scribe',
+            'provider' => 'provider://groq/free',
+            'sparkPolicy' => [
+                ['effect' => 'deny', 'match' => '*'],
+                ['effect' => 'allow', 'match' => 'spark://scribe'],
+            ],
+        ]);
+        self::assertTrue($allowScribe->allowsSpark('scribe'));
+        self::assertFalse($allowScribe->allowsSpark('product-designer'));
+
+        $denyDesigner = VesselDefinition::fromArray([
+            'name' => 'except-designer', 'runtime' => 'neuron', 'spark' => 'spark://engineer',
+            'provider' => 'provider://groq/free',
+            'sparkPolicy' => [
+                ['effect' => 'allow', 'match' => '*'],
+                ['effect' => 'deny', 'match' => 'product-designer'],
+            ],
+        ]);
+        self::assertTrue($denyDesigner->allowsSpark('engineer'));
+        self::assertFalse($denyDesigner->allowsSpark('spark://product-designer'));
+    }
+
+    public function testVesselCannotMixLegacyAllowlistAndSparkPolicy(): void
+    {
+        $this->expectExceptionMessage('cannot define both allowedSparks and sparkPolicy');
+        VesselDefinition::fromArray([
+            'name' => 'mixed', 'runtime' => 'neuron', 'spark' => 'spark://scribe',
+            'provider' => 'provider://groq/free',
+            'allowedSparks' => ['spark://scribe'],
+            'sparkPolicy' => [['effect' => 'allow', 'match' => '*']],
+        ]);
     }
 
     public function testProviderDefinitionsAcceptReferencesAndRejectLiteralSecrets(): void

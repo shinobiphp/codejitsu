@@ -14,6 +14,8 @@ Run a Vessel once with `ai:run <vessel> <prompt>`. Use `--spark=<name>`, `--prov
 
 `vessel://code` defaults to `spark://engineer`; `vessel://cognition` defaults to `spark://scribe`. Both permit the bundled product-neutral Sparks: engineer, scribe, product-designer, marketer, seo, and security. Hosted Providers receive the prompt and resolved Context content; select an offline Provider for sensitive material that must not leave the machine.
 
+Both starter Vessels use the implicit allow-all Spark policy, so newly registered Sparks appear in `ai:tui` without editing those Vessels. Define an ordered `sparkPolicy` when a Vessel needs restrictions; the last matching allow/deny rule wins.
+
 `skill://product-strategy` contains the reusable ecosystem portfolio prompt. It is allowed by the scribe, product-designer, and marketer Sparks and accepts optional `additional_context`.
 
 ## Local models

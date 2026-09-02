@@ -50,6 +50,7 @@ Remaining:
 - [x] Add Ollama and Groq Provider adapters plus starter Sparks/Vessels; prove hosted inference through `ai:run`.
 - [x] Add one-shot and TUI Spark/Provider/model selection plus reusable Skill inputs.
 - [x] Add the bundled product-strategy Skill for ecosystem prioritization.
+- [x] Replace fixed Vessel Spark lists with ordered allow/deny policy and an implicit allow-all default.
 
 ## 2. Codejitsu Runtime Boundary
 

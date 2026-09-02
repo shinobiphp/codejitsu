@@ -5,7 +5,6 @@ description: 'Implementation-oriented Neuron harness.'
 spark: spark://engineer
 runtime: neuron
 provider: provider://groq/free
-allowedSparks: [spark://engineer, spark://scribe, spark://product-designer, spark://marketer, spark://seo, spark://security]
 contexts: [context://contexts/architecture, context://contexts/operations]
 tools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]
 capabilities: [capability://ai-context-list, capability://ai-context-search, capability://ai-context-show, capability://ai-context-update-section]

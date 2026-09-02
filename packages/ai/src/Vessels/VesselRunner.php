@@ -38,7 +38,7 @@ final readonly class VesselRunner
         $providerDefinition = $this->loader->provider($provider ?? $vesselDefinition->provider);
         $sparkReference = $spark ?? $vesselDefinition->spark;
         $sparkDefinition = $this->loader->spark($sparkReference);
-        if (!$this->allows($vesselDefinition->allowedSparks, 'spark', $sparkDefinition->name)) {
+        if (!$vesselDefinition->allowsSpark($sparkDefinition->name)) {
             throw new DefinitionException(sprintf('Spark [%s] is not allowed by Vessel [%s].', $sparkReference, $vesselDefinition->name));
         }
         $selectedSkills = array_values(array_unique([...$sparkDefinition->skills, ...$skills]));

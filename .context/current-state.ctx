@@ -424,6 +424,8 @@ The Vessel, Spark, Neuron runtime, Context Toolset, execution commands, TUI, loc
 
 `ai:run` supports validated Spark, Provider, model, Skill, Skill-input, and tool-approval overrides. `ai:tui` interactively selects the same session resources plus an allowed Context subset. The bundled `product-strategy` Skill provides the current ecosystem prioritization prompt without coupling product-specific behavior into a base Spark.
 
+Vessels support ordered, last-match-wins `sparkPolicy` rules with exact or `*` matching. Omitted policy defaults to allowing every registered Spark; legacy `allowedSparks` remains supported as a compatibility allowlist. Runtime enforcement and TUI discovery use the same policy evaluator.
+
 ## Guardrails For The Next Session
 
 - Start from `main` and verify the tree/test baseline before changing anything.

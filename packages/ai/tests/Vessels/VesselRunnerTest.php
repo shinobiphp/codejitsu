@@ -52,6 +52,13 @@ final class VesselRunnerTest extends TestCase
         $runner->start('workbench', spark: 'spark://other');
     }
 
+    public function testItAllowsAnySparkWhenTheVesselHasNoSparkPolicy(): void
+    {
+        [$runner, $runtime] = $this->runner(allowAnySpark: true);
+        $runner->start('workbench', spark: 'other')->send('Inspect.');
+        self::assertSame('other', $runtime->request->metadata['spark']);
+    }
+
     public function testItAppliesProviderModelAndContextOverrides(): void
     {
         [$runner, $runtime, $codex] = $this->runner();
@@ -121,7 +128,7 @@ final class VesselRunnerTest extends TestCase
         }
     }
 
-    private function runner(): array
+    private function runner(bool $allowAnySpark = false): array
     {
         $types = TypeRegistry::builtins();
         foreach ([
@@ -135,7 +142,9 @@ final class VesselRunnerTest extends TestCase
         $codex->registerScroll((new Spark())->hydrate(['name' => 'architect', 'version' => '1.0.0', 'instructions' => 'You are the architect.', 'allowedSkills' => ['skill://review'], 'contexts' => ['context://state']]));
         $codex->registerScroll((new Spark())->hydrate(['name' => 'other', 'version' => '1.0.0', 'instructions' => 'Other.']));
         $codex->registerScroll((new Provider())->hydrate(['name'=>'openai/default','version'=>'1.0.0','adapter'=>'openai','model'=>'provider-model','credentials'=>['apiKey'=>'env://OPENAI_API_KEY']]));
-        $codex->registerScroll((new Vessel())->hydrate(['name' => 'workbench', 'version' => '1.0.0', 'runtime' => 'fake', 'spark' => 'spark://architect', 'provider'=>'provider://openai/default', 'model' => 'vessel-model']));
+        $vessel = ['name' => 'workbench', 'version' => '1.0.0', 'runtime' => 'fake', 'spark' => 'spark://architect', 'provider'=>'provider://openai/default', 'model' => 'vessel-model'];
+        if (!$allowAnySpark) $vessel['allowedSparks'] = ['spark://architect'];
+        $codex->registerScroll((new Vessel())->hydrate($vessel));
         $codex->registerScroll((new Skill())->hydrate(['name' => 'review', 'version' => '1.0.0', 'prompt' => 'Review {{subject}}.', 'inputs' => ['subject' => ['type' => 'string', 'required' => true]]]));
         $codex->registerScroll((new Context())->hydrate(['name' => 'state', 'version' => '1.0.0', 'content' => 'Current architecture.']));
         $loader = new DefinitionLoader($codex);
