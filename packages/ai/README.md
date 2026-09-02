@@ -13,13 +13,19 @@ Provider-neutral AI orchestration for Codejitsu. The package is cataloged and in
 
 Create resources with `make:spark`, `make:vessel`, `make:provider`, `make:skill`, `make:tool`, and `make:toolset`. Inspect profiles with `provider:list`, `provider:show`, and `provider:test`.
 
-Run once with `ai:run <vessel> "prompt"`. Consequential tools are denied unless named with `--approve-tool=<name>`. Open an interactive session with `ai:tui`; consequential calls require confirmation. Context updates are limited to managed sections of Context Scrolls explicitly resolved into the session.
+Run once with `ai:run <vessel> "prompt"`. Override the selected resources with `--spark=<name>`, `--provider=<name>`, and `--model=<name>`. Attach a permitted Skill with `--skill=<name>` and pass its inputs using the query-string form `--input "name=value&name2=value2"`; each input applies to the preceding Skill. Consequential tools are denied unless named with `--approve-tool=<name>`. Open `ai:tui` to select a Vessel, Spark, Provider, optional Skill/model, allowed Context subset, and tool approvals interactively. Context updates remain limited to managed sections of Context Scrolls resolved into the session.
 
 AI commands bind their PHP handlers through Capability Scrolls so arguments and the active Codex arrive in an `ExecutionContext`. Package-local Context Scrolls under `resources/contexts` document the architecture and operating model for Sparks.
 
 Neuron AI is the first runtime adapter. The package includes `provider://groq/free` for fast hosted development with `GROQ_API_KEY` and `provider://ollama/local` for offline inference. Copy `.env.example` to `.env`, set the Groq key, then run `provider:test groq/free`. Public definitions remain provider-neutral. MCP belongs in a future integration package.
 
 The bundled `code` Vessel defaults to the `engineer` Spark; `cognition` defaults to `scribe`. Both allow the bundled `product-designer`, `marketer`, `seo`, and `security` Sparks as well. Hosted Providers receive the selected Context Scrolls and prompt; use Ollama when that material must remain local.
+
+The bundled `product-strategy` Skill generates a prioritized JSON portfolio for Codejitsu, Buildshido, Shinobi, Satori, Kensho, Archiq, Kuzuryu, Ryujin, Daimyo, Sensei, and Shogun. It is permitted by the scribe, product-designer, and marketer Sparks:
+
+```bash
+./bin/codejitsu ai:run cognition --spark=product-designer --skill=product-strategy --input "additional_context=Prioritize%20funding." "Analyze the portfolio."
+```
 
 ## Local models
 

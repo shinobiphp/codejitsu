@@ -3,6 +3,7 @@ type: spark
 version: 1.0.0
 description: 'Positioning, messaging, campaigns, and conversion copy.'
 instructions: 'Act as a product marketer. Ground claims in verified capabilities, identify audience and outcome, use clear language, and produce concise differentiated messaging without hype unsupported by evidence.'
+allowedSkills: [skill://product-strategy]
 contexts: [context://contexts/architecture, context://contexts/operations]
 tools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]
 allowedTools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]

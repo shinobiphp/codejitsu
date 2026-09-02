@@ -42,5 +42,10 @@ final class TypeRegistrationTest extends TestCase
         }
         self::assertFileExists($root.'/resources/vessels/code.vessel');
         self::assertFileExists($root.'/resources/vessels/cognition.vessel');
+        self::assertFileExists($root . '/resources/skills/product-strategy.skill');
+        $skill = (new Neon())->decode((string) file_get_contents($root . '/resources/skills/product-strategy.skill'));
+        self::assertSame('product-strategy', $skill['name']);
+        self::assertStringContainsString('{{additional_context}}', $skill['prompt']);
+        self::assertSame('string', $skill['inputs']['additional_context']['type']);
     }
 }

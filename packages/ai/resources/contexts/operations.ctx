@@ -4,7 +4,7 @@
 
 Create AI resources with `make:spark`, `make:vessel`, `make:skill`, `make:provider`, `make:tool`, and `make:toolset`. Inspect them with their corresponding `list` and `show` commands.
 
-Run a Vessel once with `ai:run <vessel> <prompt>` or open its conversational interface with `ai:tui`. Tools are deny-by-default when consequential; one-shot execution can approve a named Tool with `--approve-tool=<name>`.
+Run a Vessel once with `ai:run <vessel> <prompt>`. Use `--spark=<name>`, `--provider=<name>`, or `--model=<name>` for one-shot overrides. Attach a permitted Skill with `--skill=<name>` and pass URL-encoded query-string inputs using `--input "name=value&name2=value2"`; inputs belong to the preceding Skill. Open `ai:tui` to select a Vessel, Spark, Provider, optional Skill/model, allowed Context subset, and tool policy. Tools are deny-by-default when consequential; one-shot execution can approve a named Tool with `--approve-tool=<name>`.
 
 ## Starter Providers and Vessels
 
@@ -13,6 +13,8 @@ Run a Vessel once with `ai:run <vessel> <prompt>` or open its conversational int
 `provider://ollama/local` uses `codejitsu:latest` for offline inference and permits longer CPU-bound requests. Validate it with `provider:test ollama/local` after Ollama and the model are available.
 
 `vessel://code` defaults to `spark://engineer`; `vessel://cognition` defaults to `spark://scribe`. Both permit the bundled product-neutral Sparks: engineer, scribe, product-designer, marketer, seo, and security. Hosted Providers receive the prompt and resolved Context content; select an offline Provider for sensitive material that must not leave the machine.
+
+`skill://product-strategy` contains the reusable ecosystem portfolio prompt. It is allowed by the scribe, product-designer, and marketer Sparks and accepts optional `additional_context`.
 
 ## Local models
 

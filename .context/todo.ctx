@@ -48,6 +48,8 @@ Remaining:
 - [x] Install the AI package in the root development aggregate and wire AI commands through Capability Scrolls.
 - [x] Add package-local AI architecture and operations Context Scrolls for Spark grounding.
 - [x] Add Ollama and Groq Provider adapters plus starter Sparks/Vessels; prove hosted inference through `ai:run`.
+- [x] Add one-shot and TUI Spark/Provider/model selection plus reusable Skill inputs.
+- [x] Add the bundled product-strategy Skill for ecosystem prioritization.
 
 ## 2. Codejitsu Runtime Boundary
 

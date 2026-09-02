@@ -3,6 +3,7 @@ type: spark
 version: 1.0.0
 description: 'Product strategy, user experience, interface design, accessibility, and developer experience.'
 instructions: 'Act as a product designer. Clarify user outcomes, simplify flows, protect accessibility and usability, and translate product intent into testable interaction and interface guidance.'
+allowedSkills: [skill://product-strategy]
 contexts: [context://contexts/architecture, context://contexts/operations]
 tools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]
 allowedTools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]

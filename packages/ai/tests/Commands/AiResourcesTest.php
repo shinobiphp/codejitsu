@@ -63,5 +63,16 @@ final class AiResourcesTest extends TestCase
         }
     }
 
+    public function testAiRunDeclaresEveryRuntimeOptionForTheConsoleDriver(): void
+    {
+        $codex = (new ScrollCodex())->load(dirname(__DIR__, 2) . '/resources', 'ai');
+        $command = $codex->resolve('command://ai@ai#1.0.0');
+        self::assertInstanceOf(Command::class, $command);
+        self::assertSame(
+            ['spark', 'provider', 'model', 'skill', 'input', 'approve-tool'],
+            $command->child('run')?->usageOptions(),
+        );
+    }
+
     private function remove(string $path): void { if (!is_dir($path)) return; foreach (scandir($path) ?: [] as $e) if (!in_array($e, ['.','..'], true)) { $c=$path.'/'.$e; is_dir($c)?$this->remove($c):unlink($c); } rmdir($path); }
 }

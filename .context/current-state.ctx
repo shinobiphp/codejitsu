@@ -422,6 +422,8 @@ Keep these as design goals, not excuses for premature abstraction:
 
 The Vessel, Spark, Neuron runtime, Context Toolset, execution commands, TUI, local Model lifecycle, Ollama Provider, and Groq Provider are implemented. Product-neutral engineer, scribe, product-designer, marketer, seo, and security Sparks ship with purpose-based code and cognition Vessels. Groq is the fast hosted development default; Ollama remains the offline path. The next coherent slice is using these resources on real Codejitsu work and tightening only the contracts that dogfooding proves necessary.
 
+`ai:run` supports validated Spark, Provider, model, Skill, Skill-input, and tool-approval overrides. `ai:tui` interactively selects the same session resources plus an allowed Context subset. The bundled `product-strategy` Skill provides the current ecosystem prioritization prompt without coupling product-specific behavior into a base Spark.
+
 ## Guardrails For The Next Session
 
 - Start from `main` and verify the tree/test baseline before changing anything.

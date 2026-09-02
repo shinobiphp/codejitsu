@@ -1,0 +1,36 @@
+name: product-strategy
+type: skill
+version: 1.0.0
+description: 'Prioritize and position the Codejitsu and Shinobi ecosystem as a strict JSON product portfolio.'
+prompt: '''
+Act as a senior product strategist for a next-generation software-development ecosystem.
+
+Analyze these products:
+
+- Codejitsu: composable software-development framework providing Scrolls, catalogs, packages, commands, Context, capabilities, and application infrastructure.
+- Buildshido: software-development philosophy and methodology plus a CI/CD and source-control platform with compilation, linting, static analysis, quality controls, and policy enforcement.
+- Shinobi: application runtime and primary platform for composable applications, services, packages, and workloads.
+- Satori: reusable cognition, reasoning, inference, and decision-orchestration engine—the ecosystem's brain.
+- Kensho: business-intelligence and observability server/dashboard for telemetry, application health, analytics, business metrics, reporting, and decision support.
+- Archiq: Shinobi application that analyzes codebases against configurable rules to identify code smells, technical debt, bugs, security concerns, and architectural issues, then produces prioritized actionable reports.
+- Kuzuryu: intelligent multi-store data plane for storage, enhancement, and legacy-data modernization. It chooses appropriate stores such as PostgreSQL, MongoDB, vector, and time-series databases; generates embeddings; extracts context; tags and enriches data; and maintains versions, provenance, and lineage.
+- Ryujin: authentication, identity, IAM, permissions, authorization, policy, and security platform.
+- Daimyo: composable, context-aware administrative cockpit similar to Laravel Nova but broader, more extensible, and integrated across the Shinobi ecosystem. Dojo is an alternate working name.
+- Sensei: conversational, agentic specification-generation product that interviews users, clarifies requirements, explores tradeoffs, and produces implementation-ready specifications.
+- Shogun: Shinobi orchestrator and control plane for deployments, nodes, runtimes, services, applications, configuration, workloads, and infrastructure.
+
+Additional portfolio context:
+{{additional_context}}
+
+Return a strict, parseable JSON array ordered from highest strategic priority to lowest. Base priority on near-term revenue, funding potential, implementation effort, dependency order, strategic leverage, differentiation, and dogfooding value.
+
+Every item must contain exactly these fields: name, slug, category, short_description, extended_description, value_propositions, ideal_customer_profiles, suggested_pricing, priority, dependencies, and enables.
+
+value_propositions must be an array of concrete customer outcomes. ideal_customer_profiles must be an array of objects with name and description. suggested_pricing must contain model, entry_tier, professional_tier, enterprise_tier, and rationale. priority must contain a unique rank, a score from 1 through 100, and rationale. dependencies and enables must be arrays of product slugs.
+
+Output JSON only, without Markdown fences or commentary. Use language understandable to nontechnical executives. Distinguish foundations from customer-facing products; Satori from Kensho; and Archiq from Buildshido. Treat Codejitsu as the framework, Shinobi as the runtime, Shogun as the orchestrator, and Kuzuryu as an intelligent data plane rather than an ORM. Recommend realistic initial pricing with room for managed hosting, support, enterprise licensing, and bespoke implementation. Put uncertain assumptions in the relevant rationale.
+	'''
+inputs:
+  additional_context:
+    type: string
+    default: ''

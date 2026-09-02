@@ -52,6 +52,38 @@ final class VesselRunnerTest extends TestCase
         $runner->start('workbench', spark: 'spark://other');
     }
 
+    public function testItAppliesProviderModelAndContextOverrides(): void
+    {
+        [$runner, $runtime, $codex] = $this->runner();
+        $codex->registerScroll((new Provider())->hydrate([
+            'name' => 'ollama/local',
+            'version' => '1.0.0',
+            'adapter' => 'ollama',
+            'model' => 'default:latest',
+        ]));
+
+        $session = $runner->start(
+            'workbench',
+            provider: 'ollama/local',
+            model: 'override:latest',
+            contexts: [],
+        );
+        $session->send('Inspect the project.');
+
+        self::assertSame('ollama', $runtime->request->metadata['provider']->adapter);
+        self::assertSame('override:latest', $runtime->request->model);
+        self::assertSame([], $runtime->request->metadata['contexts']);
+        self::assertStringNotContainsString('Current architecture.', $runtime->request->instructions);
+    }
+
+    public function testItRejectsAContextOutsideTheResolvedAllowlist(): void
+    {
+        [$runner, , $codex] = $this->runner();
+        $codex->registerScroll((new Context())->hydrate(['name' => 'other', 'version' => '1.0.0', 'content' => 'Other context.']));
+        $this->expectExceptionMessage('is not allowed by Vessel');
+        $runner->start('workbench', contexts: ['context://other']);
+    }
+
     public function testBundledLocalVesselsResolveTheirCompleteResourceGraph(): void
     {
         $types=TypeRegistry::builtins();
@@ -110,7 +142,7 @@ final class VesselRunnerTest extends TestCase
         $runtime = new RunnerRuntime();
         $runtimes = new RuntimeRegistry();
         $runtimes->register('fake', $runtime);
-        return [new VesselRunner($loader, new PromptAssembler(new SkillRenderer()), new ToolPolicy($loader), $runtimes, $codex), $runtime];
+        return [new VesselRunner($loader, new PromptAssembler(new SkillRenderer()), new ToolPolicy($loader), $runtimes, $codex), $runtime, $codex];
     }
 }
 

@@ -30,24 +30,47 @@ final readonly class VesselRunner
         array $tools = [],
         array $toolsets = [],
         ?ToolApproval $approval = null,
+        ?string $provider = null,
+        ?string $model = null,
+        ?array $contexts = null,
     ): VesselSession {
         $vesselDefinition = $this->loader->vessel($vessel);
-        $providerDefinition = $this->loader->provider($vesselDefinition->provider);
+        $providerDefinition = $this->loader->provider($provider ?? $vesselDefinition->provider);
         $sparkReference = $spark ?? $vesselDefinition->spark;
-        if (!in_array($sparkReference, $vesselDefinition->allowedSparks, true)) {
+        $sparkDefinition = $this->loader->spark($sparkReference);
+        if (!$this->allows($vesselDefinition->allowedSparks, 'spark', $sparkDefinition->name)) {
             throw new DefinitionException(sprintf('Spark [%s] is not allowed by Vessel [%s].', $sparkReference, $vesselDefinition->name));
         }
-        $sparkDefinition = $this->loader->spark($sparkReference);
         $selectedSkills = array_values(array_unique([...$sparkDefinition->skills, ...$skills]));
+        $skillDefinitions = [];
         foreach ($selectedSkills as $reference) {
-            if (!in_array($reference, $sparkDefinition->allowedSkills, true)) throw new DefinitionException(sprintf('Skill [%s] is not allowed by Spark [%s].', $reference, $sparkDefinition->name));
+            $skillDefinition = $this->loader->skill($reference);
+            if (!$this->allows($sparkDefinition->allowedSkills, 'skill', $skillDefinition->name)) throw new DefinitionException(sprintf('Skill [%s] is not allowed by Spark [%s].', $reference, $sparkDefinition->name));
+            $skillDefinitions[] = $skillDefinition;
         }
-        $skillDefinitions = array_map($this->loader->skill(...), $selectedSkills);
         $contextReferences = [...$sparkDefinition->contexts, ...$vesselDefinition->contexts];
         foreach ($skillDefinitions as $skillDefinition) {
             $contextReferences = [...$contextReferences, ...$skillDefinition->contexts];
         }
         $contextReferences = array_values(array_unique($contextReferences));
+        if ($contexts !== null) {
+            $allowedContexts = $contextReferences;
+            $contextReferences = [];
+            foreach ($contexts as $reference) {
+                if (!is_string($reference)) throw new DefinitionException('Context overrides must be string references.');
+                $scroll = $this->codex->resolve($reference);
+                if (!$scroll instanceof Context || !$this->allows($allowedContexts, 'context', $scroll->name)) {
+                    throw new DefinitionException(sprintf('Context [%s] is not allowed by Vessel [%s].', $reference, $vesselDefinition->name));
+                }
+                foreach ($allowedContexts as $allowedContext) {
+                    if ($allowedContext === $scroll->name || $allowedContext === 'context://' . $scroll->name) {
+                        $contextReferences[] = $allowedContext;
+                        break;
+                    }
+                }
+            }
+            $contextReferences = array_values(array_unique($contextReferences));
+        }
         $contexts = [];
         foreach ($contextReferences as $reference) {
             $scroll = $this->codex->resolve($reference);
@@ -62,7 +85,7 @@ final readonly class VesselRunner
         return new VesselSession(
             $this->runtimes->get($vesselDefinition->runtime),
             $instructions,
-            $vesselDefinition->model ?? $sparkDefinition->model ?? $providerDefinition->model,
+            $model ?? $vesselDefinition->model ?? $sparkDefinition->model ?? $providerDefinition->model,
             $resolvedTools,
             $vesselDefinition->limits,
             [
@@ -76,5 +99,13 @@ final readonly class VesselRunner
             ],
             $approval ?? new DenyConsequentialTools(),
         );
+    }
+
+    private function allows(array $references, string $type, string $name): bool
+    {
+        foreach ($references as $reference) {
+            if ($reference === $name || $reference === sprintf('%s://%s', $type, $name)) return true;
+        }
+        return false;
     }
 }
