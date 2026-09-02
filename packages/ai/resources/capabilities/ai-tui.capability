@@ -1,0 +1,3 @@
+name: ai-tui
+type: capability
+target: Codejitsu\Ai\Commands\Ai::tui

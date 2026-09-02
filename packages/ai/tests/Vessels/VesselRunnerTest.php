@@ -38,6 +38,8 @@ final class VesselRunnerTest extends TestCase
         self::assertStringContainsString('Current architecture.', $runtime->request->instructions);
         self::assertSame('vessel-model', $runtime->request->model);
         self::assertSame('openai', $runtime->request->metadata['provider']->adapter);
+        self::assertSame(['context://state'], $runtime->request->metadata['toolExecution']['allowedContexts']);
+        self::assertSame(['skill://review'], $runtime->request->metadata['skills']);
         self::assertInstanceOf(DenyConsequentialTools::class, $runtime->request->approval);
         self::assertSame('architect', $session->metadata()['spark']);
     }

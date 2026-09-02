@@ -25,7 +25,8 @@ final readonly class NeuronRuntime implements AiRuntime
         $provider = ($this->providers)($request->metadata['provider'] ?? [], $request->model);
         $agent = Agent::make()->setAiProvider($provider)->setInstructions($request->instructions);
         $approval = $request->approval ?? new DenyConsequentialTools();
-        foreach ($request->tools as $tool) $agent->addTool(new NeuronToolAdapter($tool, $this->tools, $approval));
+        $tools = $this->tools->withExecutionMetadata(is_array($request->metadata['toolExecution'] ?? null) ? $request->metadata['toolExecution'] : []);
+        foreach ($request->tools as $tool) $agent->addTool(new NeuronToolAdapter($tool, $tools, $approval));
         $messages = array_map(static fn ($message) => match ($message->role) {
             'user' => new UserMessage($message->content),
             'assistant' => new AssistantMessage($message->content),

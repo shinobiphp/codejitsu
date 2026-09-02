@@ -34,4 +34,9 @@ final class ToolRegistry
         $payload = $this->executionMetadata === [] ? $arguments : $arguments + ['_codejitsu' => $this->executionMetadata];
         return new ToolResult($capability->execute(new ExecutionContext($payload, $this->codex)));
     }
+
+    public function withExecutionMetadata(array $metadata): self
+    {
+        return new self($this->codex, $this->validator, $metadata);
+    }
 }

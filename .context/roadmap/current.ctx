@@ -88,7 +88,8 @@ Strengthen the three initial resource types with richer validation, versioning, 
 
 ## Next
 
-- choose `packages/ui` or `packages/ai` for the first implementation slice while both remain uninstalled
+- dogfood the completed, cataloged AI foundation against Context maintenance while it remains uninstalled
+- begin the cataloged `packages/ui` Astro integration slice
 - keep product-owned Scroll types in their packages rather than extending the core enum
 - first-class Application Scroll resource trees such as `app://archiq/...`
 - formal Scroll identity value object integration

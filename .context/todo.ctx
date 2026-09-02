@@ -43,7 +43,7 @@ Remaining:
 - [ ] Move/mirror independently meaningful code into package boundaries without breaking the public `Codejitsu\\` namespace where practical.
 - [x] Keep the root package as the supported development/compatibility aggregate while package source remains in root `src/`.
 - [x] Verify clean Composer installation, strict PSR-4 autoloading, and real CLI bootstrap from tracked files.
-- [ ] Do not create empty packages merely for symmetry; Crypto, DB, AI, OpenSwoole, and future agent concepts remain root/MVP concerns until their contracts are proven.
+- [x] Prove the AI package contracts through provider-neutral Vessels/Sparks, Tools, Provider profiles, Context integration, execution commands, and tests.
 
 ## 2. Codejitsu Runtime Boundary
 

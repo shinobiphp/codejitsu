@@ -65,7 +65,15 @@ final readonly class VesselRunner
             $vesselDefinition->model ?? $sparkDefinition->model ?? $providerDefinition->model,
             $resolvedTools,
             $vesselDefinition->limits,
-            ['vessel' => $vesselDefinition->name, 'spark' => $sparkDefinition->name, 'provider' => $providerDefinition],
+            [
+                'vessel' => $vesselDefinition->name,
+                'spark' => $sparkDefinition->name,
+                'provider' => $providerDefinition,
+                'contexts' => $contextReferences,
+                'skills' => $selectedSkills,
+                'tools' => array_map(static fn ($tool): string => $tool->name, $resolvedTools),
+                'toolExecution' => ['root' => getcwd() ?: '.', 'allowedContexts' => $contextReferences],
+            ],
             $approval ?? new DenyConsequentialTools(),
         );
     }

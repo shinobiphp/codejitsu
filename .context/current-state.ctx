@@ -53,11 +53,12 @@ main
 - Catalog editing distinguishes duplicate names by source, enforces effective read-only access, validates before atomic writes, and exposes package actions through a provider boundary.
 - `catalogs/sources.catalog` catalogs project catalog sources; remote fetching and custom capability execution remain explicit follow-up adapter work.
 - The package cache is non-executable JSON at `var/cache/codejitsu/packages.json`.
-- `packages/ai` and `packages/ui` are valid, cataloged `codejitsu-pkg` scaffolds and remain uninstalled.
+- `packages/ai` is a complete cataloged, uninstalled foundation: provider-neutral Context/Skill/Spark/Vessel/Tool contracts, Neuron/OpenAI adapters, non-secret Provider profiles, scoped Context tools, one-shot execution, and a conversational TUI.
+- `packages/ui` remains a valid, cataloged, uninstalled scaffold.
 
 ## Next Slice
 
-Choose `packages/ui` or `packages/ai` for the first implementation slice while leaving both out of root Composer requirements. Do not add `world`, `scene`, `edition`, `vessel`, or `spark` to the core enum.
+Dogfood `packages/ai` against Context maintenance, then begin `packages/ui`; keep both out of root Composer requirements. Do not add product-owned Scroll types to the core enum.
 
 ## What Is Locked In
 
