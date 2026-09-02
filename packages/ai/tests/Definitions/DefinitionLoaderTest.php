@@ -71,6 +71,19 @@ final class DefinitionLoaderTest extends TestCase
         ]);
     }
 
+    public function testOllamaProviderDefinitionsDoNotRequireCredentials(): void
+    {
+        $provider = ProviderDefinition::fromArray([
+            'name' => 'ollama/local',
+            'adapter' => 'ollama',
+            'model' => 'codejitsu:latest',
+            'options' => ['url' => 'http://127.0.0.1:11434/api', 'parameters' => ['temperature' => 0.2]],
+        ]);
+
+        self::assertSame([], $provider->credentials);
+        self::assertSame('http://127.0.0.1:11434/api', $provider->options['url']);
+    }
+
     #[DataProvider('invalidTools')]
     public function testItRejectsInvalidTools(array $data, string $message): void
     {
