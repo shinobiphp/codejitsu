@@ -37,17 +37,30 @@ The AI package adds a `model` command namespace:
 - `model:list` delegates to `ollama list`;
 - `model:show <name>` delegates to `ollama show`;
 - `model:build [manifest] [--name=...] [--base=...]` renders a temporary Modelfile with the selected base and invokes `ollama create`;
+- `model:ensure [manifest]` returns immediately when the model exists and otherwise opens the setup wizard;
 - `model:test [name]` performs deterministic chat and tool-call smoke tests;
 - `model:remove` is excluded from this slice because it is destructive and Ollama already exposes it directly.
 
 The builder uses an injected process boundary, validates model names and references, writes temporary files under the project `var/tmp` convention, streams useful build output, and returns non-zero failures without hiding Ollama errors. No shell interpolation is used.
 
+## Package Setup Lifecycle
+
+The Package Scroll declares an idempotent `model:ensure` setup action. After rebuilding the package registry, the Composer plugin evaluates registered setup actions. An existing `codejitsu:latest` model satisfies the action without output or mutation.
+
+When Composer is interactive and the model is missing, the AI-owned wizard offers four choices: download the recommended model, build from an existing GGUF path, build from another Ollama or Hugging Face reference, or skip. The wizard validates local paths and remote references, displays the destination name, source, approximate known download size, and exact operation, then requests confirmation before building and smoke-testing.
+
+Non-interactive installation never downloads weights implicitly. It reports the pending `model:ensure` command unless `CODEJITSU_AUTO_SETUP=1` and a valid `CODEJITSU_MODEL_SOURCE` are supplied. `CODEJITSU_MODEL_NAME` optionally overrides the destination. The same setup action is available later through `pkg:setup codejitsu/ai` and `model:ensure`.
+
+Package setup is a generic lifecycle boundary: the Composer plugin coordinates registered actions, while the owning package implements domain-specific interaction and execution. A failed or skipped optional model setup does not corrupt the package registry.
+
 ## Data and Execution Flow
 
 The model manifest and Modelfile are discovered as package resources. The Build Command resolves the selected manifest, substitutes only the validated `FROM` value, creates `codejitsu:latest`, and then runs smoke tests. Model weights remain in Ollama's managed store and never enter Git or Codejitsu caches.
+
+The repository `.gitignore` excludes model weight formats including `*.gguf` and `*.safetensors` plus package/project model staging directories. Versioned Modelfiles and small model manifests remain tracked.
 
 The future Ollama Provider adapter will call Ollama's OpenAI-compatible API. That adapter is a separate follow-up because model lifecycle and inference transport are independent boundaries.
 
 ## Verification
 
-Tests cover manifest validation, safe rendering, name/reference rejection, exact process arguments, failure propagation, and Command Scroll registration using a fake process runner. An opt-in local integration test verifies `ollama create`, direct response behavior, supplied Codejitsu Context, structured output, and a real dummy tool call. It must not download multi-gigabyte weights during the default test suite.
+Tests cover manifest validation, safe rendering, name/reference rejection, exact process arguments, setup discovery, existing-model idempotence, all interactive choices, non-interactive skipping and opt-in automation, failure propagation, and Command Scroll registration using fake process and questioner boundaries. An opt-in local integration test verifies `ollama create`, direct response behavior, supplied Codejitsu Context, structured output, and a real dummy tool call. It must not download multi-gigabyte weights during the default test suite.
