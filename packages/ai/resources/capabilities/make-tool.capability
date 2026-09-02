@@ -1,0 +1,3 @@
+name: make-tool
+type: capability
+target: Codejitsu\Ai\Commands\MakeAi::tool

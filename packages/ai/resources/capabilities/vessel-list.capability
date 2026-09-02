@@ -1,0 +1,3 @@
+name: vessel-list
+type: capability
+target: Codejitsu\Ai\Commands\AiResources::vesselList

@@ -12,7 +12,7 @@ final class CommandRegistry
     {
         $merged=[];
         foreach($commands as $command){
-            if(!isset($merged[$command->name])){$merged[$command->name]=$command;continue;}
+            if(!isset($merged[$command->name])){$merged[$command->name]=clone $command;continue;}
             $existing=$merged[$command->name];
             if(!$existing->isNamespace()||!$command->isNamespace()) throw new RuntimeException(sprintf('Command [%s] is declared more than once.', $command->name));
             $children=$existing->commands();

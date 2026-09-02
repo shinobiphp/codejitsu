@@ -1,0 +1,3 @@
+name: model-search
+type: capability
+target: Codejitsu\Ai\Commands\Models::search

@@ -1,0 +1,3 @@
+name: toolset-show
+type: capability
+target: Codejitsu\Ai\Commands\AiResources::toolsetShow

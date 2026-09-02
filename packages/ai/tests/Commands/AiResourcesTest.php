@@ -47,5 +47,21 @@ final class AiResourcesTest extends TestCase
         self::assertInstanceOf(Command::class,$codex->resolve('command://spark@ai#1.0.0'));
     }
 
+    public function testPackageCommandsBindExecutionContextHandlersAsCapabilities(): void
+    {
+        $codex = (new ScrollCodex())->load(dirname(__DIR__, 2) . '/resources', 'ai');
+
+        foreach (['ai', 'make', 'model', 'provider', 'skill', 'spark', 'tool', 'toolset', 'vessel'] as $name) {
+            $command = $codex->resolve(sprintf('command://%s@ai#1.0.0', $name));
+            self::assertInstanceOf(Command::class, $command);
+
+            foreach (array_keys($command->commands()) as $childName) {
+                $child = $command->child((string) $childName);
+                self::assertInstanceOf(Command::class, $child);
+                self::assertNotNull($child->capability(), sprintf('%s:%s must bind through a capability.', $name, $child->name));
+            }
+        }
+    }
+
     private function remove(string $path): void { if (!is_dir($path)) return; foreach (scandir($path) ?: [] as $e) if (!in_array($e, ['.','..'], true)) { $c=$path.'/'.$e; is_dir($c)?$this->remove($c):unlink($c); } rmdir($path); }
 }

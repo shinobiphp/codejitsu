@@ -1,0 +1,3 @@
+name: model-test
+type: capability
+target: Codejitsu\Ai\Commands\Models::test

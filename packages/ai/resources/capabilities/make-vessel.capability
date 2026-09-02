@@ -1,0 +1,3 @@
+name: make-vessel
+type: capability
+target: Codejitsu\Ai\Commands\MakeAi::vessel

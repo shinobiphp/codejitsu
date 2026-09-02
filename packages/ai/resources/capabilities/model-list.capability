@@ -1,0 +1,3 @@
+name: model-list
+type: capability
+target: Codejitsu\Ai\Commands\Models::list

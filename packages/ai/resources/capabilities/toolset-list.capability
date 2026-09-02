@@ -1,0 +1,3 @@
+name: toolset-list
+type: capability
+target: Codejitsu\Ai\Commands\AiResources::toolsetList

@@ -1,0 +1,3 @@
+name: spark-list
+type: capability
+target: Codejitsu\Ai\Commands\AiResources::sparkList

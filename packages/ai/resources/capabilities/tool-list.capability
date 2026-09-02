@@ -1,0 +1,3 @@
+name: tool-list
+type: capability
+target: Codejitsu\Ai\Commands\AiResources::toolList

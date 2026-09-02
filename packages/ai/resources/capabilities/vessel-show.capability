@@ -1,0 +1,3 @@
+name: vessel-show
+type: capability
+target: Codejitsu\Ai\Commands\AiResources::vesselShow

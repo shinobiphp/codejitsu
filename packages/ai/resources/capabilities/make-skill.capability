@@ -1,0 +1,3 @@
+name: make-skill
+type: capability
+target: Codejitsu\Ai\Commands\MakeAi::skill

@@ -25,4 +25,16 @@ final class CommandRegistryTest extends TestCase
         $this->expectExceptionMessage('make:spark');
         (new CommandRegistry())->merge([$a,$b]);
     }
+
+    public function testMergingDoesNotMutateSourceCommands(): void
+    {
+        $core=(new Command())->hydrate(['name'=>'make','commands'=>['context'=>['target'=>'Core::context']]]);
+        $ai=(new Command())->hydrate(['name'=>'make','commands'=>['spark'=>['target'=>'Ai::spark']]]);
+        $registry=new CommandRegistry();
+
+        self::assertSame(['context','spark'],array_keys($registry->merge([$core,$ai])[0]->commands()));
+        self::assertSame(['context','spark'],array_keys($registry->merge([$core,$ai])[0]->commands()));
+        self::assertSame(['context'],array_keys($core->commands()));
+        self::assertSame(['spark'],array_keys($ai->commands()));
+    }
 }
