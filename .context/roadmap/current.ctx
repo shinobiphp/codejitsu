@@ -89,6 +89,7 @@ Strengthen the three initial resource types with richer validation, versioning, 
 ## Next
 
 - dogfood the completed, cataloged AI foundation against Context maintenance while it remains uninstalled
+- add the Ollama inference Provider adapter so local cataloged models can power Vessels
 - begin the cataloged `packages/ui` Astro integration slice
 - keep product-owned Scroll types in their packages rather than extending the core enum
 - first-class Application Scroll resource trees such as `app://archiq/...`

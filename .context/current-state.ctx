@@ -54,6 +54,7 @@ main
 - `catalogs/sources.catalog` catalogs project catalog sources; remote fetching and custom capability execution remain explicit follow-up adapter work.
 - The package cache is non-executable JSON at `var/cache/codejitsu/packages.json`.
 - `packages/ai` is a complete cataloged, uninstalled foundation: provider-neutral Context/Skill/Spark/Vessel/Tool contracts, Neuron/OpenAI adapters, non-secret Provider profiles, scoped Context tools, one-shot execution, and a conversational TUI.
+- The AI package owns Model Scroll recipes, a generic model Catalog, a balanced local Codejitsu Modelfile, safe Ollama lifecycle commands, and optional interactive package setup; model weights remain outside Git.
 - `packages/ui` remains a valid, cataloged, uninstalled scaffold.
 
 ## Next Slice
