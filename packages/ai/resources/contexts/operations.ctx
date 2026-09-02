@@ -1,0 +1,24 @@
+# Codejitsu AI — Operations
+
+## Resource workflow
+
+Create AI resources with `make:spark`, `make:vessel`, `make:skill`, `make:provider`, `make:tool`, and `make:toolset`. Inspect them with their corresponding `list` and `show` commands.
+
+Run a Vessel once with `ai:run <vessel> <prompt>` or open its conversational interface with `ai:tui`. Tools are deny-by-default when consequential; one-shot execution can approve a named Tool with `--approve-tool=<name>`.
+
+## Local models
+
+`model://codejitsu/local` builds `codejitsu:latest` through Ollama from the cataloged Qwen2.5-Coder recipe.
+
+- `model:list` lists Ollama models.
+- `model:search <query>` searches Model Catalog entries.
+- `model:show <name-or-uri>` shows a recipe and installed status.
+- `model:build <name-or-uri>` builds directly.
+- `model:ensure [name-or-uri]` interactively ensures availability and defaults to `codejitsu/local`.
+- `model:test [name]` performs the response smoke test.
+
+Weights belong under `var/models`; temporary rendered Modelfiles belong under `var/tmp/codejitsu-ai`; Ollama owns built layers.
+
+## Memory guidance for Sparks
+
+Load only Context relevant to the current task. Prefer package-local Context for package contracts and root `.context` for repository-wide state and decisions. Treat Context as durable guidance, then verify claims against current code, manifests, catalogs, and tests.

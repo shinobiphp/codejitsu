@@ -1,6 +1,6 @@
 # Codejitsu AI
 
-Provider-neutral AI orchestration for Codejitsu. The package is cataloged but intentionally not installed by the root project.
+Provider-neutral AI orchestration for Codejitsu. The package is cataloged and installed by the root development aggregate.
 
 ## Resources
 
@@ -14,6 +14,8 @@ Provider-neutral AI orchestration for Codejitsu. The package is cataloged but in
 Create resources with `make:spark`, `make:vessel`, `make:provider`, `make:skill`, `make:tool`, and `make:toolset`. Inspect profiles with `provider:list`, `provider:show`, and `provider:test`.
 
 Run once with `ai:run <vessel> "prompt"`. Consequential tools are denied unless named with `--approve-tool=<name>`. Open an interactive session with `ai:tui`; consequential calls require confirmation. Context updates are limited to managed sections of Context Scrolls explicitly resolved into the session.
+
+AI commands bind their PHP handlers through Capability Scrolls so arguments and the active Codex arrive in an `ExecutionContext`. Package-local Context Scrolls under `resources/contexts` document the architecture and operating model for Sparks.
 
 Neuron AI is the first runtime adapter and OpenAI is the first Provider adapter. Public definitions remain provider-neutral. MCP belongs in a future integration package.
 

@@ -1,0 +1,22 @@
+# Codejitsu AI — Architecture
+
+## Purpose
+
+`codejitsu/ai` provides provider-neutral agent orchestration as composable Scroll resources.
+
+- A **Spark** is the agent: its identity, instructions, Skills, Tools, and Context references.
+- A **Vessel** is the harness: runtime, Spark, Provider, execution policy, and session boundary.
+- A **Skill** is a reusable parameterized prompt template.
+- A **Provider** is a non-secret adapter/model profile; credentials remain environment references.
+- A **Model** is a reproducible local-model recipe, not a personality.
+- A **Tool** maps validated model input to a Capability.
+- A **Toolset** composes Tools and shared guidance.
+- A **Context** Scroll is durable, queryable memory that Sparks may consume through the Codex.
+
+Neuron AI is the first runtime adapter. Runtime and provider selection remain swappable behind package contracts.
+
+## Execution boundary
+
+Command Scroll handlers that need arguments, the Codex, or other request state must be exposed through a Capability Scroll. Capabilities receive an `ExecutionContext`; raw command `target` callables receive only positional CLI arguments. Package command namespaces may extend core namespaces when their child names do not collide.
+
+Consequential Tools require explicit approval. Context mutation is limited to named managed sections of explicitly resolved Context Scrolls.

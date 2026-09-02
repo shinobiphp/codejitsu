@@ -45,6 +45,8 @@ Remaining:
 - [x] Verify clean Composer installation, strict PSR-4 autoloading, and real CLI bootstrap from tracked files.
 - [x] Prove the AI package contracts through provider-neutral Vessels/Sparks, Tools, Provider profiles, Context integration, execution commands, and tests.
 - [x] Add cataloged Model recipes, interactive Ollama model setup, package setup actions, and Git-safe model storage conventions.
+- [x] Install the AI package in the root development aggregate and wire AI commands through Capability Scrolls.
+- [x] Add package-local AI architecture and operations Context Scrolls for Spark grounding.
 - [ ] Add an Ollama Provider adapter and dogfood the local Codejitsu model through Vessels.
 
 ## 2. Codejitsu Runtime Boundary

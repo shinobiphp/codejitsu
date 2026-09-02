@@ -1,6 +1,6 @@
 # Codejitsu — Current State
 
-Updated: 2026-09-01
+Updated: 2026-09-02
 
 ## RESUME PROMPT
 
@@ -14,8 +14,8 @@ Current verified baseline:
 
 ```text
 main
-176 default tests
-613 default assertions
+186 default tests
+638 default assertions
 1 clean-install test / 5 assertions
 0 failures
 0 errors
@@ -42,7 +42,7 @@ main
 - Composer execution is behind an injectable process boundary.
 - The real CLI, PHP syntax, clean tracked-checkout installation, strict autoloading, and documentation links have automated coverage.
 - Every workspace package owns a validated Package Scroll; normal packages use `codejitsu-pkg`, while the Composer plugin participates through its required infrastructure type and explicit manifest.
-- Composer lifecycle rebuilds produce a deterministic registry containing all ten workspace packages.
+- Composer lifecycle rebuilds produce a deterministic registry containing the installed workspace packages; the root development aggregate currently installs eleven, including `codejitsu/ai`.
 - `codejitsu/context` provides deterministic Context memory commands and a minimal terminal browser without an AI dependency.
 - Generic Catalog Scrolls compose bundled, project, and private resource indexes; package commands merge catalog availability with installed Composer metadata.
 - `make:context`, `make:catalog`, and `make:pkg` provide safe purpose-specific creation. New packages are cataloged without being installed.
@@ -53,13 +53,14 @@ main
 - Catalog editing distinguishes duplicate names by source, enforces effective read-only access, validates before atomic writes, and exposes package actions through a provider boundary.
 - `catalogs/sources.catalog` catalogs project catalog sources; remote fetching and custom capability execution remain explicit follow-up adapter work.
 - The package cache is non-executable JSON at `var/cache/codejitsu/packages.json`.
-- `packages/ai` is a complete cataloged, uninstalled foundation: provider-neutral Context/Skill/Spark/Vessel/Tool contracts, Neuron/OpenAI adapters, non-secret Provider profiles, scoped Context tools, one-shot execution, and a conversational TUI.
+- `packages/ai` is installed in the root development aggregate and provides provider-neutral Context/Skill/Spark/Vessel/Tool contracts, Neuron/OpenAI adapters, non-secret Provider profiles, scoped Context tools, one-shot execution, and a conversational TUI.
 - The AI package owns Model Scroll recipes, a generic model Catalog, a balanced local Codejitsu Modelfile, safe Ollama lifecycle commands, and optional interactive package setup; model weights remain outside Git.
+- AI command handlers are wired through Capability Scrolls so every command receives `ExecutionContext`; package-local Context Scrolls give Sparks targeted architecture and operations memory.
 - `packages/ui` remains a valid, cataloged, uninstalled scaffold.
 
 ## Next Slice
 
-Dogfood `packages/ai` against Context maintenance, then begin `packages/ui`; keep both out of root Composer requirements. Do not add product-owned Scroll types to the core enum.
+Dogfood the installed `packages/ai` against Context maintenance and its local Ollama model, then begin `packages/ui`. Do not add product-owned Scroll types to the core enum.
 
 ## What Is Locked In
 
