@@ -53,7 +53,7 @@ main
 - Catalog editing distinguishes duplicate names by source, enforces effective read-only access, validates before atomic writes, and exposes package actions through a provider boundary.
 - `catalogs/sources.catalog` catalogs project catalog sources; remote fetching and custom capability execution remain explicit follow-up adapter work.
 - The package cache is non-executable JSON at `var/cache/codejitsu/packages.json`.
-- `packages/ai` is installed in the root development aggregate and provides provider-neutral Context/Skill/Spark/Vessel/Tool contracts, Neuron/OpenAI adapters, non-secret Provider profiles, scoped Context tools, one-shot execution, and a conversational TUI.
+- `packages/ai` is installed in the root development aggregate and provides provider-neutral Context/Skill/Spark/Vessel/Tool contracts, Neuron with OpenAI/Ollama/Groq Provider adapters, non-secret Provider profiles, scoped Context tools, one-shot execution, and a conversational TUI.
 - The AI package owns Model Scroll recipes, a generic model Catalog, a balanced local Codejitsu Modelfile, safe Ollama lifecycle commands, and optional interactive package setup; model weights remain outside Git.
 - AI command handlers are wired through Capability Scrolls so every command receives `ExecutionContext`; package-local Context Scrolls give Sparks targeted architecture and operations memory.
 - Command Scrolls indexed by the Codex are the authoritative command catalog; the registry renders namespaces and child commands alphabetically.
@@ -61,7 +61,7 @@ main
 
 ## Next Slice
 
-Dogfood the installed `packages/ai` against Context maintenance and its local Ollama model, then begin `packages/ui`. Do not add product-owned Scroll types to the core enum.
+Dogfood the installed `packages/ai` against Context maintenance and implementation work, then begin `packages/ui`. Use Groq for fast hosted development and Ollama for offline work. Do not add product-owned Scroll types to the core enum.
 
 ## What Is Locked In
 
@@ -418,19 +418,9 @@ Keep these as design goals, not excuses for premature abstraction:
 13. **Human-in-the-loop by default for consequential changes.** Sensei can automate inspection and proposal aggressively, but code mutation, destructive operations, publishing, and other consequential actions should have explicit policy/approval boundaries until proven safe.
 14. **Sensei is the proving ground, not the architecture owner.** If Sensei needs a special mechanism, first ask whether it belongs in the underlying Codejitsu contract; do not silently create Sensei-only infrastructure that duplicates the framework.
 
-## Next Slice
+## AI Dogfooding Slice
 
-If AI is selected next, build the agentic development vertical slice through Sensei in this order unless repository evidence suggests a safer decomposition:
-
-1. **Vessel contract** — define and test the minimal Codejitsu-owned harness boundary inside the cataloged `packages/ai` scaffold.
-2. **Neuron-AI adapter** — inspect and integrate the current Neuron-AI runtime behind the Vessel boundary.
-3. **Spark contract** — define and test the minimal agent boundary and execution/result model.
-4. **Context-aware Spark** — prove a Spark can receive targeted Context resources plus selected code/tests through its Vessel.
-5. **Sensei development Vessel/Spark** — create the first concrete developer-oriented pair and prove one useful task against Codejitsu itself.
-6. **Developer TUI expansion** — layer Vessel and Spark operations onto the existing Context terminal tooling.
-7. **Dogfood** — use Sensei against Codejitsu for inspect -> plan -> change -> test -> review loops, with explicit human approval for consequential mutations.
-
-Each step should be independently testable and should avoid pulling later-stage concerns forward.
+The Vessel, Spark, Neuron runtime, Context Toolset, execution commands, TUI, local Model lifecycle, Ollama Provider, and Groq Provider are implemented. Product-neutral engineer, scribe, product-designer, marketer, seo, and security Sparks ship with purpose-based code and cognition Vessels. Groq is the fast hosted development default; Ollama remains the offline path. The next coherent slice is using these resources on real Codejitsu work and tightening only the contracts that dogfooding proves necessary.
 
 ## Guardrails For The Next Session
 
@@ -444,7 +434,7 @@ Each step should be independently testable and should avoid pulling later-stage 
 - Do not turn the canonical graph into a generic everything-is-a-node object graph.
 - Do not make the TUI a second application architecture.
 - Do not expose or persist model chain-of-thought; persist concise reasoning summaries, actions, tool calls, provenance, and results instead.
-- Do not start by building a generalized multi-agent swarm. Prove one Vessel + one Spark + one useful task first.
+- Do not start by building a generalized multi-agent swarm. Dogfood the bundled Vessels and Sparks on useful tasks first.
 - Keep Sensei above Codejitsu in dependency direction; Codejitsu must not depend on Sensei.
 - Prefer deterministic, inspectable commands for ordinary development operations; use agents where they add real value.
 - Require explicit policy/approval boundaries around consequential agent actions.

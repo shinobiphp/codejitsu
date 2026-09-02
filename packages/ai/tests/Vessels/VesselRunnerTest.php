@@ -76,13 +76,13 @@ final class VesselRunnerTest extends TestCase
         );
 
         foreach ([
-            'code'=>['engineer','codejitsu:latest'],
-            'cognition'=>['scribe','codejitsu:latest'],
+            'code'=>['engineer','openai/gpt-oss-20b'],
+            'cognition'=>['scribe','openai/gpt-oss-20b'],
         ] as $vessel=>[$spark,$model]) {
             $session=$runner->start($vessel);
             $session->send('Inspect the project.');
             self::assertSame($spark,$runtime->request->metadata['spark']);
-            self::assertSame('ollama',$runtime->request->metadata['provider']->adapter);
+            self::assertSame('groq',$runtime->request->metadata['provider']->adapter);
             self::assertSame($model,$runtime->request->model);
             self::assertNotEmpty($runtime->request->tools);
             self::assertStringContainsString('Codejitsu AI — Architecture',$runtime->request->instructions);

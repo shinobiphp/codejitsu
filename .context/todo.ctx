@@ -47,7 +47,7 @@ Remaining:
 - [x] Add cataloged Model recipes, interactive Ollama model setup, package setup actions, and Git-safe model storage conventions.
 - [x] Install the AI package in the root development aggregate and wire AI commands through Capability Scrolls.
 - [x] Add package-local AI architecture and operations Context Scrolls for Spark grounding.
-- [ ] Add an Ollama Provider adapter and dogfood the local Codejitsu model through Vessels.
+- [x] Add Ollama and Groq Provider adapters plus starter Sparks/Vessels; prove hosted inference through `ai:run`.
 
 ## 2. Codejitsu Runtime Boundary
 
@@ -153,6 +153,7 @@ argv
 - [x] Resolve commands by canonical colon-separated names.
 - [x] Execute commands through the same Scroll/Codex path.
 - [x] Generate namespace help/listing from stored child metadata.
+- [x] Compose package command namespaces without mutating source Scrolls and render namespaces/children alphabetically.
 - [x] Exercise `bin/codejitsu` through real subprocess smoke tests.
 - [x] Cover help, listing, execution, package listing, and invalid CLI input.
 

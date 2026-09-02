@@ -6,4 +6,5 @@ adapter: ollama
 model: 'codejitsu:latest'
 options:
   url: 'http://127.0.0.1:11434/api'
+  timeout: 300
   parameters: {temperature: 0.2}

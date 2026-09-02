@@ -3,6 +3,9 @@ lib/
 lib/*
 vendor/
 vendor/*
+.env
+.env.local
+.env.*.local
 .phpunit.cache/
 .worktrees/
 packages/*/composer.lock

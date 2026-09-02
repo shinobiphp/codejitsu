@@ -1,0 +1,9 @@
+name: groq/free
+type: provider
+version: 1.0.0
+description: 'Fast hosted development inference through the Groq free tier.'
+adapter: groq
+model: 'openai/gpt-oss-20b'
+credentials: {apiKey: env://GROQ_API_KEY}
+options:
+  parameters: {temperature: 0.2}

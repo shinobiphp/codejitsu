@@ -72,7 +72,7 @@ The repository currently develops these package boundaries together:
 | `codejitsu/package` | Package manifests, registry, installer, and cache |
 | `codejitsu/composer-plugin` | Composer lifecycle integration |
 | `codejitsu/context` | Deterministic project memory and terminal authoring |
-| `codejitsu/ai` | Cataloged, uninstalled Vessel/Spark runtime with Tools, Context memory, model Catalogs, interactive Ollama setup, `ai:run`, and `ai:tui` |
+| `codejitsu/ai` | Installed development package with Vessels, Sparks, Tools, Context memory, model Catalogs, interactive Ollama setup, `ai:run`, and `ai:tui` |
 | `codejitsu/ui` | Cataloged, uninstalled Astro and narrative UI package scaffold |
 
 The root `shinobiphp/codejitsu` package remains the installable aggregate while these boundaries stabilize.

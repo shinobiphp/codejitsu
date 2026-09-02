@@ -4,8 +4,7 @@ version: 1.0.0
 description: 'Implementation-oriented Neuron harness.'
 spark: spark://engineer
 runtime: neuron
-provider: provider://ollama/local
-model: 'codejitsu:latest'
+provider: provider://groq/free
 allowedSparks: [spark://engineer, spark://scribe, spark://product-designer, spark://marketer, spark://seo, spark://security]
 contexts: [context://contexts/architecture, context://contexts/operations]
 tools: [tool://context.list, tool://context.search, tool://context.show, tool://context.update-section]

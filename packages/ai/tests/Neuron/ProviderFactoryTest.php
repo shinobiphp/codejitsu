@@ -6,6 +6,7 @@ use Codejitsu\Ai\Neuron\ProviderFactory;
 use Codejitsu\Ai\Definitions\ProviderDefinition;
 use NeuronAI\Providers\OpenAI\OpenAI;
 use NeuronAI\Providers\Ollama\Ollama;
+use NeuronAI\Providers\OpenAILike;
 use PHPUnit\Framework\TestCase;
 
 final class ProviderFactoryTest extends TestCase
@@ -45,6 +46,7 @@ final class ProviderFactoryTest extends TestCase
             'model'=>'codejitsu:latest',
             'options'=>[
                 'url'=>'http://ollama.test:11434/api',
+                'timeout'=>300,
                 'parameters'=>['temperature'=>0.2],
             ],
         ]);
@@ -55,10 +57,33 @@ final class ProviderFactoryTest extends TestCase
         self::assertSame('http://ollama.test:11434/api',$this->property($provider,'url'));
         self::assertSame('override:latest',$this->property($provider,'model'));
         self::assertSame(['temperature'=>0.2],$this->property($provider,'parameters'));
+        self::assertSame(300.0,$this->property($provider->getHttpClient(),'timeout'));
         self::assertSame(
             ['adapter'=>'ollama','model'=>'codejitsu:latest','credentials'=>[]],
             (new ProviderFactory())->test($definition),
         );
+    }
+
+    public function testItBuildsGroqThroughTheOpenAiCompatibleAdapter(): void
+    {
+        putenv('CODEJITSU_TEST_GROQ_KEY=secret');
+        $definition=ProviderDefinition::fromArray([
+            'name'=>'groq/free',
+            'adapter'=>'groq',
+            'model'=>'openai/gpt-oss-20b',
+            'credentials'=>['apiKey'=>'env://CODEJITSU_TEST_GROQ_KEY'],
+            'options'=>['parameters'=>['temperature'=>0.2]],
+        ]);
+
+        try {
+            $provider=(new ProviderFactory())->make($definition);
+            self::assertInstanceOf(OpenAILike::class,$provider);
+            self::assertSame('https://api.groq.com/openai/v1',$this->property($provider,'baseUri'));
+            self::assertSame('openai/gpt-oss-20b',$this->property($provider,'model'));
+            self::assertSame(['temperature'=>0.2],$this->property($provider,'parameters'));
+        } finally {
+            putenv('CODEJITSU_TEST_GROQ_KEY');
+        }
     }
 
     private function property(object $object,string $name):mixed

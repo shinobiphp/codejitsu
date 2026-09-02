@@ -15,6 +15,11 @@ This roadmap records direction, not promises. Items marked planned are not neces
 - [x] Separate discovered metadata descriptors from hydrated Scroll instances.
 - [x] Prove metadata queries perform zero hydration and resolution memoizes one instance.
 - [x] Add strict workspace, syntax, CLI, audit, and clean-install release gates.
+- [x] Install the AI package in the root development aggregate.
+- [x] Wire AI Command Scrolls through Capability Scrolls and make command discovery deterministic and alphabetical.
+- [x] Add package-local AI architecture and operations Context Scrolls for Spark grounding.
+- [x] Catalog and build the local Codejitsu Ollama model.
+- [x] Add Ollama and Groq Provider adapters plus product-neutral starter Sparks and Vessels.
 
 ### 1. Codex-Owned Discovery and Cache
 
@@ -88,9 +93,8 @@ Strengthen the three initial resource types with richer validation, versioning, 
 
 ## Next
 
-- dogfood the installed AI foundation and local Ollama model against Context maintenance
-- use package-local AI Context Scrolls to ground Sparks in command, resource, and execution contracts
-- add the Ollama inference Provider adapter so local cataloged models can power Vessels
+- dogfood the installed AI foundation against Context maintenance and implementation work
+- exercise alternative bundled Sparks through the interactive Vessel workflow
 - begin the cataloged `packages/ui` Astro integration slice
 - keep product-owned Scroll types in their packages rather than extending the core enum
 - first-class Application Scroll resource trees such as `app://archiq/...`
@@ -100,7 +104,6 @@ Strengthen the three initial resource types with richer validation, versioning, 
 - richer discovery/index filters
 - cache persistence drivers
 - resource dependency graph
-- command introspection and generated help
 
 ## Later
 

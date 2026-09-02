@@ -9,13 +9,14 @@ Make the installed `codejitsu/ai` package immediately usable with the existing l
 `ProviderFactory` supports `openai` and `ollama`. OpenAI retains required `env://` credentials. Ollama requires no credentials and accepts:
 
 - `options.url`, defaulting to `http://127.0.0.1:11434/api`
+- `options.timeout`, defaulting to 300 seconds for CPU-local inference
 - `options.parameters`, an optional map passed to Neuron's Ollama provider
 
 Provider validation remains adapter-owned. `provider:test` validates configuration without making an inference request.
 
 ## Bundled resources
 
-The package ships `provider://ollama/local` for `codejitsu:latest`.
+The package ships `provider://ollama/local` for offline `codejitsu:latest` inference and `provider://groq/free` for fast hosted development inference using `env://GROQ_API_KEY`.
 
 It ships six product-neutral Sparks:
 
@@ -31,7 +32,7 @@ It ships two Neuron/Ollama Vessels:
 - `code`, defaulting to `engineer`
 - `cognition`, defaulting to `scribe`
 
-Both permit all six bundled Sparks, load the package architecture and operations Context Scrolls, and expose the existing Context Toolset under the existing consequential-action approval policy.
+Both permit all six bundled Sparks, default to `provider://groq/free`, load the package architecture and operations Context Scrolls, and expose the existing Context Toolset under the existing consequential-action approval policy. Ollama remains available as the offline Provider.
 
 Vessel identity describes purpose rather than Provider infrastructure. Provider or other runtime overrides may later use URI query parameters, but override semantics are outside this slice.
 

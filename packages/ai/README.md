@@ -17,7 +17,9 @@ Run once with `ai:run <vessel> "prompt"`. Consequential tools are denied unless 
 
 AI commands bind their PHP handlers through Capability Scrolls so arguments and the active Codex arrive in an `ExecutionContext`. Package-local Context Scrolls under `resources/contexts` document the architecture and operating model for Sparks.
 
-Neuron AI is the first runtime adapter and OpenAI is the first Provider adapter. Public definitions remain provider-neutral. MCP belongs in a future integration package.
+Neuron AI is the first runtime adapter. The package includes `provider://groq/free` for fast hosted development with `GROQ_API_KEY` and `provider://ollama/local` for offline inference. Copy `.env.example` to `.env`, set the Groq key, then run `provider:test groq/free`. Public definitions remain provider-neutral. MCP belongs in a future integration package.
+
+The bundled `code` Vessel defaults to the `engineer` Spark; `cognition` defaults to `scribe`. Both allow the bundled `product-designer`, `marketer`, `seo`, and `security` Sparks as well. Hosted Providers receive the selected Context Scrolls and prompt; use Ollama when that material must remain local.
 
 ## Local models
 

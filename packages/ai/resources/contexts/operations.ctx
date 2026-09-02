@@ -6,6 +6,14 @@ Create AI resources with `make:spark`, `make:vessel`, `make:skill`, `make:provid
 
 Run a Vessel once with `ai:run <vessel> <prompt>` or open its conversational interface with `ai:tui`. Tools are deny-by-default when consequential; one-shot execution can approve a named Tool with `--approve-tool=<name>`.
 
+## Starter Providers and Vessels
+
+`provider://groq/free` is the fast hosted development default and reads its key from `env://GROQ_API_KEY`. Copy `.env.example` to `.env`, set the key, and validate it with `provider:test groq/free`. The project boot process loads `.env` without replacing values already supplied by the process environment.
+
+`provider://ollama/local` uses `codejitsu:latest` for offline inference and permits longer CPU-bound requests. Validate it with `provider:test ollama/local` after Ollama and the model are available.
+
+`vessel://code` defaults to `spark://engineer`; `vessel://cognition` defaults to `spark://scribe`. Both permit the bundled product-neutral Sparks: engineer, scribe, product-designer, marketer, seo, and security. Hosted Providers receive the prompt and resolved Context content; select an offline Provider for sensitive material that must not leave the machine.
+
 ## Local models
 
 `model://codejitsu/local` builds `codejitsu:latest` through Ollama from the cataloged Qwen2.5-Coder recipe.

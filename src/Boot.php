@@ -16,6 +16,7 @@ use Codejitsu\Substrate\Javascript;
 use Codejitsu\Substrate\Lua;
 use Codejitsu\Substrate\Php;
 use Codejitsu\Substrate\Wasm;
+use Dotenv\Dotenv;
 
 final class Boot
 {
@@ -49,6 +50,7 @@ final class Boot
         ?Environment $environment = null,
     ): Cli {
         $root = $rootDir ?? (defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd());
+        self::loadEnvironment($root);
         $scrolls = $codex ?? new ScrollCodex();
         self::registerSubstrates($scrolls);
         self::loadProjectScrolls($scrolls, $root);
@@ -66,6 +68,7 @@ final class Boot
         ?Environment $environment = null,
     ): Swoole {
         $root = $rootDir ?? (defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd());
+        self::loadEnvironment($root);
         $scrolls = $codex ?? new ScrollCodex();
         self::registerSubstrates($scrolls);
         self::loadProjectScrolls($scrolls, $root);
@@ -81,6 +84,7 @@ final class Boot
         ?Environment $environment = null,
     ): Web {
         $root = $rootDir ?? (defined('CODEJITSU_ROOT') ? CODEJITSU_ROOT : getcwd());
+        self::loadEnvironment($root);
         $scrolls = $codex ?? new ScrollCodex();
         self::registerSubstrates($scrolls);
         self::loadProjectScrolls($scrolls, $root);
@@ -96,6 +100,11 @@ final class Boot
         $registry->register('lua', new Lua());
         $registry->register('javascript', new Javascript());
         $registry->register('wasm', new Wasm());
+    }
+
+    private static function loadEnvironment(string $root): void
+    {
+        Dotenv::createImmutable(rtrim($root, '/\\'))->safeLoad();
     }
 
     private static function loadProjectScrolls(ScrollCodex $scrolls, string $root): void

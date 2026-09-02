@@ -5,12 +5,30 @@ declare(strict_types=1);
 namespace Codejitsu\Tests\Apps;
 
 use Codejitsu\Boot;
+use Symfony\Component\Filesystem\Filesystem;
 use Codejitsu\Contracts\Console\Driver;
 use Codejitsu\Kernel\Kernel;
 use PHPUnit\Framework\TestCase;
 
 final class CliTest extends TestCase
 {
+    public function testBootLoadsProjectEnvironmentWithoutOverwritingExistingValues(): void
+    {
+        $root = sys_get_temp_dir() . '/codejitsu-env-' . bin2hex(random_bytes(6));
+        mkdir($root, 0777, true);
+        file_put_contents($root . '/.env', "CODEJITSU_TEST_DOTENV=from-file\nCODEJITSU_TEST_EXISTING=from-file\n");
+        $_ENV['CODEJITSU_TEST_EXISTING'] = 'from-process';
+
+        try {
+            Boot::cli('dotenv-' . bin2hex(random_bytes(4)), rootDir: $root);
+            self::assertSame('from-file', $_ENV['CODEJITSU_TEST_DOTENV'] ?? null);
+            self::assertSame('from-process', $_ENV['CODEJITSU_TEST_EXISTING'] ?? null);
+        } finally {
+            unset($_ENV['CODEJITSU_TEST_DOTENV'], $_ENV['CODEJITSU_TEST_EXISTING']);
+            (new Filesystem())->remove($root);
+        }
+    }
+
     private string $kernelName;
 
     protected function setUp(): void
