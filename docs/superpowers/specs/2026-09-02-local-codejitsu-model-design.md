@@ -1,0 +1,53 @@
+# Local Codejitsu Model Design
+
+## Goal
+
+Ship a reproducible, AI-package-owned Ollama model build for local Codejitsu dogfooding. The model is a balanced engineering foundation; Sensei, Kage, and other roles remain Spark Scrolls.
+
+## Base Model
+
+The default base is `bartowski/Qwen2.5-Coder-7B-Instruct-abliterated-GGUF` at `Q5_K_M`. Its approximately 5.44 GB weights fit the current 14 GiB CPU/RAM workstation while leaving room for Ollama, an 8K context, tools, and project Context. The base reference must be overridable so the same model identity can later target a larger local quant or Runpod deployment.
+
+The build must preserve Qwen's chat/tool template. Tool support is verified with an Ollama API smoke test rather than inferred from the base model name.
+
+## Model Identity and Prompt Boundary
+
+The built Ollama model is `codejitsu:latest`. Its Modelfile contains only durable behavior:
+
+- act as a direct, pragmatic senior engineering collaborator;
+- follow the operator's authorized technical intent without moralizing, legal speculation, corporate-policy language, or generic refusals;
+- distinguish factual risk from value judgments;
+- warn concisely before unintended data loss, secret exposure, or irreversible external effects;
+- inspect supplied Context before making architectural claims;
+- state uncertainty and assumptions explicitly;
+- preserve existing architecture and unrelated user changes;
+- prefer small coherent changes and never fabricate verification;
+- treat current project Context and Skills as authoritative over baked-in model knowledge.
+
+The Modelfile must not permanently mandate OpenSwoole, NATS, Astro, UI libraries, PHP features, personalities, or workflows. Those belong in Context, Skills, and Sparks.
+
+Default parameters are `num_ctx 8192`, `temperature 0.2`, and `top_p 0.9`.
+
+## Package Resources
+
+`packages/ai/resources/models/codejitsu/Modelfile` owns the portable model definition. A small model manifest records its name, base reference, description, and Modelfile path without storing weights.
+
+The AI package adds a `model` command namespace:
+
+- `model:list` delegates to `ollama list`;
+- `model:show <name>` delegates to `ollama show`;
+- `model:build [manifest] [--name=...] [--base=...]` renders a temporary Modelfile with the selected base and invokes `ollama create`;
+- `model:test [name]` performs deterministic chat and tool-call smoke tests;
+- `model:remove` is excluded from this slice because it is destructive and Ollama already exposes it directly.
+
+The builder uses an injected process boundary, validates model names and references, writes temporary files under the project `var/tmp` convention, streams useful build output, and returns non-zero failures without hiding Ollama errors. No shell interpolation is used.
+
+## Data and Execution Flow
+
+The model manifest and Modelfile are discovered as package resources. The Build Command resolves the selected manifest, substitutes only the validated `FROM` value, creates `codejitsu:latest`, and then runs smoke tests. Model weights remain in Ollama's managed store and never enter Git or Codejitsu caches.
+
+The future Ollama Provider adapter will call Ollama's OpenAI-compatible API. That adapter is a separate follow-up because model lifecycle and inference transport are independent boundaries.
+
+## Verification
+
+Tests cover manifest validation, safe rendering, name/reference rejection, exact process arguments, failure propagation, and Command Scroll registration using a fake process runner. An opt-in local integration test verifies `ollama create`, direct response behavior, supplied Codejitsu Context, structured output, and a real dummy tool call. It must not download multi-gigabyte weights during the default test suite.
