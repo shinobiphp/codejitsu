@@ -1,0 +1,1 @@
+{name: codejitsu/runtimes, version: '0.1.0', description: Collection of runtimes and runtime substrates for codejitsu, capabilities: {provides: [], requires: [core-runtime]}}

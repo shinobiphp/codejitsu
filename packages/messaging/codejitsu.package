@@ -1,0 +1,1 @@
+{name: codejitsu/messaging, version: '0.1.0', description: Messaging and events for CQRS and event sourcing, capabilities: {provides: [], requires: [core-runtime]}}

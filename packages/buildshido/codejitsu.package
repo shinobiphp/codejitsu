@@ -1,0 +1,18 @@
+name: codejitsu/buildshido
+version: 0.1.0
+description: 'Master pre-compilation engine, static analysis, scroll discovery, and $O(1)$ manifest generator.'
+setup:
+  ui: {target: Codejitsu\Buildshido\PackageSetup, optional: true, interactive: true}
+capabilities:
+  provides: [buildshido-compiler, ast-compiler, manifest-generator, dto-codegen, spec-compilation]
+  requires: [core-runtime, scroll-resources, resource-codex, schema-validation, console-runtime, context-memory]
+types:
+  spec:
+    plural: specs
+    extension: spec
+    scheme: spec://
+    class: Codejitsu\Buildshido\Scrolls\Spec
+    codec: neon
+sources:
+  codejitsu-buildshido:
+    path: scrolls

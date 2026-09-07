@@ -1,0 +1,1 @@
+{name: codejitsu/cognition, version: '0.1.0', description: Cognition and cognitive abilities and related classes, capabilities: {provides: [], requires: [core-runtime]}}

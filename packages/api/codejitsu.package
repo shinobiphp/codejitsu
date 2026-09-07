@@ -1,0 +1,1 @@
+{name: codejitsu/api, version: '0.1.0', description: 'REST, GraphQL, MCP, A2U, A2A and other API related classes', capabilities: {provides: [], requires: [core-runtime]}}

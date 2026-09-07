@@ -1,0 +1,1 @@
+{name: codejitsu/iam, version: '0.1.0', description: 'Identity, auth & security', capabilities: {provides: [], requires: [core-runtime]}}

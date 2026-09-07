@@ -1,6 +1,6 @@
 {
-    "name": "codejitsu/ui",
-    "description": "Astro integration for contextual, reactive, and innovative UI runtime",
+    "name": "codejitsu/observability",
+    "description": "Opentelemetry and other observability related classes",
     "type": "codejitsu-pkg",
     "license": "proprietary",
     "extra": {
@@ -14,12 +14,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Codejitsu\\UI\\": "src/"
+            "Codejitsu\\Observability\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Codejitsu\\UI\\Tests\\": "tests/"
+            "Codejitsu\\Observability\\Tests\\": "tests/"
         }
     }
 }

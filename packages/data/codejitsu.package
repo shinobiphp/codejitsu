@@ -1,0 +1,1 @@
+{name: codejitsu/data, version: '0.1.0', description: Data modeling/stores and database access with utilities, capabilities: {provides: [], requires: [core-runtime]}}

@@ -1,0 +1,1 @@
+{name: codejitsu/observability, version: '0.1.0', description: Opentelemetry and other observability related classes, capabilities: {provides: [], requires: [core-runtime]}}

@@ -1,1 +1,42 @@
-{name: codejitsu/ui, version: '0.1.0', description: 'Astro integration for contextual, reactive, and innovative UI runtime', capabilities: {provides: [], requires: [core-runtime]}}
+name: codejitsu/ui
+version: 0.1.0
+description: 'Astro integration for contextual, reactive, and innovative UI runtime'
+setup:
+  ui: {target: Codejitsu\UI\PackageSetup, optional: true, interactive: true}
+capabilities:
+  provides: [ui-server, ui-ux, webcomponents]
+  requires: [core-runtime, scroll-resources, resource-codex, schema-validation, console-runtime, context-memory]
+types:
+  site:
+    plural: sites
+    extension: site
+    scheme: site://
+    class: Codejitsu\UI\Scrolls\Site
+    codec: neon
+  composition:
+    plural: compositions
+    extension: composition
+    scheme: composition://
+    class: Codejitsu\UI\Scrolls\Composition
+    codec: neon
+  layout:
+    plural: layouts
+    extension: layout
+    scheme: layout://
+    class: Codejitsu\UI\Scrolls\Layout
+    codec: neon
+  component:
+    plural: components
+    extension: component
+    scheme: component://
+    class: Codejitsu\UI\Scrolls\Component
+    codec: neon
+  theme:
+    plural: themes
+    extension: theme
+    scheme: theme://
+    class: Codejitsu\UI\Scrolls\Theme
+    codec: neon
+sources:
+  codejitsu-ui:
+    path: scrolls

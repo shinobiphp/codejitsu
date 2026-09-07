@@ -1,6 +1,6 @@
 {
-    "name": "codejitsu/ui",
-    "description": "Astro integration for contextual, reactive, and innovative UI runtime",
+    "name": "codejitsu/iam",
+    "description": "Identity, auth & security",
     "type": "codejitsu-pkg",
     "license": "proprietary",
     "extra": {
@@ -14,12 +14,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Codejitsu\\UI\\": "src/"
+            "Codejitsu\\Iam\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Codejitsu\\UI\\Tests\\": "tests/"
+            "Codejitsu\\Iam\\Tests\\": "tests/"
         }
     }
 }

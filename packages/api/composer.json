@@ -1,6 +1,6 @@
 {
-    "name": "codejitsu/ui",
-    "description": "Astro integration for contextual, reactive, and innovative UI runtime",
+    "name": "codejitsu/api",
+    "description": "REST, GraphQL, MCP, A2U, A2A and other API related classes",
     "type": "codejitsu-pkg",
     "license": "proprietary",
     "extra": {
@@ -14,12 +14,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Codejitsu\\UI\\": "src/"
+            "Codejitsu\\Api\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Codejitsu\\UI\\Tests\\": "tests/"
+            "Codejitsu\\Api\\Tests\\": "tests/"
         }
     }
 }
