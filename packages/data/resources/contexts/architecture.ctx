@@ -1,0 +1,10 @@
+name: data/architecture
+type: context
+version: 1.0.0
+tags: [data, architecture]
+content: |
+  Codejitsu Data owns Field, Entity, Store, and Repository Scroll types. Fields own value types, Schema references, query capabilities, and ordered Strategy references. Entities compose Fields and own persistence resources, Store selection, legacy source mappings, projections, and lifecycle hooks. Repositories own named queries and the safe dynamic filter/order surface. Stores own drivers and connection references.
+
+  Strategy is a general Codejitsu pattern and is not owned by Data. Data may reference strategy:// URIs for normalization, validation, optimization, protection, enrichment, and lifecycle behavior.
+
+  The initial relational Store layer supports SQLite, MySQL, and PostgreSQL through PDO. MongoDB requires a native document adapter. Build output is deterministic and belongs under var/build/data by default.

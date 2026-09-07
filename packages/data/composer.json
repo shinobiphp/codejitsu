@@ -10,7 +10,15 @@
     },
     "require": {
         "php": ">=8.4",
-        "codejitsu/core": "self.version"
+        "codejitsu/core": "self.version",
+        "codejitsu/scrolls": "self.version",
+        "codejitsu/codex": "self.version",
+        "codejitsu/schema": "self.version",
+        "codejitsu/console": "self.version"
+    },
+    "require-dev": {
+        "codejitsu/package": "self.version",
+        "phpunit/phpunit": "^13.3"
     },
     "autoload": {
         "psr-4": {
@@ -21,5 +29,8 @@
         "psr-4": {
             "Codejitsu\\Data\\Tests\\": "tests/"
         }
-    }
+    },
+    "repositories": [{"type": "path", "url": "../*", "options": {"symlink": true}}],
+    "config": {"vendor-dir": "../../lib/data"},
+    "scripts": {"test": "phpunit"}
 }

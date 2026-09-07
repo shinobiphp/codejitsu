@@ -1,0 +1,11 @@
+<?php
+declare(strict_types=1);
+namespace Codejitsu\Data\Compiler;
+use Codejitsu\Data\Scrolls\Entity;use Codejitsu\Data\Scrolls\Field;use Codejitsu\Scrolls\ScrollCodex;use InvalidArgumentException;
+final readonly class DataCompiler
+{
+ public function __construct(private ScrollCodex $codex){}
+ public function compile(string $reference,string $namespace='Generated\\Data'):CompiledEntity{$entity=$this->codex->resolveTyped('entity',$reference);if(!$entity instanceof Entity)throw new InvalidArgumentException('Reference is not an Entity Scroll.');if($entity->schema!==null)$this->codex->resolveTyped('schema',$entity->schema);$fields=[];foreach($entity->fields as $name=>$definition){if(is_string($definition)){$field=$this->codex->resolveTyped('field',$definition);if(!$field instanceof Field)throw new InvalidArgumentException(sprintf('Field [%s] did not resolve.',$name));$definition=$field->toArray();}else{$definition=['name'=>$entity->name.'/'.$name,...$definition];$field=(new Field())->hydrate($definition);$definition=$field->toArray();}if($field->schema!==null)$this->codex->resolveTyped('schema',$field->schema);$fields[$name]=$definition;}$class=$this->className($entity->name);$properties=[];foreach($fields as $name=>$field)$properties[]='        public '.$this->phpType($field['dataType'],(bool)($field['nullable']??false)).' $'.$name.',';$php="<?php\n\ndeclare(strict_types=1);\n\nnamespace {$namespace};\n\nfinal readonly class {$class}\n{\n    public function __construct(\n".implode("\n",$properties)."\n    ) {}\n}\n";$manifest=['entity'=>$entity->name,'class'=>$namespace.'\\'.$class,'store'=>$entity->store,'source'=>$entity->source,'schema'=>$entity->schema,'fields'=>$fields,'hooks'=>$entity->hooks,'sources'=>$entity->sources];return new CompiledEntity($class,$php,$manifest);}
+ private function className(string $name):string{return str_replace(' ','',ucwords(str_replace(['-','_','/'],' ',$name)));}
+ private function phpType(string $type,bool $nullable):string{$type=match($type){'int','integer'=>'int','float','decimal'=>'float','bool','boolean'=>'bool','array','json'=>'array','datetime','date'=>'\\DateTimeImmutable',default=>'string'};return $nullable?'?'.$type:$type;}
+}

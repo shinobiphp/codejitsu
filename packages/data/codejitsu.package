@@ -1,1 +1,13 @@
-{name: codejitsu/data, version: '0.1.0', description: Data modeling/stores and database access with utilities, capabilities: {provides: [], requires: [core-runtime]}}
+name: codejitsu/data
+version: 0.1.0
+description: 'Declarative entities, fields, repositories, stores, and generated data artifacts.'
+capabilities:
+  provides: [data-modeling, data-repositories, data-stores, data-compilation]
+  requires: [core-runtime, scroll-resources, resource-codex, schema-validation, console-runtime]
+types:
+  entity: {plural: entities, extension: entity, scheme: 'entity://', class: Codejitsu\Data\Scrolls\Entity, codec: neon}
+  field: {plural: fields, extension: field, scheme: 'field://', class: Codejitsu\Data\Scrolls\Field, codec: neon}
+  repository: {plural: repositories, extension: repository, scheme: 'repository://', class: Codejitsu\Data\Scrolls\Repository, codec: neon}
+  store: {plural: stores, extension: store, scheme: 'store://', class: Codejitsu\Data\Scrolls\Store, codec: neon}
+sources:
+  codejitsu-data: {path: resources}

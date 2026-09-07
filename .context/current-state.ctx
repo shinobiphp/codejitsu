@@ -428,6 +428,8 @@ The Vessel, Spark, Neuron runtime, Context Toolset, execution commands, TUI, loc
 
 Vessels support ordered, last-match-wins `sparkPolicy` rules with exact or `*` matching. Omitted policy defaults to allowing every registered Spark; legacy `allowedSparks` remains supported as a compatibility allowlist. Runtime enforcement and TUI discovery use the same policy evaluator.
 
+The optional `codejitsu/data` package now defines first-class `field://`, `entity://`, `repository://`, and `store://` Scrolls. Entities own Store selection, physical resources, legacy source mappings, projections, and lifecycle hooks; Fields own value types, Schema references, query capabilities, and ordered Strategy references. SQLite, MySQL, and PostgreSQL share a PDO Store layer. The initial compiler resolves an Entity graph and emits an immutable PHP DTO plus deterministic manifest under `var/build/data`. Strategy remains a cross-package pattern rather than a Data-owned Scroll type; MongoDB, hook execution/outbox, richer queries, and Buildshido orchestration remain planned.
+
 ## Guardrails For The Next Session
 
 - Start from `main` and verify the tree/test baseline before changing anything.
