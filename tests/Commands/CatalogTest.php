@@ -32,4 +32,25 @@ final class CatalogTest extends TestCase
         self::assertStringContainsString('app://shinobi/forge#1.0.0', Catalogs::search($context(['forge'])));
         self::assertSame("No catalog entries found.\n", Catalogs::search($context(['forge', 'package'])));
     }
+
+    public function testShowAcceptsASourceQualifiedNameWithoutTheCatalogScheme(): void
+    {
+        $types = TypeRegistry::builtins();
+        $types->register(new TypeDefinition('catalog', 'catalogs', 'catalog', 'catalog://', Catalog::class));
+        $codex = new ScrollCodex(types: $types);
+        $codex->registerScroll((new Catalog())->hydrate([
+            'name' => 'packages',
+            'entries' => [['identifier' => 'package://codejitsu/core', 'kind' => 'package']],
+        ]), 'codejitsu-catalogs');
+        $codex->registerScroll((new Catalog())->hydrate([
+            'name' => 'packages',
+            'entries' => [['identifier' => 'package://project/custom', 'kind' => 'package']],
+        ]), 'project-catalogs');
+        $context = new ExecutionContext(['packages@codejitsu-catalogs'], $codex);
+
+        $output = Catalogs::show($context);
+
+        self::assertStringContainsString('package://codejitsu/core', $output);
+        self::assertStringNotContainsString('package://project/custom', $output);
+    }
 }

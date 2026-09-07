@@ -31,12 +31,11 @@ final readonly class DefinitionLoader
     {
         $reference = trim($reference);
         if ($reference === '') throw new DefinitionException(ucfirst($type) . ' reference cannot be empty.');
-        if (!str_contains($reference, '://')) {
-            $matches = $this->codex->query(['type' => $type, 'name' => $reference]);
-            if (count($matches) !== 1) throw new DefinitionException(sprintf('%s [%s] was not found or is ambiguous.', ucfirst($type), $reference));
-            $reference = (string) $matches[0]->uri;
+        try {
+            $scroll = $this->codex->resolveTyped($type, $reference);
+        } catch (\Throwable $exception) {
+            throw new DefinitionException(sprintf('%s [%s] was not found.', ucfirst($type), $reference), 0, $exception);
         }
-        $scroll = $this->codex->resolve($reference);
         if (!$scroll instanceof $class || !$scroll instanceof Scroll) {
             throw new DefinitionException(sprintf('[%s] is not a %s Scroll.', $reference, ucfirst($type)));
         }

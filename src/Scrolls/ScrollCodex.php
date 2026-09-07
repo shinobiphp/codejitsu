@@ -288,9 +288,22 @@ class ScrollCodex extends EnvelopeCodex implements ScrollCodexContract
         throw new OutOfBoundsException(sprintf('Scroll [%s] not found in Codex.', $uri));
     }
 
-    public function resolveTyped(Types $type, string $name): ScrollContract
+    public function resolveTyped(Types|string $type, string $reference): ScrollContract
     {
-        return $this->resolve($type->scheme() . trim($name, '/'));
+        $definition = $this->typeDefinition($type);
+        $reference = trim($reference);
+        if ($reference === '') {
+            throw new InvalidArgumentException(sprintf('%s Scroll reference cannot be empty.', ucfirst($definition->name)));
+        }
+
+        $uri = str_contains($reference, '://')
+            ? $reference
+            : $definition->scheme . ltrim($reference, '/');
+        if (!str_starts_with(strtolower($uri), $definition->scheme)) {
+            throw new InvalidArgumentException(sprintf('Scroll [%s] is not a %s Scroll.', $reference, ucfirst($definition->name)));
+        }
+
+        return $this->resolve($uri);
     }
 
     public function invoke(Types|string $type, string $name, mixed ...$args): mixed

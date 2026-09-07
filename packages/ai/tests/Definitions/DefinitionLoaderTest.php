@@ -169,4 +169,21 @@ final class DefinitionLoaderTest extends TestCase
         self::assertSame('architect', $definition->name);
         self::assertSame('Review code.', $definition->instructions);
     }
+
+    public function testLoaderAcceptsASourceQualifiedNameWithoutTheTypeScheme(): void
+    {
+        $types = TypeRegistry::builtins();
+        $types->register(new TypeDefinition('spark', 'sparks', 'spark', 'spark://', Spark::class));
+        $codex = new ScrollCodex(types: $types);
+        $codex->registerScroll((new Spark())->hydrate([
+            'name' => 'scribe', 'instructions' => 'Package instructions.',
+        ]), 'codejitsu-ai');
+        $codex->registerScroll((new Spark())->hydrate([
+            'name' => 'scribe', 'instructions' => 'Application instructions.',
+        ]), 'application');
+
+        $definition = (new DefinitionLoader($codex))->spark('scribe@codejitsu-ai');
+
+        self::assertSame('Package instructions.', $definition->instructions);
+    }
 }

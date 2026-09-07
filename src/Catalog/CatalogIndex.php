@@ -74,17 +74,13 @@ final readonly class CatalogIndex
 
     public function catalog(string $identifier): Catalog
     {
-        if (str_contains($identifier, '://')) {
-            $catalog = $this->codex->resolve($identifier);
-            if ($catalog instanceof Catalog) return $catalog;
-        } else {
-            $matches = $this->codex->query(['type' => 'catalog', 'name' => $identifier]);
-            if ($matches !== []) {
-                $catalog = $this->codex->resolve((string) $matches[0]->uri);
-                if ($catalog instanceof Catalog) return $catalog;
-            }
+        try {
+            $catalog = $this->codex->resolveTyped('catalog', $identifier);
+        } catch (\Throwable $exception) {
+            throw new RuntimeException(sprintf('Catalog [%s] was not found.', $identifier), 0, $exception);
         }
-        throw new RuntimeException(sprintf('Catalog [%s] was not found or is ambiguous.', $identifier));
+        if ($catalog instanceof Catalog) return $catalog;
+        throw new RuntimeException(sprintf('Scroll [%s] is not a Catalog.', $identifier));
     }
 
     /** @return array<string,array<string,mixed>> */

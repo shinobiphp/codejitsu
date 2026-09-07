@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Codejitsu\Tests\Scrolls;
 
 use Codejitsu\Scrolls\ScrollCodex;
+use Codejitsu\Enums\Scrolls\Types;
 use Codejitsu\Scrolls\Types\Config;
 use PHPUnit\Framework\TestCase;
 
@@ -49,5 +50,21 @@ final class SourceResolutionTest extends TestCase
         $codex->registerScroll($tenant, 'tenant');
 
         self::assertSame('global', $codex->resolve('config://app@tenant.global')->value);
+    }
+
+    public function testTypedResolutionAcceptsNamesSourceSelectorsAndFullUris(): void
+    {
+        $framework = (new Config())->hydrate(['name' => 'app', 'value' => 'framework']);
+        $package = (new Config())->hydrate(['name' => 'app', 'value' => 'package']);
+        $app = (new Config())->hydrate(['name' => 'app', 'value' => 'app']);
+
+        $codex = new ScrollCodex();
+        $codex->registerScroll($framework, 'framework');
+        $codex->registerScroll($package, 'package');
+        $codex->registerScroll($app, 'app');
+
+        self::assertSame('app', $codex->resolveTyped(Types::CONFIG, 'app')->value);
+        self::assertSame('package', $codex->resolveTyped('config', 'app@package')->value);
+        self::assertSame('framework', $codex->resolveTyped('config', 'config://app@framework')->value);
     }
 }

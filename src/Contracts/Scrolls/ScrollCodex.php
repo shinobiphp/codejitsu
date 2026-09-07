@@ -45,6 +45,13 @@ interface ScrollCodex extends EnvelopeCodex
     public function resolve(string $uri): mixed;
 
     /**
+     * Resolve a Scroll when the expected type is already known.
+     *
+     * The reference may be a name, a source-qualified name, or a full URI.
+     */
+    public function resolveTyped(Types|string $type, string $reference): Scroll;
+
+    /**
      * Explicitly invoke a typed Scroll.
      */
     public function invoke(

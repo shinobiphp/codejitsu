@@ -46,8 +46,8 @@ final class AiResources
         $arguments = is_array($c->arguments) ? array_values($c->arguments) : [];
         $reference = self::argument($arguments, 0);
         $codex = self::codex($c);
-        if (!str_contains($reference, '://')) { $matches=$codex->query(['type'=>$type,'name'=>$reference]); if(count($matches)!==1) throw new RuntimeException(sprintf('%s [%s] was not found or is ambiguous.', ucfirst($type),$reference)); $reference=(string)$matches[0]->uri; }
-        $scroll=$codex->resolve($reference); if($scroll===null) throw new RuntimeException(sprintf('%s [%s] was not found.',ucfirst($type),$reference));
+        try { $scroll=$codex->resolveTyped($type,$reference); }
+        catch (\Throwable $exception) { throw new RuntimeException(sprintf('%s [%s] was not found.',ucfirst($type),$reference),0,$exception); }
         return json_encode($scroll->toArray(), JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR) . "\n";
     }
     private static function codex(ExecutionContext $c): \Codejitsu\Scrolls\ScrollCodex { return $c->codex ?? throw new RuntimeException('AI commands require a bound Codex.'); }

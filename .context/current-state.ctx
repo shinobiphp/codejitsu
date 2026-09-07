@@ -101,7 +101,9 @@ Source cascade semantics:
 @global.tenant  => global, then tenant
 ```
 
-An omitted source uses the registered/default cascade order, with the most recently registered source taking precedence.
+An omitted source uses the registered/default cascade order, with the most recently registered source taking precedence. Boot registers core/root defaults first and package sources afterward; application adapters can register their own sources last. This yields application → package → core/root precedence. Explicit `@source` selectors bypass the implicit cascade.
+
+Commands and APIs that already know the expected Scroll type accept a bare name, a source-qualified name such as `packages@codejitsu-catalogs`, or a complete URI such as `catalog://packages@codejitsu-catalogs`.
 
 A source alias may identify a different physical Scroll source, such as a global Scroll repository versus a tenant-local repository. The same logical URI may therefore resolve against different sources without changing its logical identity.
 

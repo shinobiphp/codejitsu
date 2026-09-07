@@ -46,6 +46,7 @@ composer test
 ./bin/codejitsu pkg:info shinobiphp/codejitsu
 ./bin/codejitsu catalog:list
 ./bin/codejitsu catalog:show packages
+./bin/codejitsu catalog:show packages@codejitsu-catalogs
 ./bin/codejitsu catalog:search astro package
 ./bin/codejitsu catalog:edit
 ./bin/codejitsu context:tui
@@ -55,6 +56,8 @@ composer test
 ```
 
 Commands are themselves Scrolls. Their schemas, capabilities, and help metadata travel through the same Codex path as other resources.
+
+Commands that operate on one known Scroll type accept a bare name, a source-qualified name such as `packages@codejitsu-catalogs`, or a full URI such as `catalog://packages@codejitsu-catalogs`. Unqualified references use the Codex source cascade; an explicit `@source` selector bypasses it.
 
 ## Package workspace
 

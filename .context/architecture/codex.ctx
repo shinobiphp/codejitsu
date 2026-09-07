@@ -70,7 +70,7 @@ means an unqualified request checks:
 @tenant → @global
 ```
 
-This makes later registrations more specific and allows tenant/project/application sources to override broader global defaults.
+This makes later registrations more specific. Core's `default` source is registered first, package sources are registered during package bootstrap, and application-specific sources may be registered last. The effective precedence is therefore application → package → core/root. Resource-specific sources such as project catalogs and Context memory follow the same last-registered rule within their Scroll types.
 
 A URI can explicitly define a source cascade with a dot-separated selector:
 
@@ -143,7 +143,7 @@ Cache persistence is not yet part of the current implementation and is deliberat
 
 ## Resolution Semantics
 
-Typed URIs are preferred when a resource name could be ambiguous. Bare names may resolve only when exactly one matching Scroll exists. The Codex treats ambiguity as an error rather than silently choosing a resource.
+When a caller already knows the Scroll type, typed resolution accepts a bare name, a source-qualified name, or a full URI. For example, all of `packages`, `packages@codejitsu-catalogs`, and `catalog://packages@codejitsu-catalogs` are valid Catalog references. Bare names use the implicit source cascade; explicit source selectors are authoritative.
 
 Resolution now additionally considers source selection and fallback. A version fragment constrains the resource version; a source selector constrains the resolution origins and their order.
 
