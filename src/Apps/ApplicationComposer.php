@@ -8,14 +8,14 @@ final readonly class ApplicationComposer {
  public function __construct(private ScrollCodex $codex) {}
  public function compose(string|App $app): EffectiveApplication {
   $scroll=$app instanceof App?$app:$this->resolveApp($app);
-  return $this->composeApp($scroll,[],[]);
+  return $this->composeApp($scroll,[]);
  }
- private function composeApp(App $app,array $stack,array $provenance): EffectiveApplication {
+ private function composeApp(App $app,array $stack): EffectiveApplication {
   $data=$app->toArray(); $uri='app://'.$app->name;
   if (in_array($uri,$stack,true)) throw new InvalidArgumentException('App inheritance cycle: '.implode(' -> ',[...$stack,$uri]));
   $parent=$data['extends']??null;
-  if (!is_string($parent)||trim($parent)==='') return new EffectiveApplication($uri,$data,[...$stack,$uri],[...$provenance,$uri]);
-  $effective=$this->composeApp($this->resolveApp($parent),[...$stack,$uri],[...$provenance,$uri]);
+  if (!is_string($parent)||trim($parent)==='') return new EffectiveApplication($uri,$data,[$uri],[$uri]);
+  $effective=$this->composeApp($this->resolveApp($parent),[...$stack,$uri]);
   return new EffectiveApplication($uri,$this->merge($effective->data,$data),[...$effective->inheritance,$uri],[...$effective->provenance,$uri]);
  }
  private function resolveApp(string $uri): App {
