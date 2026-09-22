@@ -21,6 +21,25 @@ use RuntimeException;
 
 final class Make
 {
+    public static function app(ExecutionContext $context): string
+    {
+        return self::typedScroll($context, 'app');
+    }
+
+    public static function spec(ExecutionContext $context): string
+    {
+        return self::typedScroll($context, 'spec');
+    }
+
+    private static function typedScroll(ExecutionContext $context, string $scheme): string
+    {
+        $arguments = is_array($context->arguments) ? array_values($context->arguments) : [$context->arguments];
+        $name = trim((string)($arguments[0] ?? ''));
+        if ($name === '') throw new InvalidArgumentException(sprintf('A %s name is required.', ucfirst($scheme)));
+        $arguments[0] = str_contains($name, '://') ? $name : sprintf('%s://%s', $scheme, $name);
+        return self::create($arguments[0], $arguments, $context->codex);
+    }
+
     public static function context(ExecutionContext $context): string
     {
         return Contexts::create($context);
