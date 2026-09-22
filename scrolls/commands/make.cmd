@@ -7,6 +7,14 @@ commands:
         description: 'Create a Scroll from a URI, or interactively when no URI is supplied.'
         usage: 'make:scroll [<uri>] [--target=<callable>] [--source=<code>] [--substrate=<name>]'
         capability: capability://make-scroll
+    app:
+        description: Create an App Scroll.
+        usage: 'make:app <name>'
+        capability: capability://make-app
+    spec:
+        description: Create a Spec Scroll.
+        usage: 'make:spec <name>'
+        capability: capability://make-spec
     context:
         description: Create and edit a project Context Scroll.
         usage: 'make:context <name>'
