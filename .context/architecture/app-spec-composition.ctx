@@ -1,0 +1,314 @@
+# M1 App Spec Composition Design
+
+Status: Proposed for implementation
+Date: 2026-09-22
+Decision: `decisions/0009-app-spec-composition.ctx`
+
+## Outcome
+
+M1 makes Codejitsu capable of turning a declarative `app://` Scroll into a deterministic, validated, immutable effective application definition.
+
+The complete M1 flow is:
+
+```text
+App source
+  -> Scroll discovery
+  -> Codex resolution
+  -> parent App composition
+  -> Spec resolution
+  -> structural Schema validation
+  -> typed reference validation
+  -> capability-provider conformance
+  -> EffectiveApplication
+  -> CLI inspection
+```
+
+M1 stops before runtime execution. Shinobi consumes the effective definition in M2.
+
+## Existing Foundation To Reuse
+
+The current implementation already provides the important lower-level pieces:
+
+- built-in `app://`, `capability://`, `config://`, and `schema://` Scroll types
+- package-owned Scroll type registration
+- source-aware URI resolution
+- lazy Codex indexing and hydration
+- canonical Scroll graph and named references
+- Schema Scroll validation
+- Scroll lifecycle and make/list command patterns
+
+M1 extends these mechanisms. It must not introduce a parallel App registry, resolver, filesystem convention, or validation stack.
+
+## New Resource Type: Spec
+
+Add a first-class Spec Scroll:
+
+```text
+spec://...
+*.spec
+Codejitsu\Scrolls\Types\Spec
+```
+
+Spec participates in the existing `TypeDefinition` / `TypeRegistry` system exactly like other built-in Scroll types.
+
+A Spec is a semantic contract. Its own source shape is validated by `schema://codejitsu/spec`.
+
+A Spec may reference a structural Schema for its subject and declare semantic constraints that Schema alone cannot express.
+
+Initial App-oriented Spec concepts:
+
+```neon
+subject: app
+schema: schema://shinobi/app
+
+requires:
+    capabilities:
+        - config
+        - discovery
+        - execution
+```
+
+The exact source syntax should follow existing codec and graph conventions. The semantic model is the contract.
+
+## App Contract
+
+An App Scroll may contain:
+
+```neon
+name: archiq
+spec: spec://shinobi/app
+extends: app://shinobi
+
+config:
+    - config://archiq
+
+schemas:
+    - schema://archiq/repository
+    - schema://archiq/report
+
+capabilities:
+    - capability://archiq/analyze
+    - capability://archiq/report
+
+requirements:
+    php: ^8.4
+    extensions:
+        - sqlite3
+
+dependencies:
+    - package://codejitsu/context
+```
+
+A Shinobi App defaults to `spec://shinobi/app` when no explicit compatible App Spec is selected.
+
+There is no implicit `extends: app://shinobi`.
+
+## Composition
+
+Introduce a focused App composition service rather than putting recursive behavior inside App Scroll itself.
+
+Conceptual API:
+
+```php
+$effective = $composer->compose('app://archiq');
+```
+
+Responsibilities:
+
+1. resolve the requested App through Codex
+2. resolve its optional single parent
+3. recursively compose ancestors
+4. detect inheritance cycles
+5. merge parent and child deterministically
+6. retain provenance for the resulting effective definition
+7. return an immutable effective App representation
+
+Initial merge rules:
+
+- scalars: child replaces parent
+- maps: recursive merge with child precedence
+- resource collections: parent then child, deduplicated by normalized URI
+- `spec`: child selection wins when explicitly declared; otherwise inherited/default contract applies
+- removal directives: deferred
+
+Composition does not execute capabilities or install dependencies.
+
+## Validation
+
+Validation is layered and produces useful structured failures.
+
+### Structural validation
+
+Resolve the applicable Spec, then its Schema, and validate the effective App data through the existing Schema validation mechanism.
+
+### Typed reference validation
+
+References declared in typed App fields must resolve to the expected resource type:
+
+- `config` -> Config Scroll
+- `schemas` -> Schema Scrolls
+- `capabilities` -> Capability Scrolls
+- `dependencies` -> the declared dependency resource type
+- `extends` -> App Scroll
+- `spec` -> Spec Scroll
+
+Missing resources and wrong resource types are validation failures, not silent omissions.
+
+### Semantic Spec validation
+
+Capabilities may expose exact contract names through `provides`.
+
+Example:
+
+```neon
+provides:
+    - config
+    - discovery
+```
+
+An App Spec may require provider names. Validation operates on the effective App after inheritance, so inherited capabilities satisfy requirements.
+
+M1 exact-match rule:
+
+```text
+required provider name == capability provides entry
+```
+
+No hierarchy, wildcard matching, provider ranking, dependency solver, or automatic installation in M1.
+
+## Effective Application
+
+Introduce an immutable application definition separate from the raw App Scroll.
+
+Conceptually it exposes:
+
+```text
+identity
+source/provenance
+spec
+inheritance chain
+config references
+schema references
+capability references
+requirements
+dependencies
+effective composed data
+```
+
+Resolved Scroll objects should remain lazy where practical. The effective definition records normalized identities and uses Codex for resolution rather than becoming a second resource store.
+
+The definition is the handoff boundary from Codejitsu M1 to Shinobi M2.
+
+## Boundaries
+
+Codex continues to own discovery, indexing, querying, source cascade, and URI resolution.
+
+Scroll continues to represent declarative resource data.
+
+Schema continues to own structural data validation.
+
+Spec owns semantic conformance.
+
+App composition owns inheritance and effective-App construction.
+
+Shinobi runtime will own execution of an effective application in M2.
+
+These boundaries are deliberate. App-specific semantics must not be pushed into Codex.
+
+## CLI
+
+Follow existing command patterns instead of creating a second CLI architecture.
+
+M1 should provide the practical equivalents of:
+
+```text
+make:spec
+make:app
+spec:list
+app:list
+spec:validate <uri>
+app:validate <uri>
+app:show <uri>
+```
+
+`app:show` displays the effective composed definition and enough provenance to diagnose inheritance.
+
+Exact command names may be adjusted only to preserve established repository conventions.
+
+## Error Cases
+
+M1 must explicitly reject:
+
+- missing App
+- wrong URI/resource type
+- missing parent
+- App inheritance cycle
+- missing Spec
+- incompatible Spec subject type
+- structural Schema failure
+- missing typed reference
+- typed reference resolving to wrong type
+- missing required capability provider
+- malformed `provides` declaration
+
+Failures should identify the subject URI and the relevant reference/constraint.
+
+## Tests
+
+Implementation is behavior-first and should cover at minimum:
+
+1. Spec type discovery and URI resolution
+2. Spec structural validation
+3. standalone App using default Spec
+4. App using explicit Spec
+5. one-level inheritance
+6. multi-level inheritance
+7. scalar override
+8. recursive map merge
+9. collection merge/deduplication
+10. inherited Spec behavior
+11. inheritance cycle rejection
+12. missing parent rejection
+13. typed config/schema/capability reference validation
+14. wrong reference type rejection
+15. capability `provides` exact matching
+16. inherited capability satisfying a Spec
+17. missing provider rejection
+18. immutable effective definition
+19. provenance/inheritance-chain retention
+20. CLI creation/list/validation/show behavior
+21. existing Scroll/Codex/Schema behavior remains green
+
+## M1 Completion Gate
+
+M1 is complete when a fixture equivalent to `app://archiq` can be discovered and resolved through the normal Codex, explicitly inherit another App, conform to an App Spec, validate all referenced resources and required capability providers, and produce a deterministic effective application definition inspectable from the CLI.
+
+No runtime execution is required for M1 completion.
+
+## Deferred To M2+
+
+M2:
+
+- Shinobi consumes EffectiveApplication
+- runtime boot/lifecycle
+- capability execution
+- runtime configuration binding
+- transport/workers as required by the POC
+
+M3:
+
+- ArchIQ as the first real application
+- repository ingestion
+- analysis/rules/graph
+- report generation
+- commercial workflow proof
+
+Later packages/subsystems:
+
+- security/IAM/policy
+- provider selection
+- package installation
+- dependency/version solving
+- hierarchical capability contracts
+- distributed orchestration
+- Vessel/Spark agent execution
