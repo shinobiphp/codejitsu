@@ -4,11 +4,19 @@ namespace Codejitsu\Scrolls\Types;
 use Codejitsu\Enums\Scrolls\Types as ScrollTypes;
 use Codejitsu\Scrolls\Scroll;
 use InvalidArgumentException;
+use Codejitsu\Specs\SpecValidator;
+use Codejitsu\Specs\ValidationResult;
 final class Spec extends Scroll
 {
     public const ScrollTypes TYPE = ScrollTypes::SPEC;
     public function subject(): ?string { $v=$this->attributes['subject']??null; return is_string($v)?trim($v):null; }
     public function schema(): ?string { $v=$this->attributes['schema']??null; return is_string($v)?trim($v):null; }
+    public function __invoke(Scroll $subject): ValidationResult
+    {
+        if ($this->codex === null) throw new \\LogicException('Spec must be bound to a Codex before validation.');
+        return (new SpecValidator($this->codex))->validate($this, $subject);
+    }
+
     public function hydrate(array $data): static
     {
         foreach (['subject','schema'] as $key) {
