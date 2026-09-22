@@ -1,0 +1,93 @@
+# ADR 0009: App Specs and Effective Application Composition
+
+Status: Accepted
+Date: 2026-09-22
+
+## Context
+
+M1 must let Codejitsu author, discover, resolve, compose, validate, and inspect an application definition before Shinobi executes it.
+
+Codejitsu already provides Scroll discovery, typed URI resolution, lazy Codex hydration, Schema Scroll validation, Config Scrolls, Capability Scrolls, and an App Scroll type. App currently has no composition or conformance semantics.
+
+## Decision
+
+### Spec is a first-class Scroll type
+
+A Spec describes conformance, not merely data shape. A Spec may delegate structural validation to a Schema Scroll and additionally validate semantic requirements such as typed references and required capability providers.
+
+Spec Scrolls are themselves structurally validated by a normal Schema Scroll.
+
+### Apps conform to a Spec
+
+A Shinobi App defaults to `spec://shinobi/app` unless it explicitly selects another compatible App Spec.
+
+Default conformance is not inheritance. An App does not implicitly extend `app://shinobi`.
+
+### App inheritance is explicit
+
+An App may declare one `extends: app://...` parent. The parent is recursively composed before the child. Cycles are invalid.
+
+The effective App, not only the raw child Scroll, is validated against the applicable Spec. Inherited capabilities therefore count toward conformance.
+
+Initial deterministic merge semantics:
+
+- child scalar values replace parent values
+- maps merge recursively with child precedence
+- resource collections merge and deduplicate by URI
+- removal directives and advanced merge operators are outside M1
+
+### Capability contracts
+
+Capabilities may declare `provides` values. Specs may require capabilities that provide exact contract names.
+
+M1 uses exact provider matching only. Hierarchical matching, alternatives, automatic provider selection, dependency solving, and installation are deferred.
+
+### Validation boundaries
+
+Schema validation answers whether resource data has the required structural shape.
+
+Spec validation answers whether a resource conforms to its semantic contract. For Apps this includes:
+
+- structural validation through the App Schema
+- `extends` resolving to an App
+- configured resource references resolving to their required Scroll types
+- required capability providers being present in the effective App
+- composition constraints required by the App Spec
+
+The Codex remains the discovery/index/query/resolution boundary and does not absorb App-specific composition semantics.
+
+### Effective application definition
+
+Application composition returns an immutable effective application definition. The source App Scroll remains declarative source data and is not mutated into runtime state.
+
+The effective definition retains enough identity/provenance to explain inherited and resolved resources.
+
+## M1 Scope
+
+M1 includes:
+
+1. first-class `spec://` Scroll support
+2. `schema://codejitsu/spec`
+3. App structural Schema support, with Shinobi's App Schema/Spec supplied by the appropriate source/package boundary
+4. Spec invocation against a subject Scroll
+5. explicit App inheritance and deterministic composition
+6. typed reference validation
+7. exact capability `provides` conformance
+8. immutable effective application definition
+9. CLI authoring, listing, validation, and effective-App inspection using existing command patterns
+
+Expected CLI ergonomics include `make:spec`, `make:app`, `spec:list`, `app:list`, `spec:validate`, `app:validate`, and `app:show`, subject to existing CLI conventions discovered during implementation.
+
+## Explicitly Deferred
+
+M1 does not implement security/IAM/policy, automatic provider selection, package/dependency installation, sophisticated version solving, hierarchical provider matching, runtime booting, OpenSwoole/NATS orchestration, Vessel/Spark behavior, or deployment.
+
+Security/policy is expected to become a later Codejitsu package after M1-M3 prove the execution model.
+
+## Milestone Boundary
+
+M1 ends when Codejitsu can deterministically author, discover, resolve, compose, validate, and inspect a complete effective application definition.
+
+M2 begins when Shinobi consumes that definition and runs it.
+
+M3 proves the stack with ArchIQ as a real application and sellable analysis/report workflow.
