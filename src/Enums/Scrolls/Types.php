@@ -31,6 +31,7 @@ enum Types: string
     case KATA = 'kata';
     case PACKAGE = 'package';
     case SCHEMA = 'schema';
+    case SPEC = 'spec';
     case SKILL = 'skill';
 
     public static function normalize(mixed $value, self|string|null $default = null, bool $passthroughUnmatched = false): self|string|null
@@ -81,6 +82,7 @@ enum Types: string
             'kata' => array_merge(['class' => KataScroll::class, 'plural' => 'katas', 'long_name' => 'kata', 'long_plural' => 'katas', 'extension' => 'kata', 'scheme' => 'kata://'], $codecConfig),
             'package' => array_merge(['class' => PackageScroll::class, 'plural' => 'packages', 'long_name' => 'package', 'long_plural' => 'packages', 'extension' => 'package', 'scheme' => 'package://'], $codecConfig),
             'schema' => array_merge(['class' => SchemaScroll::class, 'plural' => 'schemas', 'long_name' => 'schema', 'long_plural' => 'schemas', 'extension' => 'schema', 'scheme' => 'schema://'], $codecConfig),
+            'spec' => array_merge(['class' => SpecScroll::class, 'plural' => 'specs', 'long_name' => 'specification', 'long_plural' => 'specifications', 'extension' => 'spec', 'scheme' => 'spec://'], $codecConfig),
             'skill' => array_merge(['class' => SkillScroll::class, 'plural' => 'skills', 'long_name' => 'skill', 'long_plural' => 'skills', 'extension' => 'skill', 'scheme' => 'skill://'], $codecConfig),
         ];
     }
@@ -96,6 +98,7 @@ enum Types: string
             self::KATA => KataScroll::class,
             self::PACKAGE => PackageScroll::class,
             self::SCHEMA => SchemaScroll::class,
+            self::SPEC => SpecScroll::class,
             self::SKILL => SkillScroll::class,
         };
     }
@@ -127,6 +130,7 @@ enum Types: string
             self::KATA => 'katas',
             self::PACKAGE => 'packages',
             self::SCHEMA => 'schemas',
+            self::SPEC => 'specs',
             self::SKILL => 'skills',
         };
     }
@@ -142,6 +146,7 @@ enum Types: string
             self::KATA => 'kata',
             self::PACKAGE => 'package',
             self::SCHEMA => 'schema',
+            self::SPEC => 'spec',
             self::SKILL => 'skill',
         };
     }
