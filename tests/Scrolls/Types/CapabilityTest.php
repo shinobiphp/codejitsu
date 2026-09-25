@@ -36,4 +36,15 @@ final class CapabilityTest extends TestCase
 
         self::assertSame('hello', $capability->execute(new ExecutionContext()));
     }
+    public function testItNormalizesDeclaredProviders(): void
+    {
+        $capability = (new Capability())->hydrate(['name' => 'store', 'provides' => [' persistence ', 'persistence', 'messaging']]);
+        self::assertSame(['persistence', 'messaging'], $capability->provides());
+    }
+
+    public function testItRejectsMalformedProviders(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        (new Capability())->hydrate(['name' => 'bad', 'provides' => ['ok', 42]]);
+    }
 }

@@ -1,0 +1,3 @@
+name: make-app
+type: capability
+target: Codejitsu\\Commands\\Make::app

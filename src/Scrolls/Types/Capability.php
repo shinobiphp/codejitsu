@@ -19,6 +19,19 @@ final class Capability extends Scroll
 {
     public const ScrollTypes TYPE = ScrollTypes::CAPABILITY;
 
+    /** @return list<string> */
+    public function provides(): array
+    {
+        $providers = $this->attributes['provides'] ?? [];
+        if (is_string($providers)) $providers = [$providers];
+        $normalized = [];
+        foreach ($providers as $provider) {
+            if (!is_string($provider) || trim($provider) === '') throw new InvalidArgumentException('Capability providers must be non-empty strings.');
+            $normalized[] = trim($provider);
+        }
+        return array_values(array_unique($normalized));
+    }
+
     public function target(): Invokable|callable|string
     {
         $target = $this->attributes['target'] ?? null;
@@ -77,6 +90,12 @@ final class Capability extends Scroll
 
         if (isset($data['source']) && !is_string($data['source'])) {
             throw new InvalidArgumentException('Capability source must be a string.');
+        }
+
+        if (isset($data['provides'])) {
+            $providers = is_string($data['provides']) ? [$data['provides']] : $data['provides'];
+            if (!is_array($providers)) throw new InvalidArgumentException('Capability provides must be a string or list of strings.');
+            foreach ($providers as $provider) if (!is_string($provider) || trim($provider) === '') throw new InvalidArgumentException('Capability providers must be non-empty strings.');
         }
 
         if (isset($data['substrate']) && !is_string($data['substrate'])) {

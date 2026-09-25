@@ -1,0 +1,3 @@
+name: make-spec
+type: capability
+target: Codejitsu\\Commands\\Make::spec
