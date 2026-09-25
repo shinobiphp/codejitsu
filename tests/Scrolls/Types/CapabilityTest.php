@@ -44,7 +44,7 @@ final class CapabilityTest extends TestCase
 
     public function testItRejectsMalformedProviders(): void
     {
-        $this->expectException(\\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         (new Capability())->hydrate(['name' => 'bad', 'provides' => ['ok', 42]]);
     }
 }

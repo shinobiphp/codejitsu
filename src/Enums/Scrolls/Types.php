@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Codejitsu\Enums\Scrolls;
@@ -16,6 +15,7 @@ use Codejitsu\Scrolls\Types\Kata as KataScroll;
 use Codejitsu\Scrolls\Types\Package as PackageScroll;
 use Codejitsu\Scrolls\Types\Schema as SchemaScroll;
 use Codejitsu\Scrolls\Types\Skill as SkillScroll;
+use Codejitsu\Scrolls\Types\Spec as SpecScroll;
 use Codejitsu\Scrolls\TypeDefinition;
 use Codejitsu\Traits\EnhancedEnum;
 

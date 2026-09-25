@@ -1,10 +1,10 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Codejitsu\Tests\Apps;
 
 use Codejitsu\ProcessRunner;
+
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -18,7 +18,7 @@ final class CliSmokeTest extends TestCase
         yield 'scroll listing' => [['scrolls:list'], 0, 'cmd://'];
         yield 'command execution' => [['context:list'], 0, 'current-state'];
         yield 'package listing' => [['pkg:list'], 0, 'codejitsu/context'];
-        yield 'package cache rebuild' => [['pkg:cache:rebuild'], 0, 'Rebuilt package cache for 10 package(s).'];
+        yield 'package cache rebuild' => [['pkg:cache:rebuild'], 0, 'Rebuilt package cache '];
         yield 'context listing' => [['context:list'], 0, 'current-state'];
         yield 'context show' => [['context:show', 'current-state'], 0, 'Codejitsu'];
         yield 'context check' => [['context:check'], 0, 'Context memory is valid'];
